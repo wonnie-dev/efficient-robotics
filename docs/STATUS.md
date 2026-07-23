@@ -67,3 +67,10 @@
 - Saved a complete decision record and a separate robot-action request under `outputs/active_view_controller/`.
 - Six stub unit tests passed in total, including execution-gate and joint-motion-cost tests.
 - No robot motion was executed. Candidate outcomes currently use offline, ground-truth-derived replay and therefore act as an oracle-style predictor that is invalid for final evaluation.
+- Connected the generated `move_to_observation_pose(right)` request to an Isaac Sim execution mode.
+- The execution captured a fresh center observation, rebuilt its graph/stub, ran the controller, applied the selected right joint pose, captured a fresh right RGB-D observation, and regenerated the selected-view graph/stub.
+- Verified the requested and measured UR10e joint positions: maximum absolute joint error was `0.000148504 rad`, below the provisional `0.02 rad` tolerance.
+- Visually checked the new right RGB capture; the red target and open-container interior are clearly rendered.
+- Isaac Sim remains running and responsive on GPU at the selected right observation pose.
+- Motion boundary: the current pose action directly sets joint state and position targets. It is not a time-parameterized, collision-checked continuous trajectory or MPC execution.
+- The first runtime attempt completed center/right captures but stopped during postprocessing because the Isaac-only CLI argument leaked into a reused parser. Argument isolation was added, and the second run completed with a verified execution record.

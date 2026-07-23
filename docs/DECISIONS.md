@@ -55,3 +55,12 @@
 - Current result: select the right observation pose.
 - Boundary: candidate outcomes are read from previously captured, ground-truth-derived stub graphs. This makes the current predictor oracle-style; it is not MPC, online active perception, or valid evaluation evidence.
 - Next integration boundary: execute the action request in Isaac Sim, capture only the selected new observation, and replace outcome replay with a causal predictor before final experiments.
+
+## 2026-07-24 — Isaac Sim Active View action execution
+
+- Decision: add an opt-in `--execute-action-request` runtime mode to the existing deterministic scene loader.
+- Runtime sequence: capture center, rebuild its graph/stub, run the one-step controller, apply the selected observation pose, capture the selected view, and rebuild its graph/stub.
+- Verification: compare all six requested and measured UR10e joint values and require maximum absolute error no greater than `0.02 rad`.
+- Current verified result: the right pose was reached with maximum error `0.000148504 rad`, and fresh RGB-D/graph outputs were produced.
+- Motion boundary: `set_pose` directly writes joint positions and position targets. This validates the action interface and observation loop, not a continuous or collision-checked trajectory.
+- Research boundary: the candidate predictor remains offline/oracle-style and the motion is not MPC.

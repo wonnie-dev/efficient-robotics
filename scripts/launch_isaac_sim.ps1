@@ -1,6 +1,7 @@
 param(
     [string]$IsaacSimRoot,
-    [switch]$Headless
+    [switch]$Headless,
+    [switch]$ExecuteActionRequest
 )
 
 $ErrorActionPreference = "Stop"
@@ -49,5 +50,9 @@ if ($Headless) {
 }
 
 $openScript = Join-Path $projectRoot "scripts\open_minimal_scene.py"
-Start-Process -FilePath $pythonLauncher -ArgumentList @($openScript) -WindowStyle Normal
+$scriptArguments = @($openScript)
+if ($ExecuteActionRequest) {
+    $scriptArguments += "--execute-action-request"
+}
+Start-Process -FilePath $pythonLauncher -ArgumentList $scriptArguments -WindowStyle Normal
 Write-Output "Started Isaac Sim Python runtime with scene loader: $openScript"

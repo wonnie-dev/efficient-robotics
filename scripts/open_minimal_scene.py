@@ -1,3 +1,6 @@
+import argparse
+import json
+import sys
 from pathlib import Path
 
 from isaacsim import SimulationApp
@@ -6,6 +9,18 @@ from isaacsim import SimulationApp
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SCENE_PATH = PROJECT_ROOT / "assets" / "scenes" / "open_container_minimal.usda"
 RUNTIME_LOG = PROJECT_ROOT / "runtime_scene_status.log"
+ACTION_REQUEST_PATH = PROJECT_ROOT / "outputs" / "active_view_controller" / "action_request.json"
+ACTION_EXECUTION_PATH = (
+    PROJECT_ROOT / "outputs" / "active_view_controller" / "action_execution.json"
+)
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--execute-action-request",
+    action="store_true",
+    help="Capture center, run the controller, execute its selected view, and recapture.",
+)
+args, _unknown = parser.parse_known_args()
 
 
 def record(message: str) -> None:
@@ -142,7 +157,8 @@ simulation_app.update()
 align_tool_and_camera(stage, ur10e_ee, rg6_prim, zivid_camera, observation_config, current_ee_pose())
 record("HOME_POSE_APPLIED")
 
-for pose_name in observation_config["capture"]["poses"]:
+
+def capture_observation(pose_name: str) -> None:
     app_utils.play()
     simulation_app.update()
     set_pose(
@@ -176,13 +192,92 @@ for pose_name in observation_config["capture"]["poses"]:
     )
     record("CAPTURED_POSE=" + pose_name)
 
-app_utils.play()
-simulation_app.update()
-set_pose(robot, observation_config, "center", simulation_app.update, 1)
-app_utils.pause()
-simulation_app.update()
-align_tool_and_camera(stage, ur10e_ee, rg6_prim, zivid_camera, observation_config, current_ee_pose())
-record("RG6_AND_CAMERA_ALIGNED_TO_EE")
+
+if args.execute_action_request:
+    capture_observation("center")
+    record("ACTIVE_VIEW_INITIAL_CAPTURE=center")
+
+    from build_scene_graphs import main as build_scene_graphs
+    from build_uncertainty_stub_graphs import main as build_uncertainty_stub_graphs
+    from run_active_view_controller_stub import main as run_active_view_controller
+
+    original_argv = sys.argv
+    try:
+        sys.argv = [sys.argv[0]]
+        build_scene_graphs()
+        build_uncertainty_stub_graphs()
+        run_active_view_controller()
+    finally:
+        sys.argv = original_argv
+    action_request = json.loads(ACTION_REQUEST_PATH.read_text(encoding="utf-8"))
+    if action_request["type"] != "move_to_observation_pose":
+        raise RuntimeError(f"Unsupported active-view action: {action_request}")
+    selected_pose = action_request["pose_name"]
+    if selected_pose not in observation_config["capture"]["poses"]:
+        raise RuntimeError(f"Unknown observation pose requested: {selected_pose}")
+
+    capture_observation(selected_pose)
+    original_argv = sys.argv
+    try:
+        sys.argv = [sys.argv[0]]
+        build_scene_graphs()
+        build_uncertainty_stub_graphs()
+    finally:
+        sys.argv = original_argv
+    record("ACTIVE_VIEW_ACTION_EXECUTED=" + selected_pose)
+
+    joint_indices = [robot.dof_names.index(name) for name in observation_config["joint_order"]]
+    measured_array = robot.get_dof_positions().numpy()
+    measured_vector = measured_array[0] if measured_array.ndim > 1 else measured_array
+    measured = measured_vector[joint_indices].tolist()
+    requested = observation_config["poses_rad"][selected_pose]
+    absolute_errors = [abs(actual - target) for actual, target in zip(measured, requested)]
+    execution = {
+        "status": "completed" if max(absolute_errors) <= 0.02 else "joint_verification_failed",
+        "action_request": action_request,
+        "initial_capture": "center",
+        "selected_capture": selected_pose,
+        "requested_joint_positions_rad": requested,
+        "measured_joint_positions_rad": measured,
+        "absolute_joint_errors_rad": absolute_errors,
+        "maximum_joint_error_rad": max(absolute_errors),
+        "verification_tolerance_rad": 0.02,
+        "actual_robot_motion_executed": True,
+        "motion_mode": "direct_joint_state_set_and_position_target",
+        "continuous_trajectory_executed": False,
+        "capture_files": [
+            f"outputs/observations/{selected_pose}/rgb.png",
+            f"outputs/observations/{selected_pose}/depth_m.npy",
+            f"outputs/observations/{selected_pose}/objects.json",
+            f"outputs/observations/{selected_pose}/scene_graph.json",
+            f"outputs/observations/{selected_pose}/uncertainty_scene_graph_stub.json",
+        ],
+        "limitations": (
+            "The candidate outcome predictor still uses offline ground-truth-derived replay. "
+            "The pose transition directly sets the articulation joint state and target; "
+            "it is not a collision-checked continuous MPC trajectory."
+        ),
+    }
+    ACTION_EXECUTION_PATH.parent.mkdir(parents=True, exist_ok=True)
+    ACTION_EXECUTION_PATH.write_text(
+        json.dumps(execution, indent=2), encoding="utf-8"
+    )
+    record(
+        f"ACTION_VERIFICATION status={execution['status']} "
+        f"max_joint_error_rad={execution['maximum_joint_error_rad']}"
+    )
+else:
+    for pose_name in observation_config["capture"]["poses"]:
+        capture_observation(pose_name)
+    app_utils.play()
+    simulation_app.update()
+    set_pose(robot, observation_config, "center", simulation_app.update, 1)
+    app_utils.pause()
+    simulation_app.update()
+    align_tool_and_camera(
+        stage, ur10e_ee, rg6_prim, zivid_camera, observation_config, current_ee_pose()
+    )
+    record("RG6_AND_CAMERA_ALIGNED_TO_EE")
 
 bbox_cache = UsdGeom.BBoxCache(Usd.TimeCode.Default(), [UsdGeom.Tokens.default_])
 for bbox_path in (
