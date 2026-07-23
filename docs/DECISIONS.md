@@ -29,3 +29,12 @@
 - Node belief stores semantic-class distribution, task-conditioned target probability, uncertainty record, and provenance.
 - Relation-edge belief stores a full relation distribution, uncertainty record, and provenance instead of one hard label.
 - Boundary: entropy, calibration, task-failure risk, belief update, and MPC equations remain unresolved and must not be inferred from the illustrative example values.
+
+## 2026-07-23 — Rule-based probability stub
+
+- Decision: use a deterministic visible-fraction rule to populate the draft belief interface before VLM inference is available.
+- Target rule: clamp `0.5 + 50 * target_visible_fraction` to `[0.5, 0.95]`.
+- Relation rule: clamp `0.45 + 60 * target_visible_fraction` to `[0.45, 0.95]`; distribute the remaining mass equally over the other allowed relation labels.
+- Temporary uncertainty score: `1 - max_probability`, marked uncalibrated.
+- Ground-truth boundary: configured object identities and the configured nominal `inside` relation are used, and provenance sets `ground_truth_used_for_control` to true.
+- Research boundary: this exists only to test data flow into later belief update and MPC components. It is not a paper metric, baseline, VLM output, or final evaluation method.

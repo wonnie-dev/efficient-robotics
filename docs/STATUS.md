@@ -45,4 +45,8 @@
 - Saved the decision record, text log, CSV data, and SVG score chart under `outputs/viewpoint_selection/`.
 - Added the provisional uncertainty-aware Scene Graph `0.2.0-draft` interface, documentation, example, and invariant validator.
 - The draft defines task-conditioned target belief on nodes and spatial-relation belief distributions on edges while leaving uncertainty, calibration, task-risk, and MPC equations explicitly pending the Overleaf method definition.
-- Git checkpoints remain unavailable because the Git executable is not present on PATH.
+- Git is installed and repository checkpoints are now available via its explicit executable path.
+- Added a deterministic rule-based probability stub for testing the uncertainty-aware Scene Graph interface.
+- The stub converts per-view target visible fraction into provisional target and target-to-container relation probabilities, then records `1 - max probability` as an uncalibrated uncertainty score.
+- Generated and validated one `uncertainty_scene_graph_stub.json` for each left/center/right observation.
+- The stub explicitly uses configured object identities and the configured `inside` relation; it is not learned perception, a calibrated probability, a final metric, or valid final-evaluation evidence.
