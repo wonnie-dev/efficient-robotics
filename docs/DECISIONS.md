@@ -119,3 +119,12 @@
 - After every executed viewpoint, movement costs are recomputed from the robot's new joint pose and the planner is called again.
 - Verified loop: center plan selected right, actual right evidence updated the belief, and replanning selected center followed by grasp.
 - Boundary: the post-action adapter still uses simulator instance labels, and the executed joint interpolation is not the final MPC trajectory solver.
+
+## 2026-07-24 — Shared VLM interchange contract
+
+- Decision: the user's VLM and Hansol's VLM may be implemented independently, but both must use the same versioned input/output contract and evaluation split.
+- Inputs contain full RGB, anonymous candidate IDs, bounding boxes, masked crops, binary masks, instruction, and explicit relation queries.
+- Outputs contain pre-softmax raw target and relation logits in the exact requested order, plus reproducibility provenance.
+- Ground truth is stored separately and is forbidden from model inference and planning inputs.
+- Semantic simulator IDs are anonymized to prevent names such as `target_red` from revealing the correct answer.
+- Boundary: the current three exported views are contract examples only. Seeded scenario generation and leakage-safe train/calibration/test splits are required before model training or temperature fitting.

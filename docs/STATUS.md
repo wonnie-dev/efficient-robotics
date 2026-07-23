@@ -118,3 +118,9 @@
 - Replanning from the updated belief and the actual right robot pose selected `viewpoint_center -> grasp`. Viewpoint motion costs are recomputed relative to the executed pose.
 - Isaac Sim remains running and responsive on the RTX 4070 SUPER; observed GPU utilization was 49% with about 3996 MiB of 12282 MiB in use.
 - Nineteen unit tests pass. Execution provenance explicitly records no future capture in pre-action planning and forbids an MPC claim for the current interpolated-controller prototype.
+- Defined common VLM input, raw-logit output, and separate ground-truth JSON Schemas for independent model implementations.
+- Added an Isaac benchmark exporter that creates full RGB inputs, anonymous object candidates, masked crops, binary masks, bounding boxes, and categorical relation queries.
+- Prevented semantic label leakage: inference inputs use `object_001` style IDs and never contain simulator names such as `target_red`; ground truth is written to a separate file.
+- Generated and contract-validated three development samples for left/center/right under `outputs/vlm_dataset/`.
+- Added a deterministic mock-logit adapter for interface testing only and a cross-file validator that checks sample IDs, candidate order, logit dimensions, relation label order, query coverage, and forbidden semantic tokens.
+- Twenty-three unit tests pass. The three current samples are not a training, calibration, or test set because they share one fixed scene and seed.
