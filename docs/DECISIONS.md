@@ -38,3 +38,11 @@
 - Temporary uncertainty score: `1 - max_probability`, marked uncalibrated.
 - Ground-truth boundary: configured object identities and the configured nominal `inside` relation are used, and provenance sets `ground_truth_used_for_control` to true.
 - Research boundary: this exists only to test data flow into later belief update and MPC components. It is not a paper metric, baseline, VLM output, or final evaluation method.
+
+## 2026-07-24 — Multi-view belief-update stub
+
+- Decision: replay left, center, and right rule-based graph beliefs and combine matching distributions by normalized multiplication.
+- Temporary assumption: observations from different views are conditionally independent.
+- Temporary execution gate: target probability and required `inside` relation probability must both be at least `0.9`.
+- Purpose: verify temporal graph updates, uncertainty logging, and a future controller's stop-or-reobserve interface.
+- Boundary: repeated or correlated observations can make normalized multiplication overconfident. The fusion rule, entropy reporting, and threshold are not final paper methods or metrics.

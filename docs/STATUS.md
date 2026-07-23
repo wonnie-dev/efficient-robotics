@@ -50,3 +50,13 @@
 - The stub converts per-view target visible fraction into provisional target and target-to-container relation probabilities, then records `1 - max probability` as an uncalibrated uncertainty score.
 - Generated and validated one `uncertainty_scene_graph_stub.json` for each left/center/right observation.
 - The stub explicitly uses configured object identities and the configured `inside` relation; it is not learned perception, a calibrated probability, a final metric, or valid final-evaluation evidence.
+
+## 2026-07-24
+
+- Added a provisional multi-view belief-update stub that replays the left, center, and right Scene Graph observations.
+- The update multiplies matching categorical probabilities and normalizes them under a temporary conditional-independence assumption.
+- The fused target probability progresses from `0.654785` to `0.847653` to `0.982772`; the fused `inside` probability progresses from `0.635742` to `0.962242` to `0.999529`.
+- A temporary execution gate requiring both target and `inside` probabilities to reach `0.9` is passed only after the right-view update.
+- Saved the complete update trace as JSON and CSV under `outputs/belief_update/`, including input beliefs, fused beliefs, entropy changes, and gate decisions.
+- Three unit tests passed for normalization, consistent-evidence accumulation, and relation-label mismatch rejection.
+- This update is an interface stub using ground-truth-derived inputs. The independence assumption can make beliefs overconfident and is not approved for final evaluation.
