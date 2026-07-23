@@ -60,3 +60,10 @@
 - Saved the complete update trace as JSON and CSV under `outputs/belief_update/`, including input beliefs, fused beliefs, entropy changes, and gate decisions.
 - Three unit tests passed for normalization, consistent-evidence accumulation, and relation-label mismatch rejection.
 - This update is an interface stub using ground-truth-derived inputs. The independence assumption can make beliefs overconfident and is not approved for final evaluation.
+- Added a one-step rule-based Active View Controller that starts from the center observation and compares left/right candidate views.
+- Candidate utility combines expected target-entropy reduction, expected relation-entropy reduction, and mean joint-motion cost using provisional configurable weights.
+- The controller selected `move_to_observation_pose(right)`: right utility `0.607101` exceeded left utility `0.394346`.
+- Center alone failed the temporary execution gate; the replayed center-plus-right belief passed with target probability `0.967820` and `inside` probability `0.995905`.
+- Saved a complete decision record and a separate robot-action request under `outputs/active_view_controller/`.
+- Six stub unit tests passed in total, including execution-gate and joint-motion-cost tests.
+- No robot motion was executed. Candidate outcomes currently use offline, ground-truth-derived replay and therefore act as an oracle-style predictor that is invalid for final evaluation.

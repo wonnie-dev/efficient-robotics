@@ -46,3 +46,12 @@
 - Temporary execution gate: target probability and required `inside` relation probability must both be at least `0.9`.
 - Purpose: verify temporal graph updates, uncertainty logging, and a future controller's stop-or-reobserve interface.
 - Boundary: repeated or correlated observations can make normalized multiplication overconfident. The fusion rule, entropy reporting, and threshold are not final paper methods or metrics.
+
+## 2026-07-24 — One-step Active View Controller stub
+
+- Decision: select between the fixed left/right observation poses from the center view using a configurable one-step utility.
+- Temporary utility: weighted expected target-entropy reduction plus expected relation-entropy reduction minus mean joint-motion cost.
+- Output interface: emit one `move_to_observation_pose` action request, then evaluate the temporary execution gate on the replayed post-action belief.
+- Current result: select the right observation pose.
+- Boundary: candidate outcomes are read from previously captured, ground-truth-derived stub graphs. This makes the current predictor oracle-style; it is not MPC, online active perception, or valid evaluation evidence.
+- Next integration boundary: execute the action request in Isaac Sim, capture only the selected new observation, and replace outcome replay with a causal predictor before final experiments.
