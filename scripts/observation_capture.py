@@ -1,6 +1,7 @@
 """UR10e provisional observation poses and wrist-camera RGB/depth capture."""
 
 import json
+import math
 from pathlib import Path
 
 import numpy as np
@@ -49,6 +50,127 @@ def set_pose(robot, config: dict, pose_name: str, update, warmup_frames: int = 8
     robot.set_dof_position_targets(values, dof_indices=indices)
     for _ in range(warmup_frames):
         update()
+
+
+def move_pose_interpolated(
+    robot,
+    config: dict,
+    pose_name: str,
+    update,
+    contact_force_reader=None,
+    collision_checker=None,
+) -> dict:
+    """Move to a configured pose through joint-space position-target waypoints."""
+    settings = config["trajectory"]
+    indices = [robot.dof_names.index(name) for name in JOINT_NAMES]
+    current_array = robot.get_dof_positions().numpy()
+    current = current_array[0] if current_array.ndim > 1 else current_array
+    start = np.asarray(current[indices], dtype=np.float64)
+    target = np.asarray(config["poses_rad"][pose_name], dtype=np.float64)
+    lower_raw, upper_raw = robot.get_dof_limits(dof_indices=indices)
+    lower_array, upper_array = lower_raw.numpy(), upper_raw.numpy()
+    lower = lower_array[0] if lower_array.ndim > 1 else lower_array
+    upper = upper_array[0] if upper_array.ndim > 1 else upper_array
+    if np.any(target < lower) or np.any(target > upper):
+        raise ValueError(f"Target pose {pose_name} violates UR10e joint limits")
+
+    maximum_delta = float(np.max(np.abs(target - start)))
+    steps = max(1, math.ceil(maximum_delta / settings["maximum_joint_step_rad"]))
+    maximum_contact_force = 0.0
+    collision_detected = False
+    collision_check_method = (
+        "physx_contact_force"
+        if contact_force_reader is not None
+        else "world_aabb_overlap"
+        if collision_checker is not None
+        else "none"
+    )
+    waypoint_records = []
+
+    for step in range(1, steps + 1):
+        alpha = step / steps
+        waypoint = start + alpha * (target - start)
+        if np.any(waypoint < lower) or np.any(waypoint > upper):
+            raise ValueError(f"Interpolated waypoint {step} violates UR10e joint limits")
+        robot.set_dof_position_targets(waypoint.tolist(), dof_indices=indices)
+        for _ in range(settings["control_frames_per_waypoint"]):
+            update()
+            if contact_force_reader is not None:
+                force = float(contact_force_reader())
+                maximum_contact_force = max(maximum_contact_force, force)
+                if force > settings["contact_force_abort_threshold_n"]:
+                    collision_detected = True
+                    break
+            if collision_checker is not None and collision_checker():
+                collision_detected = True
+                break
+        measured_array = robot.get_dof_positions().numpy()
+        measured_vector = measured_array[0] if measured_array.ndim > 1 else measured_array
+        measured = np.asarray(measured_vector[indices], dtype=np.float64)
+        waypoint_records.append(
+            {
+                "step": step,
+                "alpha": alpha,
+                "maximum_waypoint_error_rad": float(np.max(np.abs(measured - waypoint))),
+                "maximum_contact_force_n": maximum_contact_force,
+            }
+        )
+        if collision_detected:
+            robot.set_dof_position_targets(measured.tolist(), dof_indices=indices)
+            break
+
+    settle_frames = 0
+    if not collision_detected:
+        for settle_frames in range(1, settings["maximum_final_settle_frames"] + 1):
+            robot.set_dof_position_targets(target.tolist(), dof_indices=indices)
+            update()
+            if contact_force_reader is not None:
+                force = float(contact_force_reader())
+                maximum_contact_force = max(maximum_contact_force, force)
+                if force > settings["contact_force_abort_threshold_n"]:
+                    collision_detected = True
+                    break
+            if collision_checker is not None and collision_checker():
+                collision_detected = True
+                break
+            measured_array = robot.get_dof_positions().numpy()
+            measured_vector = measured_array[0] if measured_array.ndim > 1 else measured_array
+            measured = np.asarray(measured_vector[indices], dtype=np.float64)
+            if float(np.max(np.abs(measured - target))) <= settings["final_tolerance_rad"]:
+                break
+
+    measured_array = robot.get_dof_positions().numpy()
+    measured_vector = measured_array[0] if measured_array.ndim > 1 else measured_array
+    measured = np.asarray(measured_vector[indices], dtype=np.float64)
+    maximum_final_error = float(np.max(np.abs(measured - target)))
+    return {
+        "status": (
+            "collision_abort"
+            if collision_detected
+            else "completed"
+            if maximum_final_error <= settings["final_tolerance_rad"]
+            else "final_tolerance_failed"
+        ),
+        "pose_name": pose_name,
+        "motion_mode": "interpolated_joint_position_targets",
+        "waypoint_count": steps,
+        "control_frames_per_waypoint": settings["control_frames_per_waypoint"],
+        "settle_frames": settle_frames,
+        "joint_limits_checked": True,
+        "collision_monitoring_enabled": (
+            contact_force_reader is not None or collision_checker is not None
+        ),
+        "collision_check_method": collision_check_method,
+        "contact_force_monitoring_enabled": contact_force_reader is not None,
+        "collision_detected": collision_detected,
+        "maximum_contact_force_n": maximum_contact_force,
+        "contact_force_abort_threshold_n": settings["contact_force_abort_threshold_n"],
+        "requested_joint_positions_rad": target.tolist(),
+        "measured_joint_positions_rad": measured.tolist(),
+        "maximum_joint_error_rad": maximum_final_error,
+        "verification_tolerance_rad": settings["final_tolerance_rad"],
+        "waypoints": waypoint_records,
+    }
 
 
 def align_tool_and_camera(stage, ee_prim, rg6_prim, camera_prim, config: dict, ee_pose=None) -> None:

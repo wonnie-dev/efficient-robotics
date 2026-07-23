@@ -64,3 +64,12 @@
 - Current verified result: the right pose was reached with maximum error `0.000148504 rad`, and fresh RGB-D/graph outputs were produced.
 - Motion boundary: `set_pose` directly writes joint positions and position targets. This validates the action interface and observation loop, not a continuous or collision-checked trajectory.
 - Research boundary: the candidate predictor remains offline/oracle-style and the motion is not MPC.
+
+## 2026-07-24 — Interpolated observation-pose transition
+
+- Decision: replace the direct active-view pose jump with joint-space interpolation using position targets and physics updates.
+- Provisional limits: maximum configured joint step `0.02 rad`, three control frames per waypoint, final tolerance `0.02 rad`.
+- Every waypoint is checked against the UR10e articulation's reported lower and upper joint limits.
+- Collision policy: prefer PhysX contact-force monitoring with a `5 N` abort threshold; if the contact view is unavailable, use per-frame world-AABB overlap against the table, container, target, and distractor.
+- Current result: 15-waypoint Center-to-Right motion completed with no AABB collision and final trajectory error `0.000017715 rad`.
+- Boundary: this is a deterministic reference trajectory, not MPC. AABB checks do not replace narrow-phase collision checking, and the provisional kinematic RG6 mount is excluded from swept-volume evaluation.

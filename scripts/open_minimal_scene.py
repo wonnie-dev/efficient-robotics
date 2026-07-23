@@ -49,7 +49,7 @@ from isaacsim.storage.native import get_assets_root_path
 from omni.kit.viewport.utility import frame_viewport_prims, get_active_viewport
 from omni.kit.viewport.utility.camera_state import ViewportCameraState
 from pxr import Gf, Sdf, Usd, UsdGeom
-from isaacsim.core.experimental.prims import Articulation, GeomPrim
+from isaacsim.core.experimental.prims import Articulation, GeomPrim, RigidPrim
 from isaacsim.core.simulation_manager import SimulationManager
 
 from observation_capture import (
@@ -59,6 +59,7 @@ from observation_capture import (
     create_capture_pipeline,
     load_observation_config,
     make_gripper_kinematic,
+    move_pose_interpolated,
     save_capture,
     set_pose,
 )
@@ -145,6 +146,33 @@ physical_ee_name = next(
 ee_link_index = robot.link_names.index(physical_ee_name)
 ee_geom = GeomPrim(paths=robot.link_paths[0][ee_link_index])
 record("PHYSX_EE_LINK=" + physical_ee_name)
+moving_link_names = [
+    name
+    for name in robot.link_names
+    if name
+    in {
+        "shoulder_link",
+        "upper_arm_link",
+        "forearm_link",
+        "wrist_1_link",
+        "wrist_2_link",
+        "wrist_3_link",
+        "ee_link",
+        "tool0",
+    }
+]
+moving_link_paths = [
+    robot.link_paths[0][robot.link_names.index(name)] for name in moving_link_names
+]
+contact_monitor = None
+try:
+    contact_monitor = RigidPrim(
+        paths=moving_link_paths,
+        contact_filter_paths=observation_config["trajectory"]["contact_filter_paths"],
+    )
+    record("CONTACT_MONITOR_LINKS=" + "|".join(moving_link_names))
+except Exception as error:
+    record(f"CONTACT_MONITOR_UNAVAILABLE={type(error).__name__}:{error}")
 
 
 def current_ee_pose():
@@ -216,7 +244,66 @@ if args.execute_action_request:
     if selected_pose not in observation_config["capture"]["poses"]:
         raise RuntimeError(f"Unknown observation pose requested: {selected_pose}")
 
-    capture_observation(selected_pose)
+    def maximum_contact_force() -> float:
+        forces = contact_monitor.get_net_contact_forces(dt=1.0 / 60.0).numpy()
+        return float((forces**2).sum(axis=1).max() ** 0.5)
+
+    collision_obstacle_paths = observation_config["trajectory"]["contact_filter_paths"]
+
+    def world_aabb_collision() -> bool:
+        cache = UsdGeom.BBoxCache(Usd.TimeCode.Default(), [UsdGeom.Tokens.default_])
+        obstacle_ranges = [
+            cache.ComputeWorldBound(stage.GetPrimAtPath(path)).ComputeAlignedRange()
+            for path in collision_obstacle_paths
+        ]
+        for link_path in moving_link_paths:
+            link_range = cache.ComputeWorldBound(
+                stage.GetPrimAtPath(link_path)
+            ).ComputeAlignedRange()
+            link_min, link_max = link_range.GetMin(), link_range.GetMax()
+            for obstacle_range in obstacle_ranges:
+                obstacle_min, obstacle_max = obstacle_range.GetMin(), obstacle_range.GetMax()
+                if all(
+                    link_min[axis] <= obstacle_max[axis]
+                    and link_max[axis] >= obstacle_min[axis]
+                    for axis in range(3)
+                ):
+                    return True
+        return False
+
+    app_utils.play()
+    trajectory_result = move_pose_interpolated(
+        robot,
+        observation_config,
+        selected_pose,
+        simulation_app.update,
+        maximum_contact_force if contact_monitor is not None else None,
+        world_aabb_collision,
+    )
+    app_utils.pause()
+    simulation_app.update()
+    if trajectory_result["status"] != "completed":
+        raise RuntimeError(f"Active-view trajectory failed: {trajectory_result}")
+    pose_position, pose_orientation = current_ee_pose()
+    align_tool_and_camera(
+        stage,
+        ur10e_ee,
+        rg6_prim,
+        zivid_camera,
+        observation_config,
+        (pose_position, pose_orientation),
+    )
+    for _ in range(8):
+        simulation_app.update()
+    rep.orchestrator.step(rt_subframes=4)
+    rep.orchestrator.step(rt_subframes=4)
+    save_capture(
+        output_root,
+        selected_pose,
+        rgb_annotator.get_data(),
+        depth_annotator.get_data(),
+    )
+    record("CAPTURED_POSE=" + selected_pose)
     original_argv = sys.argv
     try:
         sys.argv = [sys.argv[0]]
@@ -241,10 +328,11 @@ if args.execute_action_request:
         "measured_joint_positions_rad": measured,
         "absolute_joint_errors_rad": absolute_errors,
         "maximum_joint_error_rad": max(absolute_errors),
-        "verification_tolerance_rad": 0.02,
+        "verification_tolerance_rad": observation_config["trajectory"]["final_tolerance_rad"],
         "actual_robot_motion_executed": True,
-        "motion_mode": "direct_joint_state_set_and_position_target",
-        "continuous_trajectory_executed": False,
+        "motion_mode": "interpolated_joint_position_targets",
+        "continuous_trajectory_executed": True,
+        "trajectory": trajectory_result,
         "capture_files": [
             f"outputs/observations/{selected_pose}/rgb.png",
             f"outputs/observations/{selected_pose}/depth_m.npy",
@@ -254,8 +342,10 @@ if args.execute_action_request:
         ],
         "limitations": (
             "The candidate outcome predictor still uses offline ground-truth-derived replay. "
-            "The pose transition directly sets the articulation joint state and target; "
-            "it is not a collision-checked continuous MPC trajectory."
+            "The transition is deterministic joint-space interpolation, not MPC. "
+            "When the PhysX contact view is unavailable, collision monitoring falls back "
+            "to conservative world-AABB overlap; the kinematic RG6 visual mount is not "
+            "included in swept-volume checking."
         ),
     }
     ACTION_EXECUTION_PATH.parent.mkdir(parents=True, exist_ok=True)

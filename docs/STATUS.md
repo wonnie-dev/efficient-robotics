@@ -74,3 +74,11 @@
 - Isaac Sim remains running and responsive on GPU at the selected right observation pose.
 - Motion boundary: the current pose action directly sets joint state and position targets. It is not a time-parameterized, collision-checked continuous trajectory or MPC execution.
 - The first runtime attempt completed center/right captures but stopped during postprocessing because the Isaac-only CLI argument leaked into a reused parser. Argument isolation was added, and the second run completed with a verified execution record.
+- Replaced the direct Center-to-Right joint-state jump with deterministic interpolated joint-position targets.
+- The verified transition used 15 waypoints at a maximum configured joint increment of `0.02 rad`, with three physics frames per waypoint.
+- All interpolated waypoints and the final target passed the UR10e joint-limit checks.
+- Final trajectory error was `0.000017715 rad`; the post-capture verification error was `0.000117016 rad`, both below the `0.02 rad` tolerance.
+- Isaac Sim's experimental PhysX contact view failed to initialize in this GPU runtime (`AttributeError: 'NoneType' object has no attribute 'check'`).
+- A conservative world-AABB overlap fallback checked moving UR10e links against the table, open container, target, and distractor on every physics frame; no overlap was detected.
+- Safety boundary: AABB overlap is conservative but not equivalent to narrow-phase collision/contact checking, and the kinematic RG6 visual mount is not included in swept-volume checks.
+- Isaac Sim remains running and responsive at the right observation pose after the successful interpolated transition.

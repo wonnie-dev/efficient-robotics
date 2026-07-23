@@ -27,5 +27,20 @@
     "poses": ["left", "center", "right"],
     "warmup_frames": 20,
     "output_directory": "outputs/observations"
+  },
+  "trajectory": {
+    "status": "provisional_interpolated_joint_motion_not_mpc",
+    "maximum_joint_step_rad": 0.02,
+    "control_frames_per_waypoint": 3,
+    "maximum_final_settle_frames": 120,
+    "waypoint_tolerance_rad": 0.05,
+    "final_tolerance_rad": 0.02,
+    "contact_force_abort_threshold_n": 5.0,
+    "contact_filter_paths": [
+      "/World/Table",
+      "/World/OpenContainer",
+      "/World/TargetRed",
+      "/World/DistractorBlue"
+    ]
   }
 }
