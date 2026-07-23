@@ -89,3 +89,11 @@
 - Isaac Sim is currently running the benchmark scene and remains responsive on GPU.
 - Benchmark limitation: the RGB color-key fallback merges/confuses similar red and orange objects. Benchmark Active View execution is disabled until correct multi-instance segmentation and the expanded graph are implemented.
 - Added `docs/BENCHMARK_ENVIRONMENT.md` with profiles, commands, inventory, limitations, and final-experiment acceptance criteria.
+- Implemented a benchmark-only temporary emissive color-ID render pass: all non-task geometry is black during the pass, eight task entities receive unique simulator materials, and visible materials are restored before the GUI continues.
+- Added RTX tone-mapping-aware ID prototypes and connected-component separation for the orange/yellow and purple/magenta object pairs.
+- Visually verified center and right instance masks against their RGB images. The red target, orange occluder, yellow distractor, rear red candidate, boundary object, blue/green distractors, and container are independently represented.
+- Verified active-view evidence in the benchmark masks: target pixels increase from `45` at center to `636` at right (about `14.1x`).
+- Added deterministic benchmark Scene Graph generation with 9 nodes (camera plus container and seven configured objects) and 15 relation/visibility edges per view.
+- Added offline ID-pass reprocessing so classification changes do not require relaunching Isaac Sim.
+- Eight unit tests pass, including benchmark relation construction and paired-instance component separation.
+- Boundary: the custom color-ID pass is simulator-only and not native RTX ground truth. Benchmark Active View remains disabled until the uncertainty-aware graph is expanded to consume all benchmark entities.

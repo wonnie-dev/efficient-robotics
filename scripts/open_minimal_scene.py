@@ -3,6 +3,7 @@ import json
 import sys
 from pathlib import Path
 
+import numpy as np
 from isaacsim import SimulationApp
 
 
@@ -72,6 +73,7 @@ from isaacsim.core.experimental.prims import Articulation, GeomPrim, RigidPrim
 from isaacsim.core.simulation_manager import SimulationManager
 
 from observation_capture import (
+    BENCHMARK_SEMANTIC_OBJECTS,
     add_scene_labels,
     align_tool_and_camera,
     configure_camera,
@@ -79,6 +81,7 @@ from observation_capture import (
     load_observation_config,
     make_gripper_kinematic,
     move_pose_interpolated,
+    render_benchmark_id_pass,
     save_capture,
     set_pose,
 )
@@ -138,10 +141,26 @@ if not zivid_camera.IsValid():
     raise RuntimeError("Zivid 2 wrist camera prim is missing")
 
 observation_config = load_observation_config(PROJECT_ROOT)
-add_scene_labels(stage)
+add_scene_labels(
+    stage,
+    BENCHMARK_SEMANTIC_OBJECTS if args.scene_profile == "benchmark" else None,
+)
 for _ in range(10):
     simulation_app.update()
-record("SEMANTIC_LABELS_ADDED=target_red|distractor_blue|container")
+record(
+    "SEMANTIC_LABELS_ADDED="
+    + "|".join(
+        (
+            BENCHMARK_SEMANTIC_OBJECTS
+            if args.scene_profile == "benchmark"
+            else {
+                "/World/TargetRed": "target_red",
+                "/World/DistractorBlue": "distractor_blue",
+                "/World/OpenContainer": "container",
+            }
+        ).values()
+    )
+)
 configure_camera(zivid_camera, observation_config)
 make_gripper_kinematic(rg6_prim)
 record("RG6_KINEMATIC_FOR_PROVISIONAL_MOUNT")
@@ -233,11 +252,19 @@ def capture_observation(pose_name: str) -> None:
         simulation_app.update()
     rep.orchestrator.step(rt_subframes=4)
     rep.orchestrator.step(rt_subframes=4)
+    rgb_data = np.asarray(rgb_annotator.get_data()).copy()
+    depth_data = np.asarray(depth_annotator.get_data()).copy()
+    instance_override = (
+        render_benchmark_id_pass(stage, rep, rgb_annotator)
+        if args.scene_profile == "benchmark"
+        else None
+    )
     save_capture(
         output_root,
         pose_name,
-        rgb_annotator.get_data(),
-        depth_annotator.get_data(),
+        rgb_data,
+        depth_data,
+        instance_override=instance_override,
     )
     record("CAPTURED_POSE=" + pose_name)
 
@@ -380,6 +407,11 @@ if args.execute_action_request:
 else:
     for pose_name in observation_config["capture"]["poses"]:
         capture_observation(pose_name)
+    if args.scene_profile == "benchmark":
+        from build_benchmark_scene_graphs import main as build_benchmark_scene_graphs
+
+        build_benchmark_scene_graphs()
+        record("BENCHMARK_SCENE_GRAPHS_BUILT=left|center|right")
     app_utils.play()
     simulation_app.update()
     set_pose(robot, observation_config, "center", simulation_app.update, 1)

@@ -53,20 +53,24 @@ Benchmark captures are written separately under
 
 - This is a visual/scenario prototype, not a finalized evaluation environment.
 - Native Isaac Sim instance segmentation still crashes in the current runtime.
-- The RGB color-key fallback cannot distinguish the red target from the similar
-  red candidate and can confuse the orange occluder with the target.
-- Benchmark Active View execution is therefore disabled until a correct
-  multi-object mask/instance pipeline and expanded Scene Graph are available.
-- Additional objects are not yet included in the uncertainty-aware graph.
+- A benchmark-specific simulator fallback now renders a temporary emissive
+  unique-color ID pass with all non-task geometry black, restores the visible
+  materials, and converts the pass to eight instance IDs.
+- The ID pass and masks were visually verified, but this remains a custom
+  simulator-only fallback rather than native RTX instance ground truth.
+- A deterministic benchmark Scene Graph includes all eight task entities and
+  configured relations. The uncertainty-aware graph still needs to be expanded.
+- Benchmark Active View execution remains disabled until the expanded
+  uncertainty graph consumes these instances.
 - Object geometry uses simulator primitives rather than finalized lab props.
 - Controlled randomization, physics properties, grasps, and real-lab dimension
   matching remain pending.
 
 ## Acceptance criteria before final experiments
 
-1. Every task object has a correct, visually verified instance mask.
-2. The graph contains all target candidates, distractors, occluders, and their
-   task-relevant relations.
+1. Replace or cross-check the custom ID pass with stable native instance IDs.
+2. Expand the uncertainty-aware graph to contain all target candidates,
+   distractors, occluders, and their task-relevant relation distributions.
 3. Center-to-selected-view execution uses only causally available observations.
 4. Object positions, lighting, clutter, and occlusion are generated from saved
    seeded scenario configurations.

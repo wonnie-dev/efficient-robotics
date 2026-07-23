@@ -2,6 +2,7 @@
 
 import json
 import math
+from collections import deque
 from pathlib import Path
 
 import numpy as np
@@ -23,11 +24,87 @@ SEMANTIC_OBJECTS = {
     "/World/OpenContainer": "container",
 }
 
+BENCHMARK_SEMANTIC_OBJECTS = {
+    "/World/TargetRed": "target_red",
+    "/World/OccluderOrange": "occluder_orange",
+    "/World/DistractorYellow": "distractor_yellow",
+    "/World/DistractorBlue": "distractor_blue",
+    "/World/DistractorGreen": "distractor_green",
+    "/World/BoundaryPurple": "boundary_purple",
+    "/World/RearRedCandidate": "rear_red_candidate",
+    "/World/OpenContainer": "container",
+}
 
-def add_scene_labels(stage) -> None:
+BENCHMARK_ID_COLORS = {
+    "target_red": (255, 0, 0),
+    "occluder_orange": (255, 128, 0),
+    "distractor_yellow": (255, 255, 0),
+    "distractor_blue": (0, 0, 255),
+    "distractor_green": (0, 255, 0),
+    "boundary_purple": (128, 0, 255),
+    "rear_red_candidate": (255, 0, 255),
+    "container": (0, 255, 255),
+}
+
+# RTX tone mapping shifts emissive inputs. These prototypes were measured from
+# the deterministic benchmark ID pass; ambiguous hue pairs are split spatially.
+BENCHMARK_RENDERED_ID_PROTOTYPES = {
+    "target_red": (248, 47, 43),
+    "occluder_orange": (248, 240, 54),
+    "distractor_yellow": (248, 240, 54),
+    "distractor_blue": (25, 45, 240),
+    "distractor_green": (3, 240, 12),
+    "boundary_purple": (240, 30, 245),
+    "rear_red_candidate": (240, 30, 245),
+    "container": (10, 235, 240),
+}
+
+
+def _split_id_pair_by_horizontal_components(
+    instance_ids: np.ndarray,
+    pair: tuple[int, int],
+    left_id: int,
+    right_id: int,
+) -> None:
+    """Resolve known color-managed ID pairs using their disconnected components."""
+    mask = np.isin(instance_ids, pair)
+    visited = np.zeros(mask.shape, dtype=bool)
+    components = []
+    height, width = mask.shape
+    for y, x in zip(*np.nonzero(mask)):
+        if visited[y, x]:
+            continue
+        queue = deque([(int(y), int(x))])
+        visited[y, x] = True
+        pixels = []
+        while queue:
+            cy, cx = queue.popleft()
+            pixels.append((cy, cx))
+            for ny, nx in ((cy - 1, cx), (cy + 1, cx), (cy, cx - 1), (cy, cx + 1)):
+                if (
+                    0 <= ny < height
+                    and 0 <= nx < width
+                    and mask[ny, nx]
+                    and not visited[ny, nx]
+                ):
+                    visited[ny, nx] = True
+                    queue.append((ny, nx))
+        if len(pixels) >= 20:
+            components.append(pixels)
+    if len(components) < 2:
+        return
+    largest = sorted(components, key=len, reverse=True)[:2]
+    largest.sort(key=lambda pixels: sum(x for _, x in pixels) / len(pixels))
+    for object_id, pixels in zip((left_id, right_id), largest):
+        ys, xs = zip(*pixels)
+        instance_ids[np.asarray(ys), np.asarray(xs)] = object_id
+
+
+def add_scene_labels(stage, semantic_objects=None) -> None:
     import omni.replicator.core as rep
 
-    for prim_path, label in SEMANTIC_OBJECTS.items():
+    semantic_objects = semantic_objects or SEMANTIC_OBJECTS
+    for prim_path, label in semantic_objects.items():
         prim = stage.GetPrimAtPath(prim_path)
         if not prim.IsValid():
             raise RuntimeError(f"Semantic object prim is missing: {prim_path}")
@@ -266,9 +343,15 @@ def _colorize_instance_ids(instance_ids: np.ndarray) -> np.ndarray:
     return preview
 
 
-def _object_statistics(instance_ids: np.ndarray, id_to_labels: dict, depth: np.ndarray) -> dict:
+def _object_statistics(
+    instance_ids: np.ndarray,
+    id_to_labels: dict,
+    depth: np.ndarray,
+    expected_objects=None,
+) -> dict:
     statistics = {}
-    for expected_label in SEMANTIC_OBJECTS.values():
+    expected_objects = expected_objects or SEMANTIC_OBJECTS.values()
+    for expected_label in expected_objects:
         matching_ids = []
         for instance_id, labels in id_to_labels.items():
             if isinstance(labels, dict) and str(labels.get("class")) == expected_label:
@@ -313,7 +396,120 @@ def _instance_ids_from_scene_colors(rgb: np.ndarray, depth: np.ndarray) -> tuple
     return instance_ids, labels
 
 
-def save_capture(output_root: Path, pose_name: str, rgb_data, depth_data) -> None:
+def render_benchmark_id_pass(stage, rep, rgb_annotator) -> tuple[np.ndarray, dict]:
+    """Render temporary unique object colors, then restore visible scene colors."""
+    from pxr import Gf, Sdf, UsdGeom, UsdShade
+
+    material_root = "/World/__BenchmarkIdMaterials"
+    restored_bindings = {}
+    materials = {}
+    background_material = UsdShade.Material.Define(stage, f"{material_root}/background")
+    background_shader = UsdShade.Shader.Define(
+        stage, f"{material_root}/background/Shader"
+    )
+    background_shader.CreateIdAttr("UsdPreviewSurface")
+    background_shader.CreateInput("diffuseColor", Sdf.ValueTypeNames.Color3f).Set(
+        Gf.Vec3f(0.0, 0.0, 0.0)
+    )
+    background_shader.CreateInput("emissiveColor", Sdf.ValueTypeNames.Color3f).Set(
+        Gf.Vec3f(0.0, 0.0, 0.0)
+    )
+    background_material.CreateSurfaceOutput().ConnectToSource(
+        background_shader.ConnectableAPI(), "surface"
+    )
+    for label, color in BENCHMARK_ID_COLORS.items():
+        material = UsdShade.Material.Define(stage, f"{material_root}/{label}")
+        shader = UsdShade.Shader.Define(stage, f"{material_root}/{label}/Shader")
+        shader.CreateIdAttr("UsdPreviewSurface")
+        normalized_color = Gf.Vec3f(*(channel / 255.0 for channel in color))
+        shader.CreateInput("diffuseColor", Sdf.ValueTypeNames.Color3f).Set(normalized_color)
+        shader.CreateInput("emissiveColor", Sdf.ValueTypeNames.Color3f).Set(normalized_color)
+        shader.CreateInput("roughness", Sdf.ValueTypeNames.Float).Set(1.0)
+        material.CreateSurfaceOutput().ConnectToSource(shader.ConnectableAPI(), "surface")
+        materials[label] = material
+
+    for prim in stage.Traverse():
+        if prim.GetPath().HasPrefix(material_root):
+            continue
+        gprim = UsdGeom.Gprim(prim)
+        if not gprim:
+            continue
+        binding_api = UsdShade.MaterialBindingAPI.Apply(prim)
+        relationship = binding_api.GetDirectBindingRel()
+        restored_bindings[str(prim.GetPath())] = (
+            relationship,
+            relationship.GetTargets(),
+        )
+        binding_api.Bind(background_material)
+
+    for prim_path, label in BENCHMARK_SEMANTIC_OBJECTS.items():
+        root_path = stage.GetPrimAtPath(prim_path).GetPath()
+        for prim in stage.Traverse():
+            if not prim.GetPath().HasPrefix(root_path):
+                continue
+            gprim = UsdGeom.Gprim(prim)
+            if not gprim:
+                continue
+            binding_api = UsdShade.MaterialBindingAPI.Apply(prim)
+            binding_api.Bind(materials[label])
+
+    for _ in range(2):
+        rep.orchestrator.step(rt_subframes=4)
+    color_pass = np.asarray(rgb_annotator.get_data())[:, :, :3].astype(np.float32).copy()
+
+    for relationship, previous_targets in restored_bindings.values():
+        if previous_targets:
+            relationship.SetTargets(previous_targets)
+        else:
+            relationship.ClearTargets(True)
+    stage.RemovePrim(material_root)
+    for _ in range(2):
+        rep.orchestrator.step(rt_subframes=4)
+
+    instance_ids, labels = classify_benchmark_color_pass(color_pass)
+    return instance_ids, labels, color_pass.astype(np.uint8)
+
+
+def classify_benchmark_color_pass(color_pass: np.ndarray) -> tuple[np.ndarray, dict]:
+    """Convert the measured RTX color-ID pass into benchmark instance IDs."""
+    color_pass = color_pass.astype(np.float32)
+    brightness = color_pass.max(axis=2)
+    chroma = color_pass.max(axis=2) - color_pass.min(axis=2)
+    normalized = color_pass / np.maximum(color_pass.sum(axis=2, keepdims=True), 1.0)
+    prototypes = []
+    for color in BENCHMARK_RENDERED_ID_PROTOTYPES.values():
+        prototype = np.asarray(color, dtype=np.float32)
+        prototypes.append(prototype / prototype.sum())
+    distances = np.stack(
+        [np.linalg.norm(normalized - prototype, axis=2) for prototype in prototypes],
+        axis=2,
+    )
+    closest = np.argmin(distances, axis=2)
+    minimum_distance = np.min(distances, axis=2)
+    valid = (brightness > 35) & (chroma > 35) & (minimum_distance < 0.20)
+    instance_ids = np.where(valid, closest + 1, 0).astype(np.uint32)
+    _split_id_pair_by_horizontal_components(
+        instance_ids, pair=(2, 3), left_id=3, right_id=2
+    )
+    _split_id_pair_by_horizontal_components(
+        instance_ids, pair=(6, 7), left_id=7, right_id=6
+    )
+    labels = {}
+    for instance_id, (label, color) in enumerate(BENCHMARK_ID_COLORS.items(), start=1):
+        prim_path = next(
+            path for path, value in BENCHMARK_SEMANTIC_OBJECTS.items() if value == label
+        )
+        labels[str(instance_id)] = {"class": label, "primPath": prim_path}
+    return instance_ids, labels
+
+
+def save_capture(
+    output_root: Path,
+    pose_name: str,
+    rgb_data,
+    depth_data,
+    instance_override=None,
+) -> None:
     pose_dir = output_root / pose_name
     pose_dir.mkdir(parents=True, exist_ok=True)
     rgba = np.asarray(rgb_data)
@@ -327,7 +523,22 @@ def save_capture(output_root: Path, pose_name: str, rgb_data, depth_data) -> Non
         if far > near:
             preview[finite] = np.clip((depth[finite] - near) / (far - near) * 255, 0, 255).astype(np.uint8)
     Image.fromarray(preview, "L").save(pose_dir / "depth_preview.png")
-    instance_ids, id_to_labels = _instance_ids_from_scene_colors(rgba[:, :, :3], depth)
+    if instance_override is None:
+        instance_ids, id_to_labels = _instance_ids_from_scene_colors(rgba[:, :, :3], depth)
+        expected_objects = SEMANTIC_OBJECTS.values()
+        segmentation_source = "rgb_color_key_fallback"
+        segmentation_limitation = (
+            "Replace with RTX instance annotator after Isaac Sim synthetic-data crash is resolved."
+        )
+    else:
+        instance_ids, id_to_labels, raw_color_pass = instance_override
+        Image.fromarray(raw_color_pass, "RGB").save(pose_dir / "instance_color_pass.png")
+        expected_objects = BENCHMARK_SEMANTIC_OBJECTS.values()
+        segmentation_source = "temporary_unique_color_id_render_pass"
+        segmentation_limitation = (
+            "Simulator-only fallback; visually validate masks and replace with native "
+            "instance IDs when the RTX annotator is stable."
+        )
     np.save(pose_dir / "instance_ids.npy", instance_ids)
     Image.fromarray(_colorize_instance_ids(instance_ids), "RGB").save(
         pose_dir / "instance_segmentation.png"
@@ -335,7 +546,9 @@ def save_capture(output_root: Path, pose_name: str, rgb_data, depth_data) -> Non
     (pose_dir / "instance_labels.json").write_text(
         json.dumps(_json_safe(id_to_labels), indent=2), encoding="utf-8"
     )
-    object_statistics = _object_statistics(instance_ids, id_to_labels, depth)
+    object_statistics = _object_statistics(
+        instance_ids, id_to_labels, depth, expected_objects=expected_objects
+    )
     (pose_dir / "objects.json").write_text(
         json.dumps(object_statistics, indent=2), encoding="utf-8"
     )
@@ -354,7 +567,7 @@ def save_capture(output_root: Path, pose_name: str, rgb_data, depth_data) -> Non
             }
         ),
         "object_statistics_file": "objects.json",
-        "segmentation_source": "rgb_color_key_fallback",
-        "segmentation_limitation": "Replace with RTX instance annotator after Isaac Sim synthetic-data crash is resolved.",
+        "segmentation_source": segmentation_source,
+        "segmentation_limitation": segmentation_limitation,
     }
     (pose_dir / "metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")

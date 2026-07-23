@@ -83,3 +83,12 @@
 - Boundary: the environment is a visual/scenario prototype, not yet an approved final evaluation scene.
 - Safety guard: benchmark Active View execution remains disabled because the current color-key segmentation cannot produce correct instances for similar red/orange objects.
 - Finalization requires correct instance masks, expanded uncertainty graph nodes/edges, seeded scenario generation, physics validation, and alignment with the confirmed real-lab setup.
+
+## 2026-07-24 — Benchmark instance-label fallback
+
+- Decision: use a second temporary emissive-material render pass for benchmark instance IDs while the native RTX annotator is unstable.
+- During the ID pass, all non-task geometry is black and eight task entities receive distinct ID materials; original bindings are restored immediately afterward.
+- RTX tone-mapping shifts the rendered colors, so classification uses measured rendered prototypes. Two close hue pairs are resolved by disconnected horizontal components in the fixed benchmark views.
+- Current verification: all eight task entities have independent IDs; target visibility increases from 45 center pixels to 636 right pixels.
+- Added a deterministic expanded benchmark graph containing target, similar candidate, occluder, distractors, boundary object, container, and view-dependent visibility.
+- Boundary: this is a controlled simulator fallback, not native instance ground truth and not suitable for real-camera masks. The probabilistic graph and VLM replacement remain pending.
