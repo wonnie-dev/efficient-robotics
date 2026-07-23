@@ -49,6 +49,20 @@ Benchmark captures are written separately under
 - Inside, outside-near, near-boundary, behind-container, and occluding objects
   are visually represented in one controlled scene.
 
+## Provisional uncertainty and active-view interface
+
+Each left/center/right capture now produces `uncertainty_scene_graph_stub.json`.
+All eight task entities receive existence and task-conditioned target beliefs,
+and configured spatial edges receive relation-versus-unknown beliefs. The
+one-step controller record is written to
+`outputs/benchmark_active_view_controller/decision.json`; its selected motion
+request is written separately as `action_request.json`.
+
+These values exercise the full Scene Graph-to-controller interface only. They
+are deterministic, uncalibrated, ground-truth-derived stubs and must later be
+replaced by VLM/grounding outputs, calibration, an online observation model,
+and the approved task-risk-aware MPC formulation.
+
 ## Current limitations
 
 - This is a visual/scenario prototype, not a finalized evaluation environment.

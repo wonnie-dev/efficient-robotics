@@ -409,9 +409,19 @@ else:
         capture_observation(pose_name)
     if args.scene_profile == "benchmark":
         from build_benchmark_scene_graphs import main as build_benchmark_scene_graphs
+        from build_benchmark_uncertainty_graphs import (
+            main as build_benchmark_uncertainty_graphs,
+        )
+        from run_benchmark_active_view_stub import (
+            main as run_benchmark_active_view_stub,
+        )
 
         build_benchmark_scene_graphs()
-        record("BENCHMARK_SCENE_GRAPHS_BUILT=left|center|right")
+        build_benchmark_uncertainty_graphs()
+        run_benchmark_active_view_stub()
+        record(
+            "BENCHMARK_UNCERTAINTY_AND_ACTIVE_VIEW_BUILT=left|center|right"
+        )
     app_utils.play()
     simulation_app.update()
     set_pose(robot, observation_config, "center", simulation_app.update, 1)

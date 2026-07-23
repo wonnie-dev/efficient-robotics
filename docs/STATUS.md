@@ -97,3 +97,10 @@
 - Added offline ID-pass reprocessing so classification changes do not require relaunching Isaac Sim.
 - Eight unit tests pass, including benchmark relation construction and paired-instance component separation.
 - Boundary: the custom color-ID pass is simulator-only and not native RTX ground truth. Benchmark Active View remains disabled until the uncertainty-aware graph is expanded to consume all benchmark entities.
+- Expanded the benchmark Scene Graph with provisional beliefs for all eight task entities: existence probability/uncertainty and task-conditioned target probability/uncertainty on nodes, plus relation distributions/uncertainty on configured relation edges.
+- Added a graph-level target distribution, required `inside` relation belief, and temporary task-failure risk `1 - P(target_red) * P(inside)`.
+- Added a one-step information-seeking controller stub that evaluates left/right replay observations using task-risk reduction, target/relation entropy reduction, and joint-motion cost.
+- From the center belief, the stub selected `right`: predicted task-risk reduction was `0.522695`, compared with `0.092036` for left; utilities were `0.749290` and `0.128904`, respectively.
+- The target probability changes from `0.574113` at center to `0.854702` in the independently generated right observation graph; the target `inside` probability changes from `0.568253` to `0.931184`.
+- Eleven unit tests pass. The benchmark scene loader now regenerates deterministic graphs, uncertainty graphs, and the view-selection request after capturing all three views.
+- Research boundary: these are uncalibrated rule-based probabilities and offline ground-truth-derived candidate replay. The controller is an interface prototype, not the final VLM, predictor, risk metric, MPC solver, or valid final-evaluation method.

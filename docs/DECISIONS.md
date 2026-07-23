@@ -92,3 +92,11 @@
 - Current verification: all eight task entities have independent IDs; target visibility increases from 45 center pixels to 636 right pixels.
 - Added a deterministic expanded benchmark graph containing target, similar candidate, occluder, distractors, boundary object, container, and view-dependent visibility.
 - Boundary: this is a controlled simulator fallback, not native instance ground truth and not suitable for real-camera masks. The probabilistic graph and VLM replacement remain pending.
+
+## 2026-07-24 — Expanded benchmark uncertainty-flow stub
+
+- Decision: add replaceable engineering probabilities to all eight benchmark entities without fixing the paper's final uncertainty or MPC equations.
+- Node interface: existence belief and task-conditioned target belief; relation interface: configured relation versus `unknown`; graph interface: target distribution, required `inside` belief, and temporary task-failure risk.
+- Temporary risk expression: `1 - P(target_red) * P(target_red inside container)`.
+- The one-step controller combines predicted risk reduction, target/relation entropy reduction, and mean joint-motion cost, and currently selects the right observation pose.
+- Boundary: all probability mappings and objective weights are explicitly labeled stubs. Candidate outcomes use captured simulator ground truth, so this is not online prediction, calibrated VLM uncertainty, final MPC, a paper metric, or evaluation evidence.
