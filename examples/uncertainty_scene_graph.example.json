@@ -1,0 +1,129 @@
+{
+  "schema_version": "0.2.0-draft",
+  "schema_status": "provisional_pending_overleaf_method_definition",
+  "scene_id": "open_container_minimal_v1",
+  "episode_id": "example_only",
+  "seed": 0,
+  "task": {
+    "instruction": "Find the target object inside or near the basket.",
+    "target_condition": "requested object satisfying the basket relation",
+    "allowed_relations": ["inside", "outside", "near", "behind"]
+  },
+  "observation": {
+    "view_id": "center",
+    "sequence_index": 0,
+    "rgb_path": "outputs/observations/center/rgb.png",
+    "depth_path": "outputs/observations/center/depth_m.npy",
+    "camera_prim": "/World/RobotSystem/RG6/Zivid2Camera",
+    "timestamp_seconds": null
+  },
+  "nodes": [
+    {
+      "id": "target_red",
+      "type": "object",
+      "observation": {
+        "visible": true,
+        "visible_fraction": 0.004908854166666666,
+        "bbox_xyxy": [327, 222, 369, 269],
+        "depth_mean_m": 0.6334452629089355
+      },
+      "belief": {
+        "class_distribution": {
+          "red_cube": 0.85,
+          "other": 0.15
+        },
+        "target_probability": 0.72,
+        "target_uncertainty": {
+          "status": "pending_definition",
+          "method": null,
+          "value": null,
+          "calibrated": false,
+          "units": null
+        },
+        "source": "rule_based_stub"
+      },
+      "last_observed_view": "center"
+    },
+    {
+      "id": "container",
+      "type": "container",
+      "observation": {
+        "visible": true,
+        "visible_fraction": 0.163525390625,
+        "bbox_xyxy": [53, 106, 621, 409],
+        "depth_mean_m": 0.6602858901023865
+      },
+      "belief": {
+        "class_distribution": {
+          "open_container": 1.0
+        },
+        "target_probability": 0.0,
+        "target_uncertainty": {
+          "status": "not_observed",
+          "method": null,
+          "value": null,
+          "calibrated": false,
+          "units": null
+        },
+        "source": "ground_truth_stub"
+      },
+      "last_observed_view": "center"
+    }
+  ],
+  "edges": [
+    {
+      "id": "target_red_to_container",
+      "source": "target_red",
+      "target": "container",
+      "type": "spatial_relation_belief",
+      "belief": {
+        "relation_distribution": {
+          "inside": 0.60,
+          "outside": 0.20,
+          "near": 0.15,
+          "behind": 0.05
+        },
+        "relation_uncertainty": {
+          "status": "pending_definition",
+          "method": null,
+          "value": null,
+          "calibrated": false,
+          "units": null
+        },
+        "source": "rule_based_stub"
+      },
+      "last_updated_view": "center"
+    }
+  ],
+  "graph_belief": {
+    "most_likely_target": "target_red",
+    "target_uncertainty": {
+      "status": "pending_definition",
+      "method": null,
+      "value": null,
+      "calibrated": false,
+      "units": null
+    },
+    "relation_uncertainty": {
+      "status": "pending_definition",
+      "method": null,
+      "value": null,
+      "calibrated": false,
+      "units": null
+    },
+    "task_failure_risk": {
+      "status": "pending_definition",
+      "method": null,
+      "value": null,
+      "calibrated": false,
+      "units": null
+    },
+    "observation_count": 1
+  },
+  "provenance": {
+    "schema_file": "configs/scene_graph/uncertainty_aware_scene_graph.schema.json",
+    "perception_source": "example rule-based stub values",
+    "ground_truth_used_for_control": false,
+    "notes": "Probabilities are illustrative only and are not experimental results."
+  }
+}

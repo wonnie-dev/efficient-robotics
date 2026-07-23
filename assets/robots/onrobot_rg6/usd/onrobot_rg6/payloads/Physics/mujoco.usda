@@ -1,0 +1,231 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "URDF USD Converter v0.1.2"
+    }
+    defaultPrim = "onrobot_rg6_model"
+    doc = """Generated from Composed Stage of root layer D:\\isaac_project\\.tmp\\rg6_import\\tmpa5wmyygi\\onrobot_rg6_model.usdc
+
+
+Generated from Composed Stage of root layer D:\\isaac_project\\assets\\robots\\onrobot_rg6\\usd\\_debug_onrobot_rg6\\usdex_onrobot_rg6\\onrobot_rg6_model.usdc
+
+
+Generated from Composed Stage of root layer D:\\isaac_project\\assets\\robots\\onrobot_rg6\\usd\\_debug_onrobot_rg6\\temp_onrobot_rg6\\onrobot_rg6.usd
+
+
+Generated from Composed Stage of root layer D:\\isaac_project\\assets\\robots\\onrobot_rg6\\usd\\onrobot_rg6\\payloads\\base.usd
+"""
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    subLayers = [
+        @./physics.usda@
+    ]
+    upAxis = "Z"
+)
+
+over "onrobot_rg6_model"
+{
+    over "Physics"
+    {
+        def MjcActuator "finger_joint_actuator"
+        {
+            uniform double[] mjc:biasPrm = [0, -1.7453292608261108, -0.1745329201221466, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:biasType = "affine"
+            uniform double mjc:forceRange:max = 1000
+            uniform double mjc:forceRange:min = -1000
+            uniform double[] mjc:gainPrm = [1.7453292608261108, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:gainType = "fixed"
+            custom rel mjc:target
+            prepend rel mjc:target = </onrobot_rg6_model/Physics/finger_joint>
+        }
+
+        def MjcActuator "left_inner_knuckle_joint_actuator"
+        {
+            uniform double[] mjc:biasPrm = [0, -1.7453292608261108, -0.1745329201221466, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:biasType = "affine"
+            uniform double mjc:forceRange:max = 1000
+            uniform double mjc:forceRange:min = -1000
+            uniform double[] mjc:gainPrm = [1.7453292608261108, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:gainType = "fixed"
+            custom rel mjc:target
+            prepend rel mjc:target = </onrobot_rg6_model/Physics/left_inner_knuckle_joint>
+        }
+
+        def MjcActuator "left_inner_finger_joint_actuator"
+        {
+            uniform double[] mjc:biasPrm = [0, -1.7453292608261108, -0.1745329201221466, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:biasType = "affine"
+            uniform double mjc:forceRange:max = 1000
+            uniform double mjc:forceRange:min = -1000
+            uniform double[] mjc:gainPrm = [1.7453292608261108, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:gainType = "fixed"
+            custom rel mjc:target
+            prepend rel mjc:target = </onrobot_rg6_model/Physics/left_inner_finger_joint>
+        }
+
+        def MjcActuator "right_outer_knuckle_joint_actuator"
+        {
+            uniform double[] mjc:biasPrm = [0, -1.7453292608261108, -0.1745329201221466, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:biasType = "affine"
+            uniform double mjc:forceRange:max = 1000
+            uniform double mjc:forceRange:min = -1000
+            uniform double[] mjc:gainPrm = [1.7453292608261108, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:gainType = "fixed"
+            custom rel mjc:target
+            prepend rel mjc:target = </onrobot_rg6_model/Physics/right_outer_knuckle_joint>
+        }
+
+        def MjcActuator "right_inner_knuckle_joint_actuator"
+        {
+            uniform double[] mjc:biasPrm = [0, -1.7453292608261108, -0.1745329201221466, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:biasType = "affine"
+            uniform double mjc:forceRange:max = 1000
+            uniform double mjc:forceRange:min = -1000
+            uniform double[] mjc:gainPrm = [1.7453292608261108, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:gainType = "fixed"
+            custom rel mjc:target
+            prepend rel mjc:target = </onrobot_rg6_model/Physics/right_inner_knuckle_joint>
+        }
+
+        def MjcActuator "right_inner_finger_joint_actuator"
+        {
+            uniform double[] mjc:biasPrm = [0, -1.7453292608261108, -0.1745329201221466, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:biasType = "affine"
+            uniform double mjc:forceRange:max = 1000
+            uniform double mjc:forceRange:min = -1000
+            uniform double[] mjc:gainPrm = [1.7453292608261108, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:gainType = "fixed"
+            custom rel mjc:target
+            prepend rel mjc:target = </onrobot_rg6_model/Physics/right_inner_finger_joint>
+        }
+
+        over "root_joint"
+        {
+        }
+
+        over "finger_joint" (
+            delete apiSchemas = ["PhysicsDriveAPI:angular", "PhysicsJointStateAPI:angular"]
+        )
+        {
+        }
+
+        over "left_inner_knuckle_joint" (
+            delete apiSchemas = ["PhysicsDriveAPI:angular", "PhysicsJointStateAPI:angular"]
+        )
+        {
+        }
+
+        over "left_inner_finger_joint" (
+            delete apiSchemas = ["PhysicsDriveAPI:angular", "PhysicsJointStateAPI:angular"]
+        )
+        {
+        }
+
+        over "right_outer_knuckle_joint" (
+            delete apiSchemas = ["PhysicsDriveAPI:angular", "PhysicsJointStateAPI:angular"]
+        )
+        {
+        }
+
+        over "right_inner_knuckle_joint" (
+            delete apiSchemas = ["PhysicsDriveAPI:angular", "PhysicsJointStateAPI:angular"]
+        )
+        {
+        }
+
+        over "right_inner_finger_joint" (
+            delete apiSchemas = ["PhysicsDriveAPI:angular", "PhysicsJointStateAPI:angular"]
+        )
+        {
+        }
+    }
+
+    over "Geometry"
+    {
+        over "onrobot_rg6_base_link"
+        {
+            over "left_outer_knuckle"
+            {
+                over "left_inner_finger"
+                {
+                    over "inner_finger"
+                    {
+                    }
+
+                    over "inner_finger_1"
+                    {
+                    }
+                }
+
+                over "outer_knuckle"
+                {
+                }
+
+                over "outer_knuckle_1"
+                {
+                }
+            }
+
+            over "left_inner_knuckle"
+            {
+                over "inner_knuckle"
+                {
+                }
+
+                over "inner_knuckle_1"
+                {
+                }
+            }
+
+            over "right_outer_knuckle"
+            {
+                over "right_inner_finger"
+                {
+                    over "inner_finger"
+                    {
+                    }
+
+                    over "inner_finger_1"
+                    {
+                    }
+                }
+
+                over "outer_knuckle"
+                {
+                }
+
+                over "outer_knuckle_1"
+                {
+                }
+            }
+
+            over "right_inner_knuckle"
+            {
+                over "inner_knuckle"
+                {
+                }
+
+                over "inner_knuckle_1"
+                {
+                }
+            }
+
+            over "base_link"
+            {
+            }
+
+            over "base_link_1"
+            {
+            }
+        }
+    }
+
+    over "Materials"
+    {
+    }
+
+    over "VisualMaterials"
+    {
+    }
+}
+

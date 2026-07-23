@@ -1,0 +1,26 @@
+# Python caches and local dependencies
+__pycache__/
+*.py[cod]
+.vendor/
+
+# Temporary import/build files
+.tmp/
+assets/robots/onrobot_rg6/usd/_debug_onrobot_rg6/
+
+# Generated experiment outputs
+outputs/
+
+# Runtime and diagnostic artifacts
+*.log
+diagnostic_*.png
+instance_segmentation_diagnostic.json
+
+# Isaac Sim and crash artifacts
+*.dmp
+*.crash
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

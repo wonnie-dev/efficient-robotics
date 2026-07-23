@@ -1,0 +1,14 @@
+{
+  "status": "provisional_engineering_heuristic_not_paper_metric",
+  "initial_view": "center",
+  "candidate_views": ["left", "right"],
+  "target_node_id": "target_red",
+  "sufficient_score_threshold": 0.8,
+  "reference_target_pixels": 2500,
+  "weights": {
+    "target_area": 0.75,
+    "depth_validity": 0.25
+  },
+  "formula": "score = visible * (0.75 * min(pixel_count / 2500, 1) + 0.25 * depth_valid_pixels / pixel_count)",
+  "uncertainty_formula": "uncertainty = 1 - score"
+}

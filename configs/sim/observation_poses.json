@@ -1,0 +1,31 @@
+{
+  "status": "provisional_until_lab_calibration",
+  "joint_order": [
+    "shoulder_pan_joint",
+    "shoulder_lift_joint",
+    "elbow_joint",
+    "wrist_1_joint",
+    "wrist_2_joint",
+    "wrist_3_joint"
+  ],
+  "poses_rad": {
+    "home": [-1.5708, -1.5708, 1.5708, -1.5708, -1.5708, 0.0],
+    "left": [-1.8500, -1.4500, 1.7500, -1.8708, -1.5708, -0.2800],
+    "center": [-1.5708, -1.4500, 1.7500, -1.8708, -1.5708, 0.0],
+    "right": [-1.2900, -1.4500, 1.7500, -1.8708, -1.5708, 0.2800]
+  },
+  "camera": {
+    "resolution": [640, 480],
+    "look_at_world_m": [0.48, 0.08, 0.80],
+    "mount_offset_ee_m": [0.0, 0.0, 0.04],
+    "optical_clearance_toward_target_m": 0.18,
+    "focal_length_mm": 24.0,
+    "horizontal_aperture_mm": 36.0,
+    "clipping_range_m": [0.05, 5.0]
+  },
+  "capture": {
+    "poses": ["left", "center", "right"],
+    "warmup_frames": 20,
+    "output_directory": "outputs/observations"
+  }
+}
