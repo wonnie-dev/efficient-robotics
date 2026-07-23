@@ -203,7 +203,7 @@ def plan(config: dict) -> dict:
             "reason": "minimum_non_oracle_expected_horizon_objective",
         },
         "disabled_actions": {
-            name: action["disabled_until"]
+            name: action.get("disabled_until", "disabled_for_current_replan")
             for name, action in config["actions"].items()
             if not action["enabled"]
         },

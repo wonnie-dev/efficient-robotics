@@ -21,6 +21,14 @@ parser.add_argument(
     help="Capture center, run the controller, execute its selected view, and recapture.",
 )
 parser.add_argument(
+    "--execute-non-oracle-plan",
+    action="store_true",
+    help=(
+        "Benchmark only: plan from center without future captures, execute the "
+        "selected viewpoint, update belief from the new observation, and replan."
+    ),
+)
+parser.add_argument(
     "--scene-profile",
     choices=("minimal", "benchmark"),
     default="minimal",
@@ -31,6 +39,10 @@ if args.scene_profile == "benchmark" and args.execute_action_request:
         "Benchmark active-view execution is disabled until its multi-object "
         "segmentation and graph pipeline are implemented."
     )
+if args.execute_non_oracle_plan and args.scene_profile != "benchmark":
+    parser.error("--execute-non-oracle-plan requires --scene-profile benchmark")
+if args.execute_non_oracle_plan and args.execute_action_request:
+    parser.error("Select only one execution mode")
 SCENE_PATH = (
     PROJECT_ROOT
     / "assets"
@@ -269,7 +281,167 @@ def capture_observation(pose_name: str) -> None:
     record("CAPTURED_POSE=" + pose_name)
 
 
-if args.execute_action_request:
+if args.execute_non_oracle_plan:
+    import copy
+
+    from run_non_oracle_hybrid_planner import load_json as load_method_json
+    from run_non_oracle_hybrid_planner import plan as make_non_oracle_plan
+    from update_belief_from_executed_observation import update_from_observation
+
+    method_config_path = (
+        PROJECT_ROOT / "configs" / "research" / "initial_method_design.json"
+    )
+    method_config = load_method_json(method_config_path)
+    non_oracle_output = PROJECT_ROOT / method_config["output_root"]
+    non_oracle_output.mkdir(parents=True, exist_ok=True)
+
+    capture_observation("center")
+    initial_plan = make_non_oracle_plan(method_config)
+    (non_oracle_output / "pre_action_plan.json").write_text(
+        json.dumps(initial_plan, indent=2) + "\n", encoding="utf-8"
+    )
+    action_name = initial_plan["action_request"]["type"]
+    if not action_name.startswith("viewpoint_"):
+        raise RuntimeError(f"Expected a viewpoint action, got: {action_name}")
+    selected_pose = action_name.removeprefix("viewpoint_")
+    if selected_pose not in observation_config["capture"]["poses"]:
+        raise RuntimeError(f"Unknown non-oracle observation pose: {selected_pose}")
+    record(f"NON_ORACLE_PRE_ACTION_PLAN={action_name}")
+
+    def maximum_contact_force_non_oracle() -> float:
+        forces = contact_monitor.get_net_contact_forces(dt=1.0 / 60.0).numpy()
+        return float((forces**2).sum(axis=1).max() ** 0.5)
+
+    collision_obstacle_paths = [
+        "/World/WorkBench",
+        "/World/OpenContainer",
+        "/World/TargetRed",
+        "/World/OccluderOrange",
+        "/World/DistractorBlue",
+    ]
+
+    def world_aabb_collision_non_oracle() -> bool:
+        cache = UsdGeom.BBoxCache(Usd.TimeCode.Default(), [UsdGeom.Tokens.default_])
+        obstacle_ranges = [
+            cache.ComputeWorldBound(stage.GetPrimAtPath(path)).ComputeAlignedRange()
+            for path in collision_obstacle_paths
+            if stage.GetPrimAtPath(path).IsValid()
+        ]
+        for link_path in moving_link_paths:
+            link_range = cache.ComputeWorldBound(
+                stage.GetPrimAtPath(link_path)
+            ).ComputeAlignedRange()
+            link_min, link_max = link_range.GetMin(), link_range.GetMax()
+            for obstacle_range in obstacle_ranges:
+                obstacle_min, obstacle_max = obstacle_range.GetMin(), obstacle_range.GetMax()
+                if all(
+                    link_min[axis] <= obstacle_max[axis]
+                    and link_max[axis] >= obstacle_min[axis]
+                    for axis in range(3)
+                ):
+                    return True
+        return False
+
+    app_utils.play()
+    trajectory_result = move_pose_interpolated(
+        robot,
+        observation_config,
+        selected_pose,
+        simulation_app.update,
+        maximum_contact_force_non_oracle if contact_monitor is not None else None,
+        world_aabb_collision_non_oracle,
+    )
+    app_utils.pause()
+    simulation_app.update()
+    if trajectory_result["status"] != "completed":
+        raise RuntimeError(f"Non-oracle trajectory failed: {trajectory_result}")
+
+    capture_observation(selected_pose)
+    actual_objects_path = output_root / selected_pose / "objects.json"
+    actual_objects = json.loads(actual_objects_path.read_text(encoding="utf-8"))
+    belief_update = update_from_observation(
+        initial_plan["current_belief"],
+        action_name,
+        actual_objects,
+        method_config,
+    )
+    (non_oracle_output / "belief_update.json").write_text(
+        json.dumps(belief_update, indent=2) + "\n", encoding="utf-8"
+    )
+
+    replanning_config = copy.deepcopy(method_config)
+    replanning_config["initial_belief"]["target"] = belief_update["posterior"]["target"]
+    replanning_config["initial_belief"]["relation"] = belief_update["posterior"][
+        "relation"
+    ]
+    replanning_config["initial_belief"]["source"] = (
+        "post_action_simulator_observation_adapter"
+    )
+    current_joints = observation_config["poses_rad"][selected_pose]
+    for pose_name in observation_config["capture"]["poses"]:
+        candidate_joints = observation_config["poses_rad"][pose_name]
+        replanning_config["actions"][f"viewpoint_{pose_name}"]["motion_cost"] = (
+            sum(
+                abs(current - candidate)
+                for current, candidate in zip(current_joints, candidate_joints)
+            )
+            / len(current_joints)
+        )
+    replanning_config["actions"][action_name]["enabled"] = False
+    replanning_config["actions"][action_name]["disabled_until"] = (
+        "a_new_physical_viewpoint_change"
+    )
+    replanned = make_non_oracle_plan(replanning_config)
+    (non_oracle_output / "post_action_replan.json").write_text(
+        json.dumps(replanned, indent=2) + "\n", encoding="utf-8"
+    )
+
+    joint_indices = [
+        robot.dof_names.index(name) for name in observation_config["joint_order"]
+    ]
+    measured_array = robot.get_dof_positions().numpy()
+    measured_vector = measured_array[0] if measured_array.ndim > 1 else measured_array
+    measured = measured_vector[joint_indices].tolist()
+    requested = observation_config["poses_rad"][selected_pose]
+    absolute_errors = [
+        abs(actual - target) for actual, target in zip(measured, requested)
+    ]
+    execution = {
+        "status": (
+            "completed"
+            if max(absolute_errors)
+            <= observation_config["trajectory"]["final_tolerance_rad"]
+            else "joint_verification_failed"
+        ),
+        "pre_action_plan": "outputs/non_oracle_planner/pre_action_plan.json",
+        "executed_action": action_name,
+        "actual_observation": str(
+            actual_objects_path.relative_to(PROJECT_ROOT)
+        ).replace("\\", "/"),
+        "belief_update": "outputs/non_oracle_planner/belief_update.json",
+        "post_action_replan": "outputs/non_oracle_planner/post_action_replan.json",
+        "post_action_first_action": replanned["action_request"]["type"],
+        "trajectory": trajectory_result,
+        "maximum_joint_error_rad": max(absolute_errors),
+        "future_capture_used_in_pre_action_plan": False,
+        "actual_capture_consumed_only_after_motion": True,
+        "actual_robot_motion_executed": True,
+        "planner_label": "non_oracle_receding_horizon_engineering_prototype",
+        "mpc_claim_allowed": False,
+        "limitations": (
+            "The observation model is hand specified, the post-action adapter "
+            "uses simulator instance labels, and the joint interpolation is not "
+            "the final continuous MPC solver."
+        ),
+    }
+    (non_oracle_output / "execution.json").write_text(
+        json.dumps(execution, indent=2) + "\n", encoding="utf-8"
+    )
+    record(
+        f"NON_ORACLE_EXECUTION status={execution['status']} "
+        f"executed={action_name} replan={execution['post_action_first_action']}"
+    )
+elif args.execute_action_request:
     capture_observation("center")
     record("ACTIVE_VIEW_INITIAL_CAPTURE=center")
 

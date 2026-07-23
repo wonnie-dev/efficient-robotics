@@ -110,3 +110,12 @@
 - Initial objective: expected task-failure risk minus weighted task-conditioned expected information gain, plus motion and collision costs.
 - Initial extensions boundary: temperature scaling first; conformal prediction, CVaR, and full chance-constrained MPC remain optional future work.
 - Current implementation boundary: viewpoint and grasp are enabled; likelihoods and initial beliefs are engineering stubs pending VLM logits, a calibration split, and a learned or validated observation model.
+
+## 2026-07-24 — Non-oracle Isaac execution boundary
+
+- Decision: the pre-action planner may consume only the current belief and the action-conditioned observation model.
+- The selected-view RGB-D and simulator instance labels become available only after the interpolated robot motion completes.
+- Post-action simulator labels are converted to detected/not-detected and relation-evidence symbols, then applied through the same Bayesian likelihood model.
+- After every executed viewpoint, movement costs are recomputed from the robot's new joint pose and the planner is called again.
+- Verified loop: center plan selected right, actual right evidence updated the belief, and replanning selected center followed by grasp.
+- Boundary: the post-action adapter still uses simulator instance labels, and the executed joint interpolation is not the final MPC trajectory solver.

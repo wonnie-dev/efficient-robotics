@@ -80,3 +80,30 @@ D:\isaac-sim\python.bat scripts\run_non_oracle_hybrid_planner.py
 ```
 
 The plan is written to `outputs/non_oracle_planner/plan.json`.
+
+## Isaac Sim execution loop
+
+The benchmark execution mode is:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\launch_isaac_sim.ps1 `
+  -IsaacSimRoot D:\isaac-sim -SceneProfile benchmark -ExecuteNonOraclePlan
+```
+
+It captures only the current center observation, creates a pre-action plan,
+executes the selected interpolated viewpoint motion, captures the actual new
+observation, performs a Bayesian update, and replans. The actual selected-view
+capture is consumed only after motion and is never read by the pre-action
+planner.
+
+Execution records are written to:
+
+- `outputs/non_oracle_planner/pre_action_plan.json`;
+- `outputs/non_oracle_planner/belief_update.json`;
+- `outputs/non_oracle_planner/post_action_replan.json`;
+- `outputs/non_oracle_planner/execution.json`.
+
+The verified run executed `viewpoint_right`. Post-action evidence increased the
+target-red belief from `0.574113` to `0.763479` and the required `inside`
+relation belief from `0.568253` to `0.863000`. The next receding-horizon plan
+selected `viewpoint_center -> grasp`, rather than immediately grasping.

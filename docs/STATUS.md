@@ -111,3 +111,10 @@
 - The current plan selects `viewpoint_right -> grasp`; direct grasp, left-view-then-grasp, center-view-then-grasp, and right-view-then-grasp are all recorded with their costs.
 - Eighteen unit tests pass, including temperature scaling, negative evidence, branch normalization, entropy, risk, and the explicit non-oracle provenance guard.
 - Boundary: the initial belief is uncalibrated and the likelihood model is hand specified. This is a non-oracle receding-horizon engineering prototype, not yet the final learned observation predictor or MPC solver and not valid final-evaluation evidence.
+- Connected the non-oracle planner to a benchmark Isaac Sim execution mode: center capture, pre-action plan, interpolated viewpoint motion, actual post-action capture, Bayesian belief update, and replanning.
+- Verified the pre-action planner selected `viewpoint_right` without reading any future capture. The UR10e completed 15 interpolated waypoints with no world-AABB collision and a post-capture maximum joint error of approximately `0.000108 rad`.
+- The actual right observation was consumed only after motion. It contained 624 target pixels and produced `target_red: 0.574113 -> 0.763479` and `inside: 0.568253 -> 0.863000`.
+- Target entropy decreased from `0.713172` to `0.551787` nats; relation entropy decreased from `1.034558` to `0.474410` nats.
+- Replanning from the updated belief and the actual right robot pose selected `viewpoint_center -> grasp`. Viewpoint motion costs are recomputed relative to the executed pose.
+- Isaac Sim remains running and responsive on the RTX 4070 SUPER; observed GPU utilization was 49% with about 3996 MiB of 12282 MiB in use.
+- Nineteen unit tests pass. Execution provenance explicitly records no future capture in pre-action planning and forbids an MPC claim for the current interpolated-controller prototype.

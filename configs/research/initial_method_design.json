@@ -85,5 +85,11 @@
     "required_relation": "inside"
   },
   "task_failure_risk_definition": "1-max_h P(target=h)*P(required_relation_for_selected_target)_engineering_factorization",
+  "post_action_observation_adapter": {
+    "status": "simulator_instance_label_adapter_not_real_perception",
+    "target_object_id": "target_red",
+    "container_id": "container",
+    "detection_pixel_threshold": 100
+  },
   "output_root": "outputs/non_oracle_planner"
 }

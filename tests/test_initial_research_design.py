@@ -18,6 +18,10 @@ from calibrated_belief import (  # noqa: E402
 )
 from run_non_oracle_hybrid_planner import observation_branches, plan  # noqa: E402
 from run_non_oracle_hybrid_planner import task_failure_risk  # noqa: E402
+from update_belief_from_executed_observation import (  # noqa: E402
+    observed_symbols,
+    update_from_observation,
+)
 
 
 class InitialResearchDesignTests(unittest.TestCase):
@@ -72,6 +76,35 @@ class InitialResearchDesignTests(unittest.TestCase):
             "relation": {"inside": 0.9, "unknown": 0.1},
         }
         self.assertAlmostEqual(task_failure_risk(belief, self.config["objective"]), 0.28)
+
+    def test_post_action_adapter_uses_negative_evidence(self) -> None:
+        objects = {
+            "target_red": {"pixel_count": 0, "bbox_xyxy": None},
+            "container": {"pixel_count": 1000, "bbox_xyxy": [0, 0, 100, 100]},
+        }
+        symbols = observed_symbols(
+            objects, self.config["post_action_observation_adapter"]
+        )
+        self.assertFalse(symbols["target_detected"])
+        update = update_from_observation(
+            {
+                "target": self.config["initial_belief"]["target"],
+                "relation": self.config["initial_belief"]["relation"],
+            },
+            "viewpoint_right",
+            objects,
+            self.config,
+        )
+        self.assertLess(
+            update["posterior"]["target"]["target_red"],
+            update["prior"]["target"]["target_red"],
+        )
+
+    def test_viewpoint_motion_cost_is_mean_joint_change(self) -> None:
+        center = [-1.5708, -1.45, 1.75, -1.8708, -1.5708, 0.0]
+        right = [-1.29, -1.45, 1.75, -1.8708, -1.5708, 0.28]
+        mean_change = sum(abs(a - b) for a, b in zip(center, right)) / len(center)
+        self.assertAlmostEqual(mean_change, 0.09346666666666666)
 
 
 if __name__ == "__main__":
