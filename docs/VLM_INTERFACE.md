@@ -78,3 +78,17 @@ D:\isaac-sim\python.bat scripts\validate_vlm_contract.py INPUT_JSON OUTPUT_JSON
 
 The deterministic mock adapter tests file compatibility only. It has no
 perception ability and must not be used as a baseline result.
+
+## Data strategy
+
+The project will not manually build and label a large VLM training dataset.
+Model training or adaptation should start from pretrained weights and suitable
+existing public datasets.
+
+Project-specific data is still required for calibration and evaluation because
+the robot, camera, object candidates, relations, and active-view actions differ
+from public datasets. These samples will be generated and labeled
+automatically by Isaac Sim rather than manually annotated. They must be divided
+by scene seed and episode into disjoint train/adaptation (if needed),
+calibration, validation, and test groups. Different views of the same episode
+must never be split across calibration and test.

@@ -3,6 +3,7 @@ param(
     [switch]$Headless,
     [switch]$ExecuteActionRequest,
     [switch]$ExecuteNonOraclePlan,
+    [switch]$MovementDemo,
     [ValidateSet("minimal", "benchmark")]
     [string]$SceneProfile = "minimal"
 )
@@ -64,6 +65,9 @@ if ($ExecuteActionRequest) {
 }
 if ($ExecuteNonOraclePlan) {
     $scriptArguments += "--execute-non-oracle-plan"
+}
+if ($MovementDemo) {
+    $scriptArguments += "--movement-demo"
 }
 Start-Process -FilePath $pythonLauncher -ArgumentList $scriptArguments -WindowStyle Normal
 Write-Output "Started Isaac Sim Python runtime with scene loader: $openScript"

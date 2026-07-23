@@ -124,3 +124,8 @@
 - Generated and contract-validated three development samples for left/center/right under `outputs/vlm_dataset/`.
 - Added a deterministic mock-logit adapter for interface testing only and a cross-file validator that checks sample IDs, candidate order, logit dimensions, relation label order, query coverage, and forbidden semantic tokens.
 - Twenty-three unit tests pass. The three current samples are not a training, calibration, or test set because they share one fixed scene and seed.
+- Adopted a data strategy based on pretrained models and existing public training data, without manually constructing a large labeled VLM dataset.
+- Project-specific calibration and evaluation samples will instead be generated and labeled automatically in Isaac Sim, with episode/seed-level separation to prevent view leakage.
+- Added and ran a visual-only slow movement demo: `center -> left -> center -> right -> center`, with 90 paused interpolation steps and a two-second hold at each pose.
+- The visual demo is explicitly not physics evidence or MPC. The first attempted slow physics demo exposed UR10e instability under an excessively fine 57-waypoint/long-settle setting; it was discarded, and the previously verified 15-waypoint physics execution remains unchanged.
+- The successful visual demo is recorded at `outputs/movement_demo.json`; Isaac Sim remains responsive on GPU after completion.

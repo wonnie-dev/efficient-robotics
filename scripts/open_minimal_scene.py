@@ -29,6 +29,11 @@ parser.add_argument(
     ),
 )
 parser.add_argument(
+    "--movement-demo",
+    action="store_true",
+    help="Run a slow center-left-center-right-center motion for visual inspection.",
+)
+parser.add_argument(
     "--scene-profile",
     choices=("minimal", "benchmark"),
     default="minimal",
@@ -43,6 +48,10 @@ if args.execute_non_oracle_plan and args.scene_profile != "benchmark":
     parser.error("--execute-non-oracle-plan requires --scene-profile benchmark")
 if args.execute_non_oracle_plan and args.execute_action_request:
     parser.error("Select only one execution mode")
+if args.movement_demo and (
+    args.execute_non_oracle_plan or args.execute_action_request
+):
+    parser.error("Movement demo cannot be combined with another execution mode")
 SCENE_PATH = (
     PROJECT_ROOT
     / "assets"
@@ -281,7 +290,94 @@ def capture_observation(pose_name: str) -> None:
     record("CAPTURED_POSE=" + pose_name)
 
 
-if args.execute_non_oracle_plan:
+if args.movement_demo:
+    demo_config = observation_config
+    set_pose(robot, demo_config, "center", simulation_app.update, 1)
+    pose_position, pose_orientation = current_ee_pose()
+    align_tool_and_camera(
+        stage,
+        ur10e_ee,
+        rg6_prim,
+        zivid_camera,
+        demo_config,
+        (pose_position, pose_orientation),
+    )
+    record("MOVEMENT_DEMO_READY_WAIT=5s")
+    for _ in range(300):
+        simulation_app.update()
+    demo_results = []
+    for pose_name in ("left", "center", "right", "center"):
+        app_utils.pause()
+        joint_indices = [
+            robot.dof_names.index(name) for name in demo_config["joint_order"]
+        ]
+        current_array = robot.get_dof_positions().numpy()
+        current_vector = current_array[0] if current_array.ndim > 1 else current_array
+        start = np.asarray(current_vector[joint_indices], dtype=np.float64)
+        target = np.asarray(demo_config["poses_rad"][pose_name], dtype=np.float64)
+        visual_steps = 90
+        for step in range(1, visual_steps + 1):
+            alpha = step / visual_steps
+            waypoint = start + alpha * (target - start)
+            robot.set_dof_positions(
+                waypoint.tolist(), dof_indices=joint_indices
+            )
+            robot.set_dof_position_targets(
+                waypoint.tolist(), dof_indices=joint_indices
+            )
+            for _ in range(2):
+                simulation_app.update()
+        measured_array = robot.get_dof_positions().numpy()
+        measured_vector = (
+            measured_array[0] if measured_array.ndim > 1 else measured_array
+        )
+        measured = np.asarray(measured_vector[joint_indices], dtype=np.float64)
+        result = {
+            "status": "completed",
+            "pose_name": pose_name,
+            "motion_mode": "paused_visual_direct_joint_interpolation",
+            "visual_steps": visual_steps,
+            "maximum_joint_error_rad": float(
+                np.max(np.abs(measured - target))
+            ),
+            "physics_result_valid": False,
+        }
+        pose_position, pose_orientation = current_ee_pose()
+        align_tool_and_camera(
+            stage,
+            ur10e_ee,
+            rg6_prim,
+            zivid_camera,
+            demo_config,
+            (pose_position, pose_orientation),
+        )
+        demo_results.append(result)
+        record(
+            f"MOVEMENT_DEMO_POSE={pose_name} "
+            f"visual_steps={result['visual_steps']} "
+            f"max_error={result['maximum_joint_error_rad']}"
+        )
+        for _ in range(120):
+            simulation_app.update()
+    demo_output = PROJECT_ROOT / "outputs" / "movement_demo.json"
+    demo_output.parent.mkdir(parents=True, exist_ok=True)
+    demo_output.write_text(
+        json.dumps(
+            {
+                "status": "completed",
+                "sequence": ["center", "left", "center", "right", "center"],
+                "startup_wait_seconds": 5,
+                "hold_seconds_per_pose": 2,
+                "results": demo_results,
+                "purpose": "visual_inspection_only_not_physics_or_mpc",
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    record("MOVEMENT_DEMO_COMPLETED")
+elif args.execute_non_oracle_plan:
     import copy
 
     from run_non_oracle_hybrid_planner import load_json as load_method_json

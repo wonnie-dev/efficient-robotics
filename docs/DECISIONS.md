@@ -128,3 +128,10 @@
 - Ground truth is stored separately and is forbidden from model inference and planning inputs.
 - Semantic simulator IDs are anonymized to prevent names such as `target_red` from revealing the correct answer.
 - Boundary: the current three exported views are contract examples only. Seeded scenario generation and leakage-safe train/calibration/test splits are required before model training or temperature fitting.
+
+## 2026-07-24 — VLM data-source strategy
+
+- Decision: do not manually construct a large VLM training dataset; use pretrained models and suitable existing public datasets for training or adaptation.
+- Project-specific Isaac Sim samples are still mandatory for temperature calibration, validation, and final simulation evaluation, but they will be generated and labeled automatically.
+- Split isolation is by episode and scene seed, not by image. Multiple views of one episode must stay in the same split.
+- Boundary: the current single-seed three-view export is interface-development data only and cannot support training, calibration, or evaluation claims.
