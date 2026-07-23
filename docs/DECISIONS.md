@@ -100,3 +100,13 @@
 - Temporary risk expression: `1 - P(target_red) * P(target_red inside container)`.
 - The one-step controller combines predicted risk reduction, target/relation entropy reduction, and mean joint-motion cost, and currently selects the right observation pose.
 - Boundary: all probability mappings and objective weights are explicitly labeled stubs. Candidate outcomes use captured simulator ground truth, so this is not online prediction, calibrated VLM uncertainty, final MPC, a paper metric, or evaluation evidence.
+
+## 2026-07-24 — Initial uncertainty and planning research design
+
+- Decision: represent target and relation hypotheses as temperature-calibrated categorical beliefs and use categorical entropy in nats as the only scalar uncertainty summary.
+- Decision: update beliefs using Bayesian filtering with action-conditioned positive and negative evidence.
+- Decision: planning must use a pre-action future-observation model. Reading already captured candidate-view outcomes during planning is classified as offline oracle replay and must never be called MPC.
+- Decision: use a hybrid receding-horizon action interface over viewpoint, uncover, occluder movement, and grasp, introduced according to the approved scenario stages.
+- Initial objective: expected task-failure risk minus weighted task-conditioned expected information gain, plus motion and collision costs.
+- Initial extensions boundary: temperature scaling first; conformal prediction, CVaR, and full chance-constrained MPC remain optional future work.
+- Current implementation boundary: viewpoint and grasp are enabled; likelihoods and initial beliefs are engineering stubs pending VLM logits, a calibration split, and a learned or validated observation model.

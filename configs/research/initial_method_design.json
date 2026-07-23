@@ -1,0 +1,89 @@
+{
+  "design_status": "approved_initial_research_design",
+  "implementation_status": "engineering_model_pending_vlm_logits_and_calibration_data",
+  "seed": 0,
+  "horizon": 2,
+  "temperature_scaling": {
+    "initial_temperature": 1.0,
+    "fit_range": [0.25, 5.0],
+    "fit_steps": 191,
+    "status": "implemented_pending_calibration_dataset"
+  },
+  "initial_belief": {
+    "source": "current_center_observation_engineering_stub",
+    "calibrated": false,
+    "target": {
+      "target_red": 0.574113,
+      "rear_red_candidate": 0.42,
+      "other": 0.005887
+    },
+    "relation": {
+      "inside": 0.568253,
+      "outside": 0.08,
+      "occluded": 0.301747,
+      "unknown": 0.05
+    }
+  },
+  "observation_model": {
+    "status": "hand_specified_geometry_informed_likelihood_stub",
+    "target_outcomes": ["detected", "not_detected"],
+    "relation_outcomes": ["inside_evidence", "outside_evidence", "unknown_evidence"],
+    "viewpoint_left": {
+      "target_detection_probability": {
+        "target_red": 0.42,
+        "rear_red_candidate": 0.7,
+        "other": 0.08
+      },
+      "relation_likelihood": {
+        "inside": {"inside_evidence": 0.48, "outside_evidence": 0.08, "unknown_evidence": 0.44},
+        "outside": {"inside_evidence": 0.08, "outside_evidence": 0.62, "unknown_evidence": 0.3},
+        "occluded": {"inside_evidence": 0.16, "outside_evidence": 0.06, "unknown_evidence": 0.78},
+        "unknown": {"inside_evidence": 0.2, "outside_evidence": 0.2, "unknown_evidence": 0.6}
+      }
+    },
+    "viewpoint_center": {
+      "target_detection_probability": {
+        "target_red": 0.3,
+        "rear_red_candidate": 0.58,
+        "other": 0.08
+      },
+      "relation_likelihood": {
+        "inside": {"inside_evidence": 0.4, "outside_evidence": 0.08, "unknown_evidence": 0.52},
+        "outside": {"inside_evidence": 0.08, "outside_evidence": 0.55, "unknown_evidence": 0.37},
+        "occluded": {"inside_evidence": 0.12, "outside_evidence": 0.06, "unknown_evidence": 0.82},
+        "unknown": {"inside_evidence": 0.18, "outside_evidence": 0.18, "unknown_evidence": 0.64}
+      }
+    },
+    "viewpoint_right": {
+      "target_detection_probability": {
+        "target_red": 0.9,
+        "rear_red_candidate": 0.38,
+        "other": 0.08
+      },
+      "relation_likelihood": {
+        "inside": {"inside_evidence": 0.88, "outside_evidence": 0.04, "unknown_evidence": 0.08},
+        "outside": {"inside_evidence": 0.05, "outside_evidence": 0.86, "unknown_evidence": 0.09},
+        "occluded": {"inside_evidence": 0.22, "outside_evidence": 0.05, "unknown_evidence": 0.73},
+        "unknown": {"inside_evidence": 0.18, "outside_evidence": 0.18, "unknown_evidence": 0.64}
+      }
+    }
+  },
+  "actions": {
+    "viewpoint_left": {"kind": "viewpoint", "enabled": true, "motion_cost": 0.0932, "collision_cost": 0.01},
+    "viewpoint_center": {"kind": "viewpoint", "enabled": true, "motion_cost": 0.0, "collision_cost": 0.0},
+    "viewpoint_right": {"kind": "viewpoint", "enabled": true, "motion_cost": 0.09346667, "collision_cost": 0.01},
+    "uncover": {"kind": "uncover", "enabled": false, "disabled_until": "removable_cover_stage"},
+    "occluder_move": {"kind": "occluder_move", "enabled": false, "disabled_until": "partial_occlusion_interaction_stage"},
+    "grasp": {"kind": "grasp", "enabled": true, "motion_cost": 0.15, "collision_cost": 0.03}
+  },
+  "objective": {
+    "task_failure_risk_weight": 1.0,
+    "task_conditioned_information_gain_weight": 0.35,
+    "motion_cost_weight": 0.08,
+    "collision_cost_weight": 1.0,
+    "target_id": "target_red",
+    "required_relation": "inside"
+  },
+  "task_failure_risk_definition": "1-max_h P(target=h)*P(required_relation_for_selected_target)_engineering_factorization",
+  "output_root": "outputs/non_oracle_planner"
+}

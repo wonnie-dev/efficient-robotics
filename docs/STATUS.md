@@ -104,3 +104,10 @@
 - The target probability changes from `0.574113` at center to `0.854702` in the independently generated right observation graph; the target `inside` probability changes from `0.568253` to `0.931184`.
 - Eleven unit tests pass. The benchmark scene loader now regenerates deterministic graphs, uncertainty graphs, and the view-selection request after capturing all three views.
 - Research boundary: these are uncalibrated rule-based probabilities and offline ground-truth-derived candidate replay. The controller is an interface prototype, not the final VLM, predictor, risk metric, MPC solver, or valid final-evaluation method.
+- Approved and documented the initial research design: temperature-scaled categorical target/relation beliefs, entropy-only uncertainty summaries, Bayesian filtering with negative evidence, pre-action observation prediction, and hybrid receding-horizon planning.
+- Added standalone temperature scaling, categorical entropy, and Bayesian-update utilities. Temperature fitting is implemented but remains pending real model logits and a held-out calibration dataset.
+- Added a non-oracle horizon-two planner that reads no future RGB, depth, masks, captured objects, or future Scene Graph files. It predicts outcome branches from a pre-action likelihood model.
+- The active action subset is `viewpoint + grasp`; `occluder_move` and `uncover` are present but disabled until their planned scenario stages.
+- The current plan selects `viewpoint_right -> grasp`; direct grasp, left-view-then-grasp, center-view-then-grasp, and right-view-then-grasp are all recorded with their costs.
+- Eighteen unit tests pass, including temperature scaling, negative evidence, branch normalization, entropy, risk, and the explicit non-oracle provenance guard.
+- Boundary: the initial belief is uncalibrated and the likelihood model is hand specified. This is a non-oracle receding-horizon engineering prototype, not yet the final learned observation predictor or MPC solver and not valid final-evaluation evidence.
