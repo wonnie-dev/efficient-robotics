@@ -73,3 +73,13 @@
 - Collision policy: prefer PhysX contact-force monitoring with a `5 N` abort threshold; if the contact view is unavailable, use per-frame world-AABB overlap against the table, container, target, and distractor.
 - Current result: 15-waypoint Center-to-Right motion completed with no AABB collision and final trajectory error `0.000017715 rad`.
 - Boundary: this is a deterministic reference trajectory, not MPC. AABB checks do not replace narrow-phase collision checking, and the provisional kinematic RG6 mount is excluded from swept-volume evaluation.
+
+## 2026-07-24 — Separate paper-facing benchmark environment
+
+- Decision: preserve `open_container_minimal.usda` for debugging and add `open_container_benchmark.usda` as a separate paper-facing scenario profile.
+- Benchmark design: laboratory context plus task-relevant clutter, partial target occlusion, inside/outside/boundary/behind relations, and a similar target candidate.
+- Current verified behavior: the center view is ambiguous because the orange cylinder occludes the red target; the right view reveals more target evidence.
+- Output isolation: benchmark RGB-D captures are stored under `outputs/benchmark_observations/` and do not overwrite minimal-scene observations.
+- Boundary: the environment is a visual/scenario prototype, not yet an approved final evaluation scene.
+- Safety guard: benchmark Active View execution remains disabled because the current color-key segmentation cannot produce correct instances for similar red/orange objects.
+- Finalization requires correct instance masks, expanded uncertainty graph nodes/edges, seeded scenario generation, physics validation, and alignment with the confirmed real-lab setup.

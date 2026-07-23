@@ -7,7 +7,6 @@ from isaacsim import SimulationApp
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-SCENE_PATH = PROJECT_ROOT / "assets" / "scenes" / "open_container_minimal.usda"
 RUNTIME_LOG = PROJECT_ROOT / "runtime_scene_status.log"
 ACTION_REQUEST_PATH = PROJECT_ROOT / "outputs" / "active_view_controller" / "action_request.json"
 ACTION_EXECUTION_PATH = (
@@ -20,7 +19,27 @@ parser.add_argument(
     action="store_true",
     help="Capture center, run the controller, execute its selected view, and recapture.",
 )
+parser.add_argument(
+    "--scene-profile",
+    choices=("minimal", "benchmark"),
+    default="minimal",
+)
 args, _unknown = parser.parse_known_args()
+if args.scene_profile == "benchmark" and args.execute_action_request:
+    parser.error(
+        "Benchmark active-view execution is disabled until its multi-object "
+        "segmentation and graph pipeline are implemented."
+    )
+SCENE_PATH = (
+    PROJECT_ROOT
+    / "assets"
+    / "scenes"
+    / (
+        "open_container_benchmark.usda"
+        if args.scene_profile == "benchmark"
+        else "open_container_minimal.usda"
+    )
+)
 
 
 def record(message: str) -> None:
@@ -131,6 +150,8 @@ rep, render_product, rgb_annotator, depth_annotator = create_capture_pipeline(
     "/World/RobotSystem/RG6/Zivid2Camera", resolution
 )
 output_root = PROJECT_ROOT / observation_config["capture"]["output_directory"]
+if args.scene_profile == "benchmark":
+    output_root = PROJECT_ROOT / "outputs" / "benchmark_observations"
 record("CAPTURE_PIPELINE_READY=rgb|depth|rgb_color_key_instance_fallback")
 SimulationManager.setup_simulation(dt=1.0 / 60.0)
 robot = Articulation("/World/RobotSystem/UR10e")
@@ -369,12 +390,13 @@ else:
     )
     record("RG6_AND_CAMERA_ALIGNED_TO_EE")
 
+table_prim_path = "/World/WorkBench" if args.scene_profile == "benchmark" else "/World/Table"
 bbox_cache = UsdGeom.BBoxCache(Usd.TimeCode.Default(), [UsdGeom.Tokens.default_])
 for bbox_path in (
     "/World/RobotSystem/UR10e",
     "/World/RobotSystem/RG6",
     "/World/Ground",
-    "/World/Table",
+    table_prim_path,
     "/World/OpenContainer",
     "/World/TargetRed",
     "/World/DistractorBlue",
@@ -391,7 +413,7 @@ if viewport is not None:
     frame_viewport_prims(
         viewport,
         [
-            "/World/Table",
+            table_prim_path,
             "/World/OpenContainer",
             "/World/TargetRed",
             "/World/DistractorBlue",

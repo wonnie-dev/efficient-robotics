@@ -1,12 +1,19 @@
 param(
     [string]$IsaacSimRoot,
     [switch]$Headless,
-    [switch]$ExecuteActionRequest
+    [switch]$ExecuteActionRequest,
+    [ValidateSet("minimal", "benchmark")]
+    [string]$SceneProfile = "minimal"
 )
 
 $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$scenePath = Join-Path $projectRoot "assets\scenes\open_container_minimal.usda"
+$sceneFilename = if ($SceneProfile -eq "benchmark") {
+    "open_container_benchmark.usda"
+} else {
+    "open_container_minimal.usda"
+}
+$scenePath = Join-Path $projectRoot "assets\scenes\$sceneFilename"
 
 $candidateRoots = @(
     $IsaacSimRoot,
@@ -50,7 +57,7 @@ if ($Headless) {
 }
 
 $openScript = Join-Path $projectRoot "scripts\open_minimal_scene.py"
-$scriptArguments = @($openScript)
+$scriptArguments = @($openScript, "--scene-profile", $SceneProfile)
 if ($ExecuteActionRequest) {
     $scriptArguments += "--execute-action-request"
 }

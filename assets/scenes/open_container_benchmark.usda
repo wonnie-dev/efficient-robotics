@@ -1,0 +1,283 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "World"
+{
+    def PhysicsScene "PhysicsScene"
+    {
+        vector3f physics:gravityDirection = (0, 0, -1)
+        float physics:gravityMagnitude = 9.81
+    }
+
+    def DistantLight "KeyLight"
+    {
+        float inputs:angle = 2.5
+        color3f inputs:color = (1.0, 0.94, 0.86)
+        float inputs:intensity = 2600
+        double3 xformOp:rotateXYZ = (42, -18, 32)
+        uniform token[] xformOpOrder = ["xformOp:rotateXYZ"]
+    }
+
+    def DomeLight "FillLight"
+    {
+        color3f inputs:color = (0.72, 0.80, 0.92)
+        float inputs:intensity = 520
+    }
+
+    def Xform "RobotSystem"
+    {
+        double3 xformOp:translate = (-0.20, 0.32, 0.76)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+        def Xform "UR10e" {}
+
+        def Xform "RG6" (
+            prepend references = @../robots/onrobot_rg6/usd/onrobot_rg6/onrobot_rg6.usda@
+        )
+        {
+            def Camera "Zivid2Camera" (
+                customData = {
+                    string model = "Zivid 2"
+                    string status = "intrinsics and hand-eye transform pending physical calibration"
+                }
+            )
+            {
+                float focalLength = 24
+                float horizontalAperture = 20.955
+                float2 clippingRange = (0.05, 5)
+                double3 xformOp:rotateXYZ = (0, 90, 0)
+                double3 xformOp:translate = (0.08, 0, 0.05)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ"]
+            }
+        }
+    }
+
+    def Cube "Ground"
+    {
+        double size = 1
+        float3 xformOp:scale = (3.2, 2.8, 0.05)
+        double3 xformOp:translate = (0.4, 0, -0.05)
+        color3f[] primvars:displayColor = [(0.15, 0.17, 0.20)]
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+    }
+
+    def Cube "LabBackWall"
+    {
+        double size = 1
+        float3 xformOp:scale = (3.2, 0.05, 1.6)
+        double3 xformOp:translate = (0.4, 1.35, 0.80)
+        color3f[] primvars:displayColor = [(0.70, 0.74, 0.78)]
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+    }
+
+    def Cube "LabSideWall"
+    {
+        double size = 1
+        float3 xformOp:scale = (0.05, 2.7, 1.6)
+        double3 xformOp:translate = (-1.15, 0, 0.80)
+        color3f[] primvars:displayColor = [(0.64, 0.68, 0.72)]
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+    }
+
+    def Xform "WorkBench"
+    {
+        def Cube "Top"
+        {
+            double size = 1
+            float3 xformOp:scale = (1.65, 1.00, 0.06)
+            double3 xformOp:translate = (0.35, 0, 0.70)
+            color3f[] primvars:displayColor = [(0.32, 0.35, 0.38)]
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "FrontApron"
+        {
+            double size = 1
+            float3 xformOp:scale = (1.65, 0.05, 0.18)
+            double3 xformOp:translate = (0.35, -0.95, 0.58)
+            color3f[] primvars:displayColor = [(0.20, 0.23, 0.26)]
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "LegLeft"
+        {
+            double size = 1
+            float3 xformOp:scale = (0.10, 0.10, 0.70)
+            double3 xformOp:translate = (-0.95, -0.70, 0.32)
+            color3f[] primvars:displayColor = [(0.12, 0.14, 0.16)]
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "LegRight"
+        {
+            double size = 1
+            float3 xformOp:scale = (0.10, 0.10, 0.70)
+            double3 xformOp:translate = (1.65, -0.70, 0.32)
+            color3f[] primvars:displayColor = [(0.12, 0.14, 0.16)]
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+    }
+
+    def Cube "WorkMat"
+    {
+        double size = 1
+        float3 xformOp:scale = (1.05, 0.66, 0.008)
+        double3 xformOp:translate = (0.47, 0.02, 0.735)
+        color3f[] primvars:displayColor = [(0.08, 0.12, 0.15)]
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+    }
+
+    def Xform "OpenContainer"
+    {
+        double3 xformOp:translate = (0.48, 0.10, 0.755)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+        def Cube "Bottom"
+        {
+            double size = 1
+            float3 xformOp:scale = (0.34, 0.25, 0.018)
+            color3f[] primvars:displayColor = [(0.16, 0.32, 0.38)]
+            uniform token[] xformOpOrder = ["xformOp:scale"]
+        }
+        def Cube "WallFront"
+        {
+            double size = 1
+            float3 xformOp:scale = (0.35, 0.018, 0.12)
+            double3 xformOp:translate = (0, -0.242, 0.06)
+            color3f[] primvars:displayColor = [(0.20, 0.42, 0.48)]
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "WallBack"
+        {
+            double size = 1
+            float3 xformOp:scale = (0.35, 0.018, 0.12)
+            double3 xformOp:translate = (0, 0.242, 0.06)
+            color3f[] primvars:displayColor = [(0.20, 0.42, 0.48)]
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "WallLeft"
+        {
+            double size = 1
+            float3 xformOp:scale = (0.018, 0.225, 0.12)
+            double3 xformOp:translate = (-0.332, 0, 0.06)
+            color3f[] primvars:displayColor = [(0.20, 0.42, 0.48)]
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "WallRight"
+        {
+            double size = 1
+            float3 xformOp:scale = (0.018, 0.225, 0.12)
+            double3 xformOp:translate = (0.332, 0, 0.06)
+            color3f[] primvars:displayColor = [(0.20, 0.42, 0.48)]
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "FrontRim"
+        {
+            double size = 1
+            float3 xformOp:scale = (0.37, 0.028, 0.018)
+            double3 xformOp:translate = (0, -0.242, 0.125)
+            color3f[] primvars:displayColor = [(0.10, 0.25, 0.30)]
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "BackRim"
+        {
+            double size = 1
+            float3 xformOp:scale = (0.37, 0.028, 0.018)
+            double3 xformOp:translate = (0, 0.242, 0.125)
+            color3f[] primvars:displayColor = [(0.10, 0.25, 0.30)]
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+    }
+
+    def Cube "TargetRed"
+    {
+        double size = 1
+        float3 xformOp:scale = (0.045, 0.045, 0.045)
+        double3 xformOp:translate = (0.49, 0.025, 0.795)
+        color3f[] primvars:displayColor = [(0.86, 0.035, 0.025)]
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+    }
+
+    def Cylinder "OccluderOrange"
+    {
+        double radius = 0.042
+        double height = 0.11
+        double3 xformOp:translate = (0.43, -0.035, 0.805)
+        color3f[] primvars:displayColor = [(0.92, 0.30, 0.055)]
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+
+    def Cylinder "DistractorYellow"
+    {
+        double radius = 0.035
+        double height = 0.075
+        double3 xformOp:translate = (0.30, 0.14, 0.80)
+        color3f[] primvars:displayColor = [(0.90, 0.68, 0.04)]
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+
+    def Cube "DistractorBlue"
+    {
+        double size = 1
+        float3 xformOp:scale = (0.052, 0.052, 0.052)
+        double3 xformOp:translate = (0.51, -0.31, 0.79)
+        color3f[] primvars:displayColor = [(0.025, 0.20, 0.88)]
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+    }
+
+    def Sphere "DistractorGreen"
+    {
+        double radius = 0.048
+        double3 xformOp:translate = (0.79, -0.17, 0.80)
+        color3f[] primvars:displayColor = [(0.08, 0.62, 0.28)]
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+
+    def Cube "BoundaryPurple"
+    {
+        double size = 1
+        float3 xformOp:rotateXYZ = (0, 0, 18)
+        float3 xformOp:scale = (0.04, 0.065, 0.04)
+        double3 xformOp:translate = (0.80, 0.10, 0.805)
+        color3f[] primvars:displayColor = [(0.43, 0.16, 0.65)]
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+    }
+
+    def Cylinder "RearRedCandidate"
+    {
+        double radius = 0.032
+        double height = 0.085
+        double3 xformOp:translate = (0.66, 0.31, 0.80)
+        color3f[] primvars:displayColor = [(0.72, 0.06, 0.045)]
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+
+    def Xform "LabProps"
+    {
+        def Cube "StorageBox"
+        {
+            double size = 1
+            float3 xformOp:scale = (0.22, 0.16, 0.14)
+            double3 xformOp:translate = (1.22, 0.50, 0.82)
+            color3f[] primvars:displayColor = [(0.48, 0.50, 0.52)]
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cylinder "SpareCan"
+        {
+            double radius = 0.045
+            double height = 0.16
+            double3 xformOp:translate = (1.08, 0.35, 0.82)
+            color3f[] primvars:displayColor = [(0.12, 0.38, 0.72)]
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+    }
+
+    def Camera "ObservationCamera"
+    {
+        float focalLength = 28
+        float horizontalAperture = 20.955
+        float2 clippingRange = (0.01, 1000)
+        double3 omni:kit:centerOfInterest = (0, 0, -1)
+    }
+}

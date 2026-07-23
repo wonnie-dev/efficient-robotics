@@ -82,3 +82,10 @@
 - A conservative world-AABB overlap fallback checked moving UR10e links against the table, open container, target, and distractor on every physics frame; no overlap was detected.
 - Safety boundary: AABB overlap is conservative but not equivalent to narrow-phase collision/contact checking, and the kinematic RG6 visual mount is not included in swept-volume checks.
 - Isaac Sim remains running and responsive at the right observation pose after the successful interpolated transition.
+- Added a separate paper-facing environment profile, `open_container_benchmark_v1`, while preserving the minimal debugging scene.
+- The benchmark scene adds laboratory walls, a workbench and mat, a blue-green rimmed container, task-relevant clutter, an orange occluder, a boundary object, and a similar red candidate behind the container.
+- Verified fresh left/center/right RGB-D captures under `outputs/benchmark_observations/`.
+- Visual behavior is suitable for the intended scenario prototype: the center view heavily occludes the red target, while the right view reveals substantially more of it.
+- Isaac Sim is currently running the benchmark scene and remains responsive on GPU.
+- Benchmark limitation: the RGB color-key fallback merges/confuses similar red and orange objects. Benchmark Active View execution is disabled until correct multi-instance segmentation and the expanded graph are implemented.
+- Added `docs/BENCHMARK_ENVIRONMENT.md` with profiles, commands, inventory, limitations, and final-experiment acceptance criteria.
