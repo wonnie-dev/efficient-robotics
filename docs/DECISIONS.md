@@ -1,5 +1,23 @@
 # Decisions
 
+## Active decisions — 2026-07-24
+
+### Final simulation embodiment
+
+- Universal Robots UR10e.
+- OnRobot RG6.
+- Wrist-mounted Zivid 2 3D/RGB-D camera, or a documented faithful Isaac Sim approximation.
+- Do not substitute the final embodiment without explicit user approval.
+
+### Final research claim
+
+- Maintain calibrated task-conditioned object and relation beliefs.
+- Predict action-conditioned future posteriors before executing an action.
+- Use receding-horizon optimization of task loss and wrong commitment, together with execution risk and motion cost.
+- Update beliefs with positive and negative evidence, then replan.
+
+Statements in older entries that call the robot stack provisional, pending confirmation, or freely replaceable are superseded. Those entries remain below as historical implementation records. Existing decisions about non-oracle planning, Bayesian updates, VLM contracts, calibration utilities, Scene Graph interfaces, and Isaac Sim behavior remain active unless explicitly superseded.
+
 ## 2026-07-22 — Final robot platform follows Professor Park's lab
 
 - Decision: The final simulated and physical robot will be the manipulator used for confirmed real experiments in Professor Shinkyu Park's lab.

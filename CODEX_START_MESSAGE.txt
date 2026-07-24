@@ -1,0 +1,22 @@
+Read these files completely in order:
+
+1. AGENTS.md
+2. docs/FINAL_RESEARCH_SPEC.md
+3. docs/PROJECT_CONTEXT.md
+4. docs/LITERATURE_NOVELTY_AUDIT.md
+5. docs/STATUS.md
+6. docs/DECISIONS.md
+
+Treat FINAL_RESEARCH_SPEC.md and the active decisions in DECISIONS.md as authoritative.
+
+The fixed Isaac Sim embodiment is UR10e + OnRobot RG6 + wrist-mounted Zivid 2 3D/RGB-D camera. Do not substitute another final robot, gripper, or sensor.
+
+Do not modify code yet. First:
+
+1. report your understanding of the final research problem and novelty;
+2. inspect the repository and identify outdated or conflicting assumptions;
+3. audit available UR10e, RG6, and Zivid 2 assets and the installed Isaac Sim version;
+4. propose the smallest deterministic milestone, exact files, commands, tests, expected outputs, and rollback checkpoint;
+5. label any temporary proxy asset explicitly and explain how it will be replaced.
+
+Do not call a heuristic policy belief-space MPC unless it predicts action-conditioned future posterior belief.

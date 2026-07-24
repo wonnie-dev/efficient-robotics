@@ -4,7 +4,9 @@ ICRA 2027 project for task-conditioned target and spatial-relation uncertainty i
 
 ## Current minimal scene
 
-The first deterministic scene contains a table, an open container, one target, one distractor, and the paper-based provisional UR10e + OnRobot RG6 + wrist-mounted Zivid 2 stack. The lab's exact allocated hardware is pending confirmation.
+The first deterministic scene contains a table, an open container, one target, one distractor, and the fixed project embodiment: Universal Robots UR10e, OnRobot RG6, and a wrist-mounted Zivid 2 3D/RGB-D camera.
+
+Temporary proxy assets are allowed only for isolated debugging. Every proxy must be documented and replaced by the fixed embodiment before final evaluation.
 
 To launch after Isaac Sim is installed:
 

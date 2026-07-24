@@ -1,5 +1,13 @@
 # Status
 
+## Current milestone — 2026-07-24
+
+- Final embodiment: Universal Robots UR10e + OnRobot RG6 + wrist-mounted Zivid 2 3D/RGB-D camera.
+- Authoritative specification: `docs/FINAL_RESEARCH_SPEC.md`.
+- Preserve the existing deterministic simulation and belief-planning prototype.
+- Next major research step: calibrated perception/VLM output and validated action-conditioned posterior prediction.
+- Older platform statements below that describe the robot stack as provisional or pending confirmation are preserved as implementation history and are superseded by this current milestone.
+
 ## 2026-07-22
 
 - Research context and robot-platform decision updated.

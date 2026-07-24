@@ -2,27 +2,49 @@
 
 ## Project identity
 
-This repository is the `efficient-robotics` ICRA 2027 research project.
+This repository is the `efficient-robotics` research project targeting an ICRA 2027 submission.
 
-## Required context
+## Mandatory reading order
 
-Before planning or editing, read `docs/PROJECT_CONTEXT.md` (or `efficient_robotics_project_context.md` if it has not yet been moved into `docs/`). Treat its hard constraints and current decisions as authoritative.
+Before planning, editing, or running experiments, read these files completely:
+
+1. `docs/FINAL_RESEARCH_SPEC.md`
+2. `docs/PROJECT_CONTEXT.md`
+3. `docs/LITERATURE_NOVELTY_AUDIT.md`
+4. `docs/STATUS.md` and `docs/DECISIONS.md`, if present
+
+`docs/FINAL_RESEARCH_SPEC.md` is authoritative. If an older note conflicts with it, follow the final specification and record the conflict in `docs/DECISIONS.md`.
+
+## Fixed simulation embodiment
+
+- Simulator: NVIDIA Isaac Sim.
+- Manipulator: Universal Robots UR10e.
+- Gripper: OnRobot RG6.
+- Camera: wrist-mounted Zivid 2 3D/RGB-D camera.
+- The implementation should remain modular, but do not substitute a different final embodiment without explicit user approval.
+- A temporary proxy gripper or camera may be used only for early debugging and must be clearly labeled, isolated behind configuration, and replaced before final evaluation.
 
 ## Core research direction
 
-- Simulator: NVIDIA Isaac Sim.
-- Provisional robot stack: UR10e + OnRobot RG6 + wrist-mounted Zivid 2 RGB-D camera, based on Professor Shinkyu Park's corresponding-author paper. Keep the stack replaceable until availability for this project is confirmed.
-- Research focus: task-conditioned target and spatial-relation uncertainty in a dynamic Scene Graph.
-- Control focus: MPC selects information-gathering actions that reduce wrong-action or task-failure risk before final object retrieval.
-- Starting scenario: open container plus active viewpoint change, then partial occlusion, then removable cover; hinge lid only after the core loop is stable.
+The project is not a generic VLM, Scene Graph, or MPC integration demo.
+
+The proposed method must:
+
+- maintain calibrated task-conditioned beliefs over target objects and action-relevant spatial relations;
+- represent relation uncertainty on Scene Graph edges such as `inside`, `behind`, `occluded_by`, and `covered_by`;
+- predict how candidate actions change future task beliefs;
+- select viewpoint, uncovering, occluder-removal, or grasp actions by minimizing expected task loss, wrong commitment, execution risk, and motion cost;
+- update beliefs from both positive and negative evidence, then replan in a closed loop.
+
+Do not call a controller “belief-space MPC” unless it evaluates action-conditioned future belief or posterior outcomes over a horizon. A one-step entropy heuristic is a baseline, not the proposed method.
 
 ## Working rules
 
-- Inspect the repository and environment before editing.
-- Keep simulation and real-robot platforms aligned. Do not assume or substitute a robot model before the Professor Park lab platform is confirmed.
-- Do not reduce the project to a generic VLM + MPC demo.
-- Preserve reproducibility: configs, seeds, commands, metrics, graphs, videos, and failure reasons.
+- Inspect the repository, Isaac Sim installation, robot assets, Python environment, GPU, and dependency versions before editing.
+- Preserve reproducibility with configs, seeds, commands, logs, metrics, graphs, videos, and failure reasons.
 - Use Git checkpoints before and after major changes.
-- Do not commit credentials, tokens, or large raw assets.
-- Keep `docs/STATUS.md` and `docs/DECISIONS.md` updated.
-- Ask before changing a paper claim, metric definition, baseline, robot, simulator, or scenario scope.
+- Keep hardware-specific code behind robot, gripper, camera, kinematics, and controller configuration interfaces.
+- Do not integrate heavy VLM perception before the deterministic simulation, Scene Graph interface, belief update, and control loop work with ground truth.
+- Do not commit credentials, tokens, private data, or large generated assets.
+- Update `docs/STATUS.md` after each work session and `docs/DECISIONS.md` after each design change.
+- Ask before changing the paper claim, core novelty, primary metrics, baselines, final embodiment, simulator, or scenario scope.
