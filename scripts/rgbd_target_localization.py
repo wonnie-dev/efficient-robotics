@@ -1,4 +1,10 @@
-"""Estimate an object center in world coordinates from RGB-D and an instance mask."""
+"""Estimate an object center in world coordinates from RGB-D and a mask.
+
+Depth values are Euclidean distances along camera rays, not optical-axis
+depth. Learned pipelines enter through ``localize_mask_files`` after selecting
+an anonymous RGB mask; controlled pilots can instead select a semantic instance
+with ``localize_observation``. Neither estimator reads saved world positions.
+"""
 
 from __future__ import annotations
 
@@ -15,13 +21,18 @@ def backproject_distance_pixels(
     distance_m: np.ndarray,
     calibration: dict,
 ) -> np.ndarray:
-    """Backproject Euclidean ray distances using the saved USD camera pose."""
+    """Backproject Euclidean ray distances using the saved USD camera pose.
+
+    Image coordinates use ``u`` right and ``v`` down. The USD camera looks down
+    camera ``-Z`` with ``+Y`` up, and the saved transform multiplies row vectors.
+    """
     u = np.asarray(pixel_u, dtype=np.float64)
     v = np.asarray(pixel_v, dtype=np.float64)
     distance = np.asarray(distance_m, dtype=np.float64)
     x = (u - float(calibration["cx_pixels"])) / float(
         calibration["fx_pixels"]
     )
+    # Negating image v converts the image-down convention to camera-up +Y.
     y = -(v - float(calibration["cy_pixels"])) / float(
         calibration["fy_pixels"]
     )
@@ -36,6 +47,7 @@ def backproject_distance_pixels(
         calibration["camera_to_world_row_vector_matrix"],
         dtype=np.float64,
     )
+    # Translation lives in the last row under the saved row-vector convention.
     return (homogeneous @ camera_to_world)[:, :3]
 
 
@@ -48,7 +60,7 @@ def estimate_instance_center(
     lower_percentile: float = 2.0,
     upper_percentile: float = 98.0,
 ) -> dict:
-    """Estimate a robust 3D bounding-box center for one visible instance."""
+    """Estimate the midpoint of a percentile-trimmed world-axis bounding box."""
     depth = np.asarray(depth_m, dtype=np.float64)
     ids = np.asarray(instance_ids)
     if depth.shape != ids.shape:
@@ -69,6 +81,7 @@ def estimate_instance_center(
     )
     lower = np.percentile(points, lower_percentile, axis=0)
     upper = np.percentile(points, upper_percentile, axis=0)
+    # A box midpoint is less sensitive to uneven visible surface area than a centroid.
     center = 0.5 * (lower + upper)
     return {
         "instance_id": int(instance_id),
@@ -95,7 +108,7 @@ def estimate_mask_center(
     *,
     label: str,
 ) -> dict:
-    """Estimate a center from an externally selected binary candidate mask."""
+    """Estimate a center from an externally selected anonymous candidate mask."""
     binary_mask = np.asarray(mask, dtype=bool)
     synthetic_ids = binary_mask.astype(np.uint8)
     estimate = estimate_instance_center(
@@ -114,6 +127,7 @@ def localize_mask_files(
     observation_dir: Path,
     masks: dict[str, Path],
 ) -> dict:
+    """Apply depth only after upstream perception has selected the masks."""
     from PIL import Image
 
     depth = np.load(observation_dir / "depth_m.npy")
@@ -144,6 +158,7 @@ def instance_id_for_class(
     labels: dict,
     semantic_class: str,
 ) -> int:
+    """Require one unambiguous simulator instance for a controlled pilot."""
     matches = [
         int(instance_id)
         for instance_id, value in labels.items()
@@ -161,6 +176,7 @@ def localize_observation(
     observation_dir: Path,
     semantic_classes: tuple[str, ...],
 ) -> dict:
+    """Localize named instance masks without reading saved object positions."""
     depth = np.load(observation_dir / "depth_m.npy")
     instance_ids = np.load(observation_dir / "instance_ids.npy")
     labels = json.loads(

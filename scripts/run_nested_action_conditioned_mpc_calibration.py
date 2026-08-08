@@ -47,6 +47,7 @@ def validate_outer_folds(
     episodes: dict[int, dict[str, dict]],
     folds: list[dict[str, Any]],
 ) -> None:
+    """Require disjoint outer folds that cover every calibration episode once."""
     expected = set(episodes)
     held_out = [
         int(seed)
@@ -65,6 +66,7 @@ def validate_outer_folds(
 def load_fold_target_temperatures(
     nested_config: dict[str, Any],
 ) -> dict[int, float]:
+    """Match each temperature to the exact held-out seeds of its outer fold."""
     calibration_path = nested_config.get("target_calibration_result")
     if calibration_path is None:
         return {}
@@ -100,6 +102,7 @@ def replay_loss(
     row: dict[str, Any],
     loss_config: dict[str, float],
 ) -> float:
+    """Score a replay using task outcomes plus the cost of extra observations."""
     extra_observations = max(0, int(row["observation_count"]) - 1)
     return (
         float(loss_config["wrong_grasp"]) * int(row["wrong_grasp"])
@@ -129,6 +132,7 @@ def tune_noncompletion_cost(
     *,
     action_agnostic: bool,
 ) -> dict[str, Any]:
+    """Tune inside the outer-training split with leave-one-episode-out replay."""
     candidates = []
     training_seeds = sorted(training_episodes)
     method = (
@@ -212,6 +216,7 @@ def action_difference_audit(
     episodes: dict[int, dict[str, dict]],
     nested_config: dict[str, Any],
 ) -> dict[str, Any]:
+    """Separate perceptual variation from physically different action outcomes."""
     fields = [
         str(field)
         for field in nested_config["action_difference_signature_fields"]
@@ -312,6 +317,7 @@ def action_difference_audit(
 
 
 def run_experiment(config_path: Path) -> dict[str, Any]:
+    """Run nested calibration without opening reserved test episodes."""
     nested_config = load_json(config_path)
     if nested_config.get("training_performed") is not False:
         raise ValueError("Model-weight training is forbidden")

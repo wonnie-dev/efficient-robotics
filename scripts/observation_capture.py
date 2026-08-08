@@ -1,4 +1,9 @@
-"""UR10e provisional observation poses and wrist-camera RGB/depth capture."""
+"""UR10e observation poses and wrist-camera RGB-D capture helpers.
+
+Positions are expressed in the authored USD world frame in meters. Camera
+calibration follows USD's row-vector transform convention, with the optical
+axis along camera -Z and image rows increasing downward.
+"""
 
 import json
 import math
@@ -162,6 +167,7 @@ def _split_id_pair_by_component_area(
 
 
 def add_scene_labels(stage, semantic_objects=None) -> None:
+    """Attach class labels to the scene prims used by capture annotators."""
     import omni.replicator.core as rep
 
     semantic_objects = semantic_objects or SEMANTIC_OBJECTS
@@ -368,6 +374,7 @@ def move_pose_interpolated(
 
 
 def align_tool_and_camera(stage, ee_prim, rg6_prim, camera_prim, config: dict, ee_pose=None) -> None:
+    """Express the tool and wrist-camera world poses in their parent frames."""
     import omni.usd
     from pxr import Gf, UsdGeom
 
@@ -382,6 +389,7 @@ def align_tool_and_camera(stage, ee_prim, rg6_prim, camera_prim, config: dict, e
         ee_world.SetTranslateOnly(Gf.Vec3d(*map(float, position)))
     parent_world = omni.usd.get_world_transform_matrix(robot_system)
 
+    # Gf composes row vectors, so a child local transform is world * parent^-1.
     rg6_xform = UsdGeom.Xformable(rg6_prim)
     rg6_xform.ClearXformOpOrder()
     rg6_xform.MakeMatrixXform().Set(ee_world * parent_world.GetInverse())
@@ -526,8 +534,11 @@ def create_fixed_overview_camera(stage, config: dict):
 
 
 def create_capture_pipeline(camera_path: str, resolution: tuple[int, int]):
+    """Create pixel-aligned RGB and metric-depth annotators for one camera."""
     import omni.replicator.core as rep
 
+    # Sharing one render product keeps RGB and distance samples on the same
+    # camera pose, resolution, and pixel grid.
     render_product = rep.create.render_product(camera_path, resolution)
     rgb = rep.AnnotatorRegistry.get_annotator("rgb")
     depth = rep.AnnotatorRegistry.get_annotator("distance_to_camera")
@@ -537,6 +548,7 @@ def create_capture_pipeline(camera_path: str, resolution: tuple[int, int]):
 
 
 def create_rgb_capture_pipeline(camera_path: str, resolution: tuple[int, int]):
+    """Create the RGB-only stream used by the external overview camera."""
     import omni.replicator.core as rep
 
     render_product = rep.create.render_product(camera_path, resolution)
@@ -1166,6 +1178,7 @@ def save_capture(
     camera_calibration_data=None,
     objective_behind_geometry=None,
 ) -> None:
+    """Write one aligned RGB-D sample and its simulator-only diagnostics."""
     pose_dir = output_root / pose_name
     pose_dir.mkdir(parents=True, exist_ok=True)
     rgba = np.asarray(rgb_data)
@@ -1188,6 +1201,8 @@ def save_capture(
     depth = np.asarray(depth_data, dtype=np.float32)
     np.save(pose_dir / "depth_m.npy", depth)
     finite = np.isfinite(depth)
+    # Keep metric depth untouched on disk; the 8-bit image is only a quick
+    # visual check and must not be used for geometry or localization.
     preview = np.zeros(depth.shape, dtype=np.uint8)
     if finite.any():
         near, far = np.percentile(depth[finite], [2, 98])

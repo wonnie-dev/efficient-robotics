@@ -37,6 +37,7 @@ def physics_gate_passes(
     *,
     expected_target_path: str,
 ) -> bool:
+    """Apply the same contact and motion gates to cover and target lifts."""
     force = execution.get("contact_force_n", {}).get("maximum", {})
     penetration = execution.get("maximum_contact_penetration_m", {})
     stability = execution.get("target_gripper_relative_stability", {})
@@ -72,6 +73,7 @@ def successful_positive(
     result: dict[str, Any],
     gates: dict[str, Any],
 ) -> bool:
+    """Accept a covered-target episode only when both physical actions pass."""
     return bool(
         path.name == "remove_cover_smoke_result.json"
         and result.get("status") == "completed"
@@ -96,6 +98,7 @@ def successful_negative(
     result: dict[str, Any],
     gates: dict[str, Any],
 ) -> bool:
+    """Require empty-container evidence, a second update, and outside retrieval."""
     return bool(
         path.name == "negative_evidence_live_result.json"
         and result.get("status") == "completed"
@@ -141,6 +144,7 @@ def collect(
                 outcome = "empty_container_negative_evidence"
             if outcome is None:
                 continue
+            # Repeated debugging runs of one seed do not add statistical support.
             key = (outcome, seed)
             accepted[key] = {
                 "seed": seed,

@@ -3,6 +3,11 @@
 This module does not create or close ``SimulationApp``.  It is used by the live
 Isaac observation server after a terminal grasp request so perception,
 replanning, and manipulation share one persistent stage and process.
+
+Fresh standalone composites re-express the authored world in the robot-base
+frame. A reused live composite stays in its existing world frame. In both
+cases, the target remains dynamic: transport must come from simulated contact,
+never an attachment or copied pose.
 """
 
 from __future__ import annotations
@@ -371,7 +376,12 @@ def execute_persistent_composite_grasp(
     grip_compliant_contact_stiffness_n_m: float = 0.0,
     grip_compliant_contact_damping_n_s_m: float = 0.0,
 ) -> dict:
-    """Run the contact-gated terminal manipulation without restarting Isaac."""
+    """Run contact-gated manipulation in the caller's live Isaac stage.
+
+    Success requires measured bilateral contact, bounded force and penetration,
+    continuous target motion, and a verified lift. No fixed joint, attachment,
+    or target-pose copying is introduced by this executor.
+    """
     if grasp_height_offset_m < 0.0 or grasp_height_offset_m > 0.08:
         raise ValueError(
             "grasp_height_offset_m must be between 0.0 and 0.08"
@@ -1494,6 +1504,9 @@ def execute_persistent_composite_grasp(
             simulation_app.update()
 
     if not reuse_existing_composite:
+        # The validated standalone plan uses robot-base coordinates. Shift the
+        # authored environment once; a live composite is already in the frame
+        # used by its RGB-D localization and must not be shifted again.
         for path in ENVIRONMENT_ROOTS:
             translate_root(path)
 
@@ -1790,6 +1803,8 @@ def execute_persistent_composite_grasp(
         target_collision = target_prim
         UsdPhysics.CollisionAPI.Apply(target_collision)
     if not existing_dynamic_assembly:
+        # Keep the target as a gravity-enabled dynamic body. The fingers must
+        # carry it through frictional contact; there is no grasp attachment.
         target_body = UsdPhysics.RigidBodyAPI.Apply(target_prim)
         target_body.CreateRigidBodyEnabledAttr().Set(True)
         target_body.CreateKinematicEnabledAttr().Set(False)
@@ -2201,6 +2216,9 @@ def execute_persistent_composite_grasp(
                 if sample not in contacts["unexpected_environment_pairs"]:
                     contacts["unexpected_environment_pairs"].append(sample)
 
+    # Contact reports are the manipulation contract, not just diagnostics.
+    # Active pairs establish bilateral grasping, while impulse and separation
+    # samples bound force and interpenetration before motion may continue.
     contact_subscription = (
         get_physx_simulation_interface().subscribe_contact_report_events(on_contact)
     )
@@ -3271,6 +3289,9 @@ def execute_persistent_composite_grasp(
         for depth in contacts["maximum_penetration_m"].values()
     )
     pre_lift_error = arm_error(grasp_joints)
+    # Fail closed before any upward motion. A plausible gripper pose is not
+    # enough if either finger lacks load, the target moved during closure, or
+    # an unintended collision was reported.
     safety_gate = (
         np.all(np.isfinite(measured()))
         and bilateral
@@ -3970,6 +3991,8 @@ def execute_persistent_composite_grasp(
         "finite_final_joint_state": bool(np.all(np.isfinite(measured()))),
         "trajectory_records": trajectory_records,
         "video": video,
+        # Keep the no-attachment rule explicit in every saved result so lift
+        # evidence cannot be confused with a fixed-joint or pose-copy shortcut.
         "target_attachment_used": False,
         "target_pose_copying_used": False,
         "observation_viewpoint_motion_mode": (
@@ -3983,5 +4006,7 @@ def execute_persistent_composite_grasp(
     result_path.write_text(
         json.dumps(result, indent=2) + "\n", encoding="utf-8"
     )
+    # Release this callback handle without touching the caller-owned app or
+    # stage; the persistent server may continue with another observation.
     contact_subscription = None
     return result

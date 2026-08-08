@@ -67,6 +67,7 @@ def audit_frozen_artifact(
             and identity.get("model_repository")
             and identity.get("model_revision")
         )
+        # A freeze flag alone is not evidence; its source file must still hash-match.
         replay_path = ROOT / str(identity.get("neutral_replay_config", ""))
         valid = bool(
             valid
@@ -132,6 +133,7 @@ def audit_frozen_artifact(
 
 
 def audit(config: dict[str, Any]) -> dict[str, Any]:
+    """Return a launch gate that remains closed on any protocol ambiguity."""
     failures: list[str] = []
     calibration = config["data_split"]["perception_and_policy_calibration_seeds"]
     calibration_seeds = set(
@@ -183,6 +185,7 @@ def audit(config: dict[str, Any]) -> dict[str, Any]:
         for key, value in freeze.items()
         if key.endswith("_frozen")
     }
+    # Reserved seeds are authorized only when every declared parameter is frozen.
     unresolved = sorted(key for key, value in freeze_flags.items() if not value)
     frozen_path = ROOT / freeze["frozen_parameters_path"]
     if not frozen_path.is_file():

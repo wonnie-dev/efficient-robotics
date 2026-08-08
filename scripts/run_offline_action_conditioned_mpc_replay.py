@@ -152,6 +152,7 @@ def categorical_likelihood(
     outcomes: tuple[str, ...],
     alpha: float,
 ) -> dict[str, dict[str, dict[str, float]]]:
+    """Estimate P(outcome | state, action) with symmetric smoothing."""
     grouped: dict[tuple[str, str], Counter[str]] = defaultdict(Counter)
     totals: Counter[tuple[str, str]] = Counter()
     for row in rows:
@@ -243,6 +244,7 @@ def bayesian_observation_update(
     likelihood: dict[str, dict[str, float]],
     outcome: str,
 ) -> dict[str, float]:
+    """Apply one categorical observation without collapsing the belief to a label."""
     return normalize(
         {
             state: probability * likelihood[state][outcome]
@@ -255,6 +257,7 @@ def predict_state(
     belief: dict[str, float],
     transition: dict[str, dict[str, float]],
 ) -> dict[str, float]:
+    """Propagate a belief through a state transition before observing again."""
     return normalize(
         {
             next_state: sum(
@@ -272,6 +275,7 @@ def predictive_outcome_distribution(
     likelihood: dict[str, dict[str, float]],
     outcomes: tuple[str, ...],
 ) -> dict[str, float]:
+    """Marginalize hidden state to obtain P(observation | current belief)."""
     return normalize(
         {
             outcome: sum(
@@ -418,6 +422,7 @@ def build_episode_rows(
     *,
     target_temperature: float | None = None,
 ) -> dict[int, dict[str, dict]]:
+    """Convert saved perception artifacts into causal replay records by seed."""
     calibration_root = resolve_path(config["calibration_root"])
     records = {
         item["sample_id"]: item
@@ -604,6 +609,7 @@ def fit_action_model(
     *,
     action_agnostic: bool,
 ) -> dict[str, Any]:
+    """Fit observation and transition tables from calibration episodes only."""
     rows = []
     transitions = []
     for seed, episode in training_episodes.items():
@@ -816,6 +822,7 @@ def predict_after_action(
     model: dict[str, Any],
     action: str,
 ) -> dict[str, dict[str, float]]:
+    """Fuse the executed action's measured outcome into every belief factor."""
     selected_action = model_action(action, model)
     return {
         "perception": predict_state(
@@ -898,6 +905,7 @@ def forecast_view_action(
     action: str,
     config: dict[str, Any],
 ) -> dict[str, Any]:
+    """Evaluate a view by branching over predicted outcomes, never saved future files."""
     selected_action = model_action(action, model)
     predicted = predict_after_action(belief, model, action)
     perception_outcomes = predictive_outcome_distribution(
@@ -1006,6 +1014,7 @@ def select_root_action(
     model: dict[str, Any],
     config: dict[str, Any],
 ) -> dict[str, Any]:
+    """Choose the first receding-horizon action after applying commitment gates."""
     current_terminal = terminal_metrics(
         belief, selected_target_correct_probability, config
     )
@@ -1093,6 +1102,7 @@ def replay_mpc(
     model: dict[str, Any],
     config: dict[str, Any],
 ) -> dict[str, Any]:
+    """Replay one held-out episode while revealing observations only after action selection."""
     center = episode["initial_observation"]
     belief, selected_probability = update_with_observation(
         initial_belief(model),

@@ -1,4 +1,4 @@
-"""Run one contact-gated UR10e+RG6 cover-removal development smoke."""
+"""Run one contact-gated cover-removal smoke in a persistent Isaac stage."""
 
 from __future__ import annotations
 
@@ -70,7 +70,7 @@ def learned_post_remove_localization(
     view: str = "post_remove",
     task_overrides: dict | None = None,
 ) -> dict:
-    """Run sequential learned perception and localize Qwen's selected mask."""
+    """Run learned perception, then backproject its mask with aligned RGB-D."""
     from rgbd_target_localization import localize_mask_files
     from run_live_learned_scanned_basket_pipeline import (
         resolve_input_asset,
@@ -148,7 +148,11 @@ def learned_post_remove_localization(
 
 
 def removal_contact_success(removal: dict) -> bool:
-    """Use the correct contact contract for hold-only or released covers."""
+    """Apply the contact contract appropriate to a held or released cover.
+
+    A released cover no longer has finger contact by design, so success shifts
+    to verified support, retreat clearance, and post-release stability.
+    """
     if removal.get("cover_placed_and_released"):
         placement = removal.get("supported_placement") or {}
         return bool(
@@ -163,7 +167,11 @@ def removal_contact_success(removal: dict) -> bool:
 
 
 def contact_grasp_success(server_result: dict) -> bool:
-    """Require physical lift and all contact/collision safety gates."""
+    """Require physical lift and all contact/collision safety gates.
+
+    Lift distance alone is insufficient because a wedged or over-penetrating
+    grasp can move the target without being a safe bilateral grasp.
+    """
     grasp = server_result.get("grasp_execution") or {}
     return bool(
         server_result.get("grasp_executed")
@@ -178,6 +186,7 @@ def contact_grasp_success(server_result: dict) -> bool:
 def calibration_authorizes_remove_cover(
     seed: int, *, forced_observation_calibration: bool = False
 ) -> dict:
+    """Accept removal only from its held-out calibration fold or an explicit pilot."""
     if forced_observation_calibration:
         if 200 <= seed <= 209:
             raise ValueError(
@@ -393,6 +402,8 @@ def main() -> None:
     if args.replan_after_remove_cover:
         command.append("--continue-after-remove-cover")
     environment = dict(os.environ)
+    # The renderer keeps the host's physical index, while the one exposed CUDA
+    # device is numbered 0 inside the process for PhysX.
     environment.update(
         {
             "CUDA_VISIBLE_DEVICES": str(physical_gpu),
@@ -409,6 +420,8 @@ def main() -> None:
     stdout = stdout_path.open("w", encoding="utf-8")
     stderr = stderr_path.open("w", encoding="utf-8")
     started = time.perf_counter()
+    # One server owns capture, removal, reobservation, and any follow-up grasp;
+    # keeping it alive preserves the released cover and articulation state.
     server = subprocess.Popen(
         command,
         cwd=ROOT,
@@ -560,6 +573,9 @@ def main() -> None:
     removal = server_result.get("cover_removal_execution") or {}
     final_grasp = server_result.get("grasp_execution") or {}
     final_grasp_success = contact_grasp_success(server_result)
+    # Accept the smoke only when manipulation evidence and the expected scene
+    # change agree. Contact alone cannot prove the cover revealed the target,
+    # and a visibility increase cannot prove the motion was physically safe.
     success = bool(
         server.returncode == 0
         and server_result.get("status") == "completed"

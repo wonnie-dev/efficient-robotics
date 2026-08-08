@@ -35,6 +35,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def require_single_gpu_only() -> None:
+    """Keep each stage to one model process on one visible CUDA device."""
     visible = os.environ.get("CUDA_VISIBLE_DEVICES")
     expected = os.environ.get("PHYSICAL_GPU") or visible or "0"
     if not expected.isdigit():
@@ -67,6 +68,7 @@ def resolve_project_path(value: str | Path) -> Path:
 
 
 def load_config(path: Path) -> dict[str, Any]:
+    """Load the pilot contract and reject any training-enabled variant."""
     config = json.loads(path.read_text(encoding="utf-8"))
     if config.get("training_performed") is not False:
         raise ValueError("This pilot must remain inference-only.")
@@ -95,6 +97,7 @@ def rgb_path(sample: dict[str, Any]) -> Path:
 
 
 def cuda_sample_start() -> float:
+    """Start a synchronized per-sample timing and peak-memory window."""
     import torch
 
     torch.cuda.empty_cache()
@@ -117,6 +120,7 @@ def cuda_sample_metrics(started: float) -> dict[str, Any]:
 
 
 def extract_json_value(text: str) -> dict[str, Any] | list[Any]:
+    """Recover the first balanced JSON value from otherwise noisy output."""
     stripped = text.strip()
     if stripped.startswith("```"):
         stripped = re.sub(r"^```(?:json)?\s*", "", stripped)
@@ -163,6 +167,7 @@ def extract_json_value(text: str) -> dict[str, Any] | list[Any]:
 def normalize_qwen_box(
     parsed_value: dict[str, Any] | list[Any], width: int, height: int
 ) -> list[float] | None:
+    """Convert Qwen's 0--1000 ``xyxy`` box to clipped image pixels."""
     if isinstance(parsed_value, list):
         if not parsed_value:
             return None
@@ -205,6 +210,7 @@ def normalize_qwen_box(
 def run_qwen_direct(
     config: dict[str, Any], samples: list[dict[str, Any]], force: bool
 ) -> dict[str, Any]:
+    """Run the RGB-only direct-grounding baseline with per-sample caching."""
     import torch
     from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
 
@@ -268,6 +274,7 @@ def run_qwen_direct(
             clean_up_tokenization_spaces=False,
         )[0]
         destination.mkdir(parents=True, exist_ok=True)
+        # Keep the exact response even when the structured parse fails.
         (destination / "raw_response.txt").write_text(
             raw_text + "\n", encoding="utf-8"
         )
@@ -312,6 +319,7 @@ def run_qwen_direct(
 def run_gdino_detect(
     config: dict[str, Any], samples: list[dict[str, Any]], force: bool
 ) -> dict[str, Any]:
+    """Generate RGB-only open-vocabulary boxes, reusing saved results by default."""
     import torch
     from transformers import AutoModelForZeroShotObjectDetection, AutoProcessor
 
@@ -338,6 +346,7 @@ def run_gdino_detect(
         concepts = list(config["task"]["open_vocabulary_concepts"])
         started = cuda_sample_start()
         annotations = []
+        # Separate prompts keep each saved score tied to one requested concept.
         for concept in concepts:
             text_prompt = f"{concept}."
             inputs = processor(
@@ -402,6 +411,7 @@ def run_gdino_detect(
 def run_sam2_segment(
     config: dict[str, Any], samples: list[dict[str, Any]], force: bool
 ) -> dict[str, Any]:
+    """Segment the cached detector boxes without consulting simulator masks."""
     import torch
     from sam2.build_sam import build_sam2
     from sam2.sam2_image_predictor import SAM2ImagePredictor
@@ -451,6 +461,7 @@ def run_sam2_segment(
                     multimask_output=False,
                 )
             if masks.ndim == 4:
+                # One box and one mask are kept in the same detector order.
                 masks = masks.squeeze(1)
             masks = masks.astype(bool)
             mask_scores_list = np.asarray(mask_scores).reshape(-1).tolist()
@@ -503,6 +514,7 @@ def run_sam2_segment(
 def run_sam3_segment(
     config: dict[str, Any], samples: list[dict[str, Any]], force: bool
 ) -> dict[str, Any]:
+    """Run text-prompted RGB segmentation with per-sample result caching."""
     import torch
     from sam3.model.sam3_image_processor import Sam3Processor
     from sam3.model_builder import build_sam3_image_model
@@ -570,6 +582,7 @@ def run_sam3_segment(
                         "mask_pixel_count": int(binary_mask.sum()),
                     }
                 )
+            # A concept must not carry prompt state into the next concept.
             processor.reset_all_prompts(state)
         metrics = cuda_sample_metrics(started)
         result = {

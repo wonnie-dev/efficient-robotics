@@ -89,6 +89,7 @@ def extract_center_features(
     *,
     detection_root: Path | None = None,
 ) -> dict[str, Any]:
+    """Read only the initial view features available before action selection."""
     if detection_root is None:
         detection_root = perception_root
     sample_id = f"seed{seed:03d}_center"
@@ -178,6 +179,7 @@ def fit_statistics(rows: list[dict[str, Any]]) -> tuple[list[float], list[float]
 def predict_variant_distribution(
     query: dict[str, Any], training_rows: list[dict[str, Any]], *, k: int = 3
 ) -> dict[str, Any]:
+    """Estimate scene-type belief from neighboring calibration episodes."""
     if not training_rows:
         raise ValueError("At least one calibration episode is required")
     mean, std = fit_statistics(training_rows)
@@ -212,6 +214,7 @@ def predict_variant_distribution(
 
 
 def select_action(variant_probabilities: dict[str, float]) -> dict[str, Any]:
+    """Trade action cost against the predicted chance of resolving the scene."""
     values = [
         {
             "action": "defer",

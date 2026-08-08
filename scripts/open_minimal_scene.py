@@ -1,3 +1,10 @@
+"""Open the Isaac scene, capture observations, and serve live actions.
+
+Live mode owns the SimulationApp for the whole episode. View changes,
+replanning, and optional manipulation therefore operate on one stage instead
+of reconstructing object state between processes.
+"""
+
 import argparse
 import json
 import os
@@ -571,6 +578,9 @@ record(
     "multi_gpu=False"
 )
 
+# The renderer selects a physical Vulkan device. PhysX sees the process-local
+# CUDA ordinal after CUDA_VISIBLE_DEVICES masking, so physical GPU N normally
+# appears here as physics GPU 0.
 simulation_app = SimulationApp(
     {
         "headless": args.headless,
@@ -1417,6 +1427,7 @@ def current_ee_pose():
 
 
 def align_active_wrist_camera(ee_pose) -> None:
+    """Update the active camera using the live stage's frame convention."""
     if args.actual_view_motion:
         align_world_camera_to_ee(
             zivid_camera, observation_config, ee_pose
@@ -1529,6 +1540,7 @@ def capture_observation(
     *,
     set_robot_to_configured_pose: bool = True,
 ) -> None:
+    """Settle one wrist pose and save a pixel-aligned RGB-D observation."""
     app_utils.play()
     simulation_app.update()
     if (
@@ -1564,6 +1576,8 @@ def capture_observation(
         rep.orchestrator.step(
             rt_subframes=quality_settings["rt_subframes"]
         )
+    # Copy the sensor pair from this settled render before the temporary ID
+    # passes change materials or visibility for simulator-only evaluation.
     rgb_data = np.asarray(rgb_annotator.get_data()).copy()
     depth_data = np.asarray(depth_annotator.get_data()).copy()
     overview_rgb_data = np.asarray(overview_rgb_annotator.get_data()).copy()
@@ -1608,6 +1622,9 @@ meeting_demo_result = None
 candidate_view_result = None
 live_pipeline_result = None
 if args.live_pipeline_server:
+    # This loop deliberately keeps SimulationApp and the USD stage alive while
+    # the external planner works. Each request resumes the state produced by
+    # the preceding observation or manipulation.
     live_session_dir = args.live_session_dir.resolve()
     live_method_config = json.loads(
         args.method_config.resolve().read_text(encoding="utf-8")
@@ -1905,6 +1922,8 @@ if args.live_pipeline_server:
                 terminal_rgbd_localization = json.loads(
                     localization_path.read_text(encoding="utf-8")
                 )
+        # Pass the live stage directly; serializing and reopening it would lose
+        # transient articulation, contact, and rigid-body state.
         persistent_grasp_result = execute_persistent_composite_grasp(
             project_root=PROJECT_ROOT,
             stage=stage,

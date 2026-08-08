@@ -24,6 +24,7 @@ def bbox_center_inside(inner: list[int] | None, outer: list[int] | None) -> bool
 
 
 def observed_symbols(objects: dict, adapter: dict) -> dict:
+    """Reduce the post-action instance labels to the planner's symbols."""
     target = objects[adapter["target_object_id"]]
     container = objects[adapter["container_id"]]
     detected = target["pixel_count"] >= adapter["detection_pixel_threshold"]
@@ -46,6 +47,7 @@ def update_from_observation(
     objects: dict,
     config: dict,
 ) -> dict:
+    """Update target and relation beliefs from one executed observation."""
     symbols = observed_symbols(objects, config["post_action_observation_adapter"])
     model = config["observation_model"][action_name]
     target_likelihood = binary_detection_likelihood(
@@ -55,6 +57,8 @@ def update_from_observation(
         hypothesis: outcomes[symbols["relation_outcome"]]
         for hypothesis, outcomes in model["relation_likelihood"].items()
     }
+    # Target identity and spatial relation use separate categorical filters;
+    # both are conditioned on evidence from this completed action only.
     posterior = {
         "target": bayesian_update(prior["target"], target_likelihood),
         "relation": bayesian_update(prior["relation"], relation_likelihood),

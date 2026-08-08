@@ -45,6 +45,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def configured_physical_gpu() -> int:
+    """Read the host GPU index recorded in inference provenance."""
     value = os.environ.get("PHYSICAL_GPU")
     if value is None:
         visible = os.environ.get("CUDA_VISIBLE_DEVICES")
@@ -55,6 +56,12 @@ def configured_physical_gpu() -> int:
 
 
 def require_single_gpu_only() -> None:
+    """Enforce the single-device setup used for comparable memory metrics.
+
+    CUDA renumbers a masked physical device to ``cuda:0``. ``PHYSICAL_GPU``
+    keeps the host index for provenance while ``CUDA_VISIBLE_DEVICES`` applies
+    the mask.
+    """
     expected = str(configured_physical_gpu())
     visible = os.environ.get("CUDA_VISIBLE_DEVICES")
     if visible is not None and ("," in visible or not visible.isdigit()):
@@ -72,6 +79,7 @@ def require_single_gpu_only() -> None:
 
 
 def resolve_asset_path(path_text: str, input_path: Path) -> Path:
+    """Resolve assets from the contract, repository, or input directory."""
     path = Path(path_text)
     candidates = (
         path,
@@ -90,6 +98,7 @@ def load_rgb(path: Path) -> Image.Image:
 
 
 def candidate_overlay(scene: Image.Image, candidates: list[dict]) -> Image.Image:
+    """Draw anonymous candidate IDs without adding semantic hints."""
     overlay = scene.copy()
     draw = ImageDraw.Draw(overlay)
     try:
@@ -125,6 +134,12 @@ def candidate_overlay(scene: Image.Image, candidates: list[dict]) -> Image.Image
 
 
 def build_visual_content(model_input: dict, input_path: Path) -> list[dict]:
+    """Build the common anonymous visual evidence used by every question.
+
+    Identity and relation questions see the same scene, overlays, and crops;
+    only their final text question changes. Candidate metadata beyond the
+    contract fields is never exposed here.
+    """
     scene = load_rgb(
         resolve_asset_path(model_input["image"]["rgb_path"], input_path)
     )
@@ -176,6 +191,7 @@ def build_visual_content(model_input: dict, input_path: Path) -> list[dict]:
     height = model_input["image"]["height"]
     for candidate in model_input["candidates"]:
         x0, y0, x1, y1 = candidate["bbox_xyxy"]
+        # Qwen grounding prompts use a resolution-independent 0--1000 grid.
         normalized_bbox = [
             round(1000 * x0 / width),
             round(1000 * y0 / height),
@@ -223,6 +239,7 @@ def build_visual_content(model_input: dict, input_path: Path) -> list[dict]:
 
 
 def letter_mapping(values: list[str]) -> list[tuple[str, str]]:
+    """Bind choices to single-letter outputs while preserving input order."""
     if not 2 <= len(values) <= len(CHOICE_LETTERS):
         raise ValueError(f"Forced-choice dimension is unsupported: {len(values)}")
     return list(zip(CHOICE_LETTERS, values))
@@ -301,6 +318,7 @@ def relation_question(
     query: dict,
     mapping: list[tuple[str, str]] | None = None,
 ) -> tuple[str, list[tuple[str, str]]]:
+    """Ask for one relation factor without folding in the other factors."""
     labels = list(query["label_space"])
     mapping = mapping or letter_mapping(labels)
     choices = "\n".join(f"{letter}: {label}" for letter, label in mapping)
@@ -399,6 +417,7 @@ def prepare_inputs(
 
 
 def choice_token_ids(tokenizer: Any, mapping: list[tuple[str, str]]) -> list[int]:
+    """Validate that each forced choice occupies exactly one LM token."""
     token_ids = []
     for letter, _value in mapping:
         encoded = tokenizer.encode(letter, add_special_tokens=False)
@@ -419,6 +438,7 @@ def score_question(
     mapping: list[tuple[str, str]],
     device: str,
 ) -> list[float]:
+    """Read pre-softmax next-token logits without generating an answer."""
     import torch
 
     inputs = prepare_inputs(processor, visual_content, question, device)
@@ -435,6 +455,7 @@ def score_question(
 def cyclic_mappings(
     mapping: list[tuple[str, str]],
 ) -> list[list[tuple[str, str]]]:
+    """Rotate values so every value is scored under every letter once."""
     letters = [letter for letter, _value in mapping]
     values = [value for _letter, value in mapping]
     return [
@@ -454,6 +475,7 @@ def permutation_debiased_scores(
     question_builder: Any,
     device: str,
 ) -> list[float]:
+    """Average raw logits across cyclic mappings to reduce letter preference."""
     totals = {value: 0.0 for _letter, value in base_mapping}
     mappings = cyclic_mappings(base_mapping)
     for mapping in mappings:
@@ -549,6 +571,7 @@ def run_inference(args: argparse.Namespace) -> tuple[dict, dict]:
             ),
             device,
         )
+        # The signed margin is comparable across candidates; no softmax is applied.
         target_logits.append(match_scores[0] - match_scores[1])
 
     relations = []

@@ -1,4 +1,9 @@
-"""Rank Grounded-SAM2 anonymous red proposals with one Qwen model instance."""
+"""Rank Grounded-SAM2 anonymous red proposals with one Qwen model instance.
+
+Qwen receives proposal IDs, RGB crops, and reference overlays, but never the
+simulator entity matched to a proposal. Visual identity and spatial relations
+are scored independently so one factor cannot silently stand in for the other.
+"""
 
 from __future__ import annotations
 
@@ -29,6 +34,7 @@ RANKING_PROMPT_VERSION = (
 
 
 def resolve_path(value: str | Path) -> Path:
+    """Interpret relative artifact paths from the repository root."""
     path = Path(value)
     return path if path.is_absolute() else ROOT / path
 
@@ -80,6 +86,7 @@ def main() -> None:
         destination = pilot_root / "grounded_sam2_qwen_rankings" / item["sample_id"]
         result_path = destination / "result.json"
         if result_path.is_file() and not args.force:
+            # Cache hits retain the runtime and memory metrics from their original run.
             result = json.loads(result_path.read_text(encoding="utf-8"))
             results.append(result)
             sample_metrics.append(
@@ -113,6 +120,7 @@ def main() -> None:
                 ),
                 "cuda:0",
             )
+            # This margin measures appearance only; relation evidence is stored below.
             candidate_logits.append(float(scores[0] - scores[1]))
         relation_results = []
         for query in model_input.get("relation_queries", []):
@@ -161,9 +169,11 @@ def main() -> None:
         selected_index = max(
             range(len(candidate_logits)), key=candidate_logits.__getitem__
         )
+        # Candidate order provides deterministic tie-breaking for equal margins.
         selected_candidate = model_input["candidates"][selected_index][
             "candidate_id"
         ]
+        # The singular view takes the first query; the plural view keeps all factors.
         result = {
             "schema_version": "grounded-proposal-qwen-ranking-v1",
             "sample_id": item["sample_id"],

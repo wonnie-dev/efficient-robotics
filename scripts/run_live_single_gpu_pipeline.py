@@ -1,4 +1,8 @@
-"""Run a persistent Isaac process and external Qwen replanning through JSON IPC."""
+"""Run external Qwen replanning against one persistent Isaac process.
+
+Atomic JSON files form the handoff boundary, while Isaac retains ownership of
+the stage, articulation, cameras, and rigid-body state for the full episode.
+"""
 
 from __future__ import annotations
 
@@ -64,6 +68,7 @@ def next_session_dir(seed: int) -> Path:
 
 
 def write_json_atomic(path: Path, payload: dict) -> None:
+    """Publish one complete IPC message without exposing a partial JSON file."""
     temporary_path = path.with_suffix(path.suffix + ".tmp")
     temporary_path.write_text(
         json.dumps(payload, indent=2) + "\n",
@@ -73,6 +78,7 @@ def write_json_atomic(path: Path, payload: dict) -> None:
 
 
 def wait_for_path(path: Path, process: subprocess.Popen, timeout: float) -> None:
+    """Wait for an IPC message while also watching the Isaac server lifecycle."""
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         if path.is_file():
@@ -203,6 +209,8 @@ def main() -> None:
     stderr_path = session_dir / "isaac_stderr.log"
     stdout_stream = stdout_path.open("w", encoding="utf-8")
     stderr_stream = stderr_path.open("w", encoding="utf-8")
+    # Vulkan uses the host's physical renderer index. Once that same device is
+    # the only CUDA-visible GPU, PhysX addresses it with the local ordinal 0.
     command = [
         str(ISAAC_PYTHON),
         str(ROOT / "scripts" / "open_minimal_scene.py"),
@@ -226,6 +234,8 @@ def main() -> None:
     if args.actual_view_motion:
         command.append("--actual-view-motion")
     started = time.perf_counter()
+    # Keep this process alive across every observation and terminal action so
+    # no scene or articulation state has to be reconstructed from files.
     server = subprocess.Popen(
         command,
         cwd=ROOT,
@@ -366,6 +376,9 @@ def main() -> None:
                         )
                     return path
 
+                # The selected mask and metric depth come from the same saved
+                # wrist observation, preserving their pixel and camera-frame
+                # alignment for backprojection.
                 terminal_localization = localize_mask_files(
                     session_dir / "observations" / view,
                     {
@@ -453,6 +466,8 @@ def main() -> None:
         else:
             terminal_action = "stop"
 
+        # server_result is written only after the persistent process has
+        # applied the final request and finished any requested manipulation.
         server_result_path = session_dir / "server_result.json"
         wait_for_path(
             server_result_path,

@@ -4,6 +4,7 @@ import math
 
 
 def normalize(distribution: dict[str, float], floor: float = 1e-12) -> dict[str, float]:
+    """Return a proper categorical distribution without exact zero entries."""
     clipped = {key: max(floor, float(value)) for key, value in distribution.items()}
     total = sum(clipped.values())
     if total <= 0.0:
@@ -47,6 +48,7 @@ def fit_temperature_grid(
     maximum: float = 5.0,
     steps: int = 191,
 ) -> dict:
+    """Choose the temperature with the lowest calibration-set log loss."""
     if steps < 2 or minimum <= 0.0 or maximum <= minimum:
         raise ValueError("Invalid temperature search range")
     candidates = [
@@ -71,8 +73,11 @@ def bayesian_update(
     prior: dict[str, float],
     likelihood_by_hypothesis: dict[str, float],
 ) -> dict[str, float]:
+    """Apply one categorical Bayes update and normalize the posterior."""
     if prior.keys() != likelihood_by_hypothesis.keys():
         raise ValueError("Prior and likelihood hypotheses must match")
+    # The evidence normalizer is shared across hypotheses, so it is applied
+    # once by normalize after multiplying prior mass by the likelihood.
     posterior = {
         hypothesis: prior[hypothesis] * likelihood_by_hypothesis[hypothesis]
         for hypothesis in prior
@@ -83,6 +88,7 @@ def bayesian_update(
 def binary_detection_likelihood(
     detection_probability: dict[str, float], detected: bool
 ) -> dict[str, float]:
+    """Select P(detection | hypothesis) or its complement for each state."""
     return {
         hypothesis: probability if detected else 1.0 - probability
         for hypothesis, probability in detection_probability.items()

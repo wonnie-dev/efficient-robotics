@@ -76,12 +76,15 @@ def physical_outcome(
     *,
     minimum_target_pixels: int,
 ) -> tuple[str, int]:
+    """Translate verified execution and its new image into one outcome symbol."""
     removal = server_result.get("cover_removal_execution") or {}
     if not (
         server_result.get("cover_removal_executed")
         and removal.get("status") == "completed"
         and removal.get("removal_verified")
     ):
+        # Do not interpret a post-action image when removal itself was not
+        # verified; the planner must receive an execution failure instead.
         return "action_failed", 0
     pixels = target_pixels(post_remove_dir)
     return (
@@ -97,6 +100,7 @@ def bind_graph_to_observation(
     target_pixel_count: int,
     perception_source: str,
 ) -> dict[str, Any]:
+    """Attach one RGB-D capture and its pilot provenance to a graph revision."""
     rgb = (observation_dir / "rgb.png").resolve()
     depth = (observation_dir / "depth_m.npy").resolve()
     if not rgb.is_file() or not depth.is_file():
@@ -142,6 +146,7 @@ def run_replan(
     integration_config_path: Path = DEFAULT_INTEGRATION_CONFIG,
     minimum_target_pixels: int = 100,
 ) -> dict[str, Any]:
+    """Replan once from evidence captured after physical cover removal."""
     started = time.perf_counter()
     physical_run_root = physical_run_root.resolve()
     output_root = output_root.resolve()
@@ -176,6 +181,8 @@ def run_replan(
         target_pixel_count=target_pixels(center_dir),
         perception_source="simulator_instance_mask_pre_action_pilot_oracle",
     )
+    # The root request depends only on the pre-action graph. Post-remove pixels
+    # are converted to an outcome after this request has been fixed.
     initial_policy = plan(graph_to_planner_belief(initial_graph), planner_config)
     initial_request = action_request(initial_graph, initial_policy, step_index=0)
     if initial_request["type"] != "remove_cover":

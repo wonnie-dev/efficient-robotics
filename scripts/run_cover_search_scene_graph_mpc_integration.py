@@ -76,6 +76,7 @@ def task_failure_risk(
     belief: dict[str, float],
     planner_config: dict[str, Any],
 ) -> float:
+    """Measure risk against the best currently available terminal grasp."""
     terminal_success = [
         grasp_success_probability(action, belief)
         for action in planner_config["actions"].values()
@@ -93,6 +94,7 @@ def build_scene_graph(
     sequence_index: int,
     observation_symbol: str,
 ) -> dict[str, Any]:
+    """Create and validate one graph revision from the supplied joint belief."""
     joint = normalize(belief)
     location = marginal_location(joint)
     cover = marginal_cover(joint)
@@ -233,6 +235,7 @@ def build_scene_graph(
 
 
 def graph_to_planner_belief(graph: dict[str, Any]) -> dict[str, float]:
+    """Read the planner state from a validated scene-graph revision."""
     validate_graph(graph)
     joint = graph["graph_belief"].get(
         "joint_task_state_distribution"
@@ -250,6 +253,7 @@ def action_request(
     *,
     step_index: int,
 ) -> dict[str, Any]:
+    """Bind the selected root action to the graph revision that produced it."""
     selected = str(policy["selected_action"])
     selected_value = next(
         item
@@ -300,6 +304,7 @@ def execute_contract_stub(
     expected_action: str | None,
     observation: str | None,
 ) -> dict[str, Any]:
+    """Check request/result ordering for the CPU-only executor contract."""
     if expected_action is not None and request["type"] != expected_action:
         raise ValueError(
             f"Expected {expected_action}, got {request['type']}"
@@ -310,6 +315,7 @@ def execute_contract_stub(
     if terminal and observation is not None:
         raise ValueError("Terminal stub result cannot contain observation")
     if not terminal and observation is None:
+        # An information action without a result cannot revise the belief.
         raise ValueError("Information action requires post-action observation")
     return {
         "schema_version": "cover-search-action-result-v1",
@@ -341,6 +347,7 @@ def run_episode(
     planner_config: dict[str, Any],
     episode_root: Path,
 ) -> dict[str, Any]:
+    """Write an auditable graph-request-result chain for one episode."""
     episode_root.mkdir(parents=True, exist_ok=True)
     belief = normalize(planner_config["initial_belief"])
     observation_index = 0
@@ -408,6 +415,8 @@ def run_episode(
         )
         if terminal:
             break
+        # Results are incorporated only after the request is fixed. The next
+        # graph is a new revision built from the resulting posterior.
         update = execute_observation_action(
             adapter_belief,
             selected,

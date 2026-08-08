@@ -26,6 +26,7 @@ def load_json(path: Path) -> dict:
 
 
 def task_failure_risk(belief: dict, objective: dict) -> float:
+    """Estimate failure as the complement of the best supported task state."""
     selected_target_probability = max(belief["target"].values())
     return 1.0 - (
         selected_target_probability
@@ -36,6 +37,11 @@ def task_failure_risk(belief: dict, objective: dict) -> float:
 def observation_branches(
     belief: dict, action_name: str, observation_model: dict
 ) -> list[dict]:
+    """Forecast an action's possible observations and Bayesian posteriors.
+
+    The target-detection and relation channels are factored by this prototype,
+    so their predictive probabilities multiply at each branch.
+    """
     model = observation_model[action_name]
     detection_probability = model["target_detection_probability"]
     relation_likelihood = model["relation_likelihood"]
@@ -76,6 +82,7 @@ def observation_branches(
             }
         )
     total = sum(branch["probability"] for branch in branches)
+    # Normalize once more to absorb rounding error in the configured tables.
     for branch in branches:
         branch["probability"] /= total
     return branches
@@ -112,6 +119,7 @@ def expected_view_metrics(
 
 
 def immediate_cost(action_name: str, belief: dict, config: dict) -> dict:
+    """Score the current action without peeking at a realized observation."""
     action = config["actions"][action_name]
     objective = config["objective"]
     if action["kind"] == "grasp":
@@ -143,6 +151,7 @@ def immediate_cost(action_name: str, belief: dict, config: dict) -> dict:
 
 
 def sequence_cost(sequence: list[str], belief: dict, config: dict) -> float:
+    """Evaluate a fixed sequence over every predicted observation branch."""
     action_name = sequence[0]
     action = config["actions"][action_name]
     metrics = immediate_cost(action_name, belief, config)
@@ -365,6 +374,7 @@ def belief_tree_action_values(
 
 
 def belief_tree_policy(belief: dict, config: dict) -> dict:
+    """Select the lowest-cost root action from the current belief tree."""
     evaluations = belief_tree_action_values(
         belief,
         config,
@@ -437,6 +447,7 @@ def action_forecasts(belief: dict, config: dict) -> dict:
 
 
 def plan(config: dict) -> dict:
+    """Build a plan from the current belief and pre-action models only."""
     belief = {
         "target": normalize(config["initial_belief"]["target"]),
         "relation": normalize(config["initial_belief"]["relation"]),
@@ -465,6 +476,8 @@ def plan(config: dict) -> dict:
             for item in belief_tree["action_values"]
         ]
         if belief_tree["selected"] is None:
+            # Keep an unsafe or incomplete planning state visible to the
+            # executor instead of silently substituting a grasp.
             selected = {
                 "sequence": ["defer"],
                 "cost": None,

@@ -59,6 +59,7 @@ def fit_likelihood(
     observations: list[str],
     pseudocount: float,
 ) -> dict[str, dict[str, float]]:
+    """Fit categorical observation rows with symmetric Dirichlet smoothing."""
     if pseudocount <= 0:
         raise ValueError("dirichlet_pseudocount must be positive")
     counts = {
@@ -81,6 +82,7 @@ def posterior(
     likelihood: dict[str, dict[str, float]],
     states: list[str],
 ) -> dict[str, float]:
+    """Invert the likelihood under a uniform state prior for the CV audit."""
     weights = {state: likelihood[state][observation] for state in states}
     denominator = sum(weights.values())
     return {state: value / denominator for state, value in weights.items()}
@@ -92,6 +94,7 @@ def leave_one_episode_out(
     observations: list[str],
     pseudocount: float,
 ) -> dict[str, Any]:
+    """Refit after removing every record that shares the held-out episode key."""
     folds = []
     for held_out in examples:
         training = [
@@ -127,6 +130,7 @@ def leave_one_episode_out(
 def validate_view_model(
     result: dict[str, Any], config: dict[str, Any], reserved: set[int]
 ) -> dict[str, Any]:
+    """Check support and causal isolation before a view model can be frozen."""
     folds = result["folds"]
     seeds = [int(fold["held_out_seed"]) for fold in folds]
     if len(seeds) != len(set(seeds)):
@@ -181,6 +185,7 @@ def validate_view_model(
 def cover_examples(
     readiness: dict[str, Any], reserved: set[int]
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Build cover observations only from episodes that passed physical gates."""
     examples = []
     right_after_empty = []
     mapping = {

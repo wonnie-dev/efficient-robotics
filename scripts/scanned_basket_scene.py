@@ -3,6 +3,10 @@
 The source asset remains in the existing LIBERO checkout.  This module does
 not download, copy, or modify it; it records the source and license in the
 experiment metadata so pilot outputs remain attributable and reproducible.
+
+Names ending in ``_WORLD_M`` use the stage world frame. Basket collision boxes
+are basket-local, and target mug positions use the mug's bottom contact as the
+transform origin.
 """
 
 from __future__ import annotations
@@ -219,6 +223,8 @@ ACTION_VISIBILITY_RESOLVED_MINIMUM = 0.65
 ACTION_VISIBILITY_GAIN_MINIMUM = 0.15
 ACTION_VISIBILITY_DOMINANCE_MINIMUM = 0.15
 ACTION_VISIBILITY_HIDDEN_MAXIMUM = 0.02
+# Analytic layouts are only proposals. A scene is accepted when the rendered
+# masks satisfy these view-specific visibility gates.
 
 
 def calibration_variant_for_seed(seed: int) -> str:
@@ -534,7 +540,7 @@ def validate_action_differentiating_visibility(
     variant: str,
     measurements: dict,
 ) -> dict:
-    """Validate causal view differences from rendered objective masks."""
+    """Accept an action variant only when rendered masks show its intended gain."""
     if variant not in ACTION_DIFFERENTIATING_SCENE_VARIANTS:
         raise ValueError(f"Not an action-differentiating variant: {variant}")
     required_views = ("center", "close_high", "right")
@@ -682,7 +688,7 @@ def validate_action_differentiating_visibility(
 def validate_calibration_visibility(
     variant: str, measurements: dict
 ) -> dict:
-    """Validate rendered instance-mask visibility against scene intent."""
+    """Apply the rendered-visibility acceptance gate for a calibration scene."""
     if variant not in ALL_CALIBRATION_SCENE_VARIANTS:
         raise ValueError(f"Unknown calibration scene variant: {variant}")
     required_views = ("center", "close_high", "right")
@@ -1465,7 +1471,7 @@ def replace_procedural_basket_with_scan(
     calibration_seed: int = 0,
     cover_physics_calibration: dict | None = None,
 ) -> dict:
-    """Replace only the reference-container visual with a scanned basket."""
+    """Replace the container visual while preserving its authored world frame."""
     from pxr import Gf, Sdf, Usd, UsdGeom
 
     if not BASKET_OBJ.is_file() or not BASKET_TEXTURE.is_file():
@@ -1803,6 +1809,8 @@ def replace_procedural_basket_with_scan(
         )
         else PERCEPTION_BASKET_SCALE_XYZ
     )
+    # OBJ vertices and collision boxes remain basket-local; the existing
+    # container root supplies the shared world pose for rendering and physics.
     mesh_xform.AddScaleOp().Set(Gf.Vec3f(*basket_scale))
 
     st = UsdGeom.PrimvarsAPI(mesh).CreatePrimvar(
@@ -1813,6 +1821,8 @@ def replace_procedural_basket_with_scan(
     st.Set([Gf.Vec2f(*uv) for uv in texcoords])
     st.SetIndices(texcoord_indices)
     _bind_texture(stage, mesh.GetPrim(), f"{root_path}/ScannedMaterial")
+    # The physics pilot uses the open five-box proxy instead of the raw scan;
+    # a convex hull would seal the basket and create unsafe false contacts.
     collision_metadata = (
         _add_static_basket_collision(
             stage,

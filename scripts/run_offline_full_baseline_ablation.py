@@ -59,6 +59,7 @@ def configure_relation_observations(
     membership_enabled: bool,
     occlusion_enabled: bool,
 ) -> dict[int, dict[str, dict]]:
+    """Mask selected relation channels without changing episode identity."""
     configured = copy.deepcopy(episodes)
     for episode in configured.values():
         for row in episode.values():
@@ -142,6 +143,7 @@ def make_relation_likelihood_uninformative(
 
 
 def risk_neutral_config(base_config: dict[str, Any]) -> dict[str, Any]:
+    """Disable commitment risk while leaving motion and observation costs intact."""
     selected = copy.deepcopy(base_config)
     for key in (
         "wrong_target_weight",
@@ -197,6 +199,7 @@ def tune_cost(
     base_config: dict[str, Any],
     nested_config: dict[str, Any],
 ) -> dict[str, Any]:
+    """Select a cost using only leave-one-out replays from the outer training fold."""
     candidates = []
     for value in nested_config["candidate_task_noncompletion_costs"]:
         config = with_noncompletion_cost(base_config, float(value))
@@ -286,6 +289,7 @@ def paired_loss_counts(
     comparison: list[dict[str, Any]],
     loss_config: dict[str, float],
 ) -> dict[str, int]:
+    """Compare policies on matched seeds so scene difficulty cancels out."""
     proposed_by_seed = {int(row["seed"]): row for row in proposed}
     comparison_by_seed = {int(row["seed"]): row for row in comparison}
     counts = Counter()
@@ -342,6 +346,7 @@ def run(config_path: Path) -> dict[str, Any]:
     }
 
     for fold in nested_config["outer_folds"]:
+        # No model fit or cost selection below may consume this fold's episodes.
         fold_id = int(fold["fold_id"])
         held_out_seeds = {int(seed) for seed in fold["held_out_seeds"]}
         calibrated = build_episode_rows(

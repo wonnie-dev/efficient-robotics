@@ -43,6 +43,7 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def load_mask(path: str | Path) -> np.ndarray:
+    """Load any nonzero mask pixel as foreground."""
     return (
         np.asarray(Image.open(resolve_path(path)).convert("L"), dtype=np.uint8)
         > 0
@@ -50,7 +51,7 @@ def load_mask(path: str | Path) -> np.ndarray:
 
 
 def binary_dilate(mask: np.ndarray, radius: int) -> np.ndarray:
-    """Small dependency-free square dilation used only for mask adjacency."""
+    """Square (Chebyshev-radius) dilation used only for mask adjacency."""
     source = np.asarray(mask, dtype=bool)
     if radius < 0:
         raise ValueError("Dilation radius must be nonnegative")
@@ -76,6 +77,7 @@ def masked_world_points(
     *,
     minimum_valid_pixels: int,
 ) -> np.ndarray:
+    """Backproject finite positive depth samples under a learned mask."""
     depth = np.asarray(depth_m, dtype=np.float64)
     binary = np.asarray(mask, dtype=bool)
     if depth.shape != binary.shape:
@@ -101,6 +103,7 @@ def robust_bounds(
     points: np.ndarray,
     percentiles: list[float],
 ) -> tuple[np.ndarray, np.ndarray]:
+    """Compute percentile-trimmed, world-axis-aligned bounds."""
     if len(percentiles) != 2 or percentiles[0] >= percentiles[1]:
         raise ValueError("Expected increasing [lower, upper] percentiles")
     lower, upper = np.percentile(
@@ -115,6 +118,7 @@ def bbox_overlap_fraction(
     source: list[float],
     reference: list[float],
 ) -> float:
+    """Measure inclusive-pixel intersection as a fraction of the source box."""
     sx0, sy0, sx1, sy1 = source
     rx0, ry0, rx1, ry1 = reference
     intersection_width = max(0.0, min(sx1, rx1) - max(sx0, rx0) + 1.0)
@@ -133,6 +137,7 @@ def reference_geometry(
     points: np.ndarray,
     settings: dict[str, Any],
 ) -> dict[str, Any]:
+    """Validate the learned reference mask and form its relation footprint."""
     observed_lower, observed_upper = robust_bounds(
         points, settings["robust_percentiles"]
     )
@@ -148,6 +153,7 @@ def reference_geometry(
     lower = observed_lower.copy()
     upper = observed_upper.copy()
     if settings.get("use_expected_xy_extents_for_relation", False):
+        # Known dimensions replace noisy visible extents, but not the observed center.
         center_xy = 0.5 * (observed_lower[:2] + observed_upper[:2])
         lower[:2] = center_xy - 0.5 * expected_xy
         upper[:2] = center_xy + 0.5 * expected_xy
@@ -182,6 +188,7 @@ def classify_membership(
     reference: dict[str, Any],
     boundary_abstention_m: float,
 ) -> dict[str, Any]:
+    """Classify the candidate center against the reference XY footprint."""
     if not reference["valid"]:
         return {
             "label": "unknown",
@@ -200,6 +207,7 @@ def classify_membership(
         np.maximum(lower[:2] - center_xy, center_xy - upper[:2]),
         0.0,
     )
+    # Distance is the largest axis violation, matching the axis-aligned footprint.
     outside_distance = float(np.max(outside_components))
     inside_margin = float(
         min(
@@ -232,6 +240,7 @@ def classify_occlusion(
     reference_adjacency: float,
     settings: dict[str, Any],
 ) -> dict[str, Any]:
+    """Apply an abstaining heuristic from visible height and mask adjacency."""
     if (
         visible_height_ratio
         <= float(settings["yes_max_visible_height_ratio"])
@@ -269,6 +278,7 @@ def classify_behind(
     candidate_bbox_overlap: float,
     settings: dict[str, Any],
 ) -> dict[str, Any]:
+    """Classify camera-relative behind evidence in the horizontal world plane."""
     if not reference["valid"]:
         return {
             "label": "unknown",
@@ -294,6 +304,7 @@ def classify_behind(
             "far_edge_offset_m": None,
         }
     direction = camera_to_reference_xy / norm
+    # Project the axis-aligned footprint onto the camera-to-reference direction.
     half_extent_along_ray = 0.5 * (
         abs(direction[0]) * (upper[0] - lower[0])
         + abs(direction[1]) * (upper[1] - lower[1])
@@ -305,6 +316,7 @@ def classify_behind(
             direction,
         )
     )
+    # Positive values lie beyond the reference's far edge, away from the camera.
     far_edge_offset = center_offset - half_extent_along_ray
     minimum_overlap = float(settings["minimum_candidate_bbox_overlap"])
     abstention = float(settings["far_edge_abstention_m"])
@@ -352,6 +364,7 @@ def predict_candidate(
     reference: dict[str, Any],
     config: dict[str, Any],
 ) -> dict[str, Any]:
+    """Derive relation evidence from learned masks, depth, and calibration."""
     candidate_mask = load_mask(candidate["mask_path"])
     candidate_points = masked_world_points(
         depth_m,
@@ -372,16 +385,19 @@ def predict_candidate(
             config["candidate_geometry"]["robust_percentiles"],
         ),
     )
+    # Center trimming may be stricter than the bounds used for visible extent.
     center = 0.5 * (center_lower + center_upper)
     candidate_extent = upper - lower
     ring = binary_dilate(
         candidate_mask,
         int(config["occlusion_evidence"]["mask_dilation_pixels"]),
     ) & ~candidate_mask
+    # Adjacency is the share of the candidate's outer ring covered by the reference.
     reference_adjacency = float(
         np.logical_and(ring, reference_mask).sum() / max(1, ring.sum())
     )
     visible_height_ratio = float(
+        # World Z is vertical under the axis-aligned calibration-scene assumption.
         candidate_extent[2]
         / float(config["candidate_geometry"]["known_mug_height_m"])
     )
@@ -441,6 +457,7 @@ def predict_sample(
     calibration_root: Path,
     config: dict[str, Any],
 ) -> dict[str, Any]:
+    """Predict every anonymous proposal before any audit labels are loaded."""
     sample_id = sample["sample_id"]
     input_path = (
         calibration_root
@@ -549,6 +566,7 @@ def confusion_summary(
     labels: list[str],
     abstention_label: str = "unknown",
 ) -> dict[str, Any]:
+    """Report accuracy plus accuracy conditional on a non-unknown decision."""
     matrix = {
         truth: {prediction: 0 for prediction in labels}
         for truth in labels
@@ -602,6 +620,7 @@ def audit_predictions(
     calibration_root: Path,
     perception_config: dict[str, Any],
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Join simulator identities and truth only for post-hoc calibration audit."""
     calibration_records = {
         item["sample_id"]: item
         for item in load_json(
@@ -840,6 +859,7 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 
 
 def run(config_path: Path) -> dict[str, Any]:
+    """Run the label-free prediction pass, then audit its frozen outputs."""
     config = load_json(config_path)
     calibration_root = resolve_path(config["calibration_root"])
     output_root = resolve_path(config["output_root"])
@@ -850,6 +870,7 @@ def run(config_path: Path) -> dict[str, Any]:
         predict_sample(sample, calibration_root, config)
         for sample in perception_config["samples"]
     ]
+    # Ground-truth artifacts are opened only inside this separate audit call.
     metrics, audit_rows = audit_predictions(
         predictions, calibration_root, perception_config
     )

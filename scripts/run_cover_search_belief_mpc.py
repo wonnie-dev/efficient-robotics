@@ -142,6 +142,7 @@ def predict_belief(
     action_name: str,
     config: dict[str, Any],
 ) -> dict[str, float]:
+    """Push the current belief through the selected action's transition model."""
     predicted = {state: 0.0 for state in config["state_space"]}
     for state, probability in belief.items():
         for next_state, transition_probability in (
@@ -162,6 +163,7 @@ def observation_likelihood(
     *,
     negative_evidence_enabled: bool,
 ) -> dict[str, float]:
+    """Return the state likelihood of an outcome for the executed action."""
     model = config["observation_model"][action_name]
     if outcome not in model["outcomes"]:
         raise ValueError(
@@ -176,6 +178,8 @@ def observation_likelihood(
         and outcome == "empty_container"
         and not negative_evidence_enabled
     ):
+        # The ablation preserves evidence about the cover transition while
+        # removing the empty-container clue about target location.
         open_average = sum(
             likelihood[state]
             for state in likelihood
@@ -205,6 +209,7 @@ def update_belief(
     *,
     negative_evidence_enabled: bool,
 ) -> dict[str, float]:
+    """Apply Bayes' rule to the post-transition belief."""
     likelihood = observation_likelihood(
         action_name,
         outcome,
@@ -226,6 +231,7 @@ def predictive_observation_distribution(
     *,
     negative_evidence_enabled: bool,
 ) -> dict[str, float]:
+    """Marginalize latent states into action-conditioned outcome branches."""
     return normalize(
         {
             outcome: sum(
@@ -260,6 +266,7 @@ def terminal_action_values(
     belief: dict[str, float],
     config: dict[str, Any],
 ) -> list[dict[str, Any]]:
+    """Score safe terminal choices, including wrong-commitment risk."""
     objective = config["objective"]
     minimum_success = float(
         objective["minimum_grasp_success_probability"]
@@ -352,6 +359,7 @@ def belief_tree_action_values(
     used_observation_actions: frozenset[str] = frozenset(),
     negative_evidence_enabled: bool = True,
 ) -> list[dict[str, Any]]:
+    """Evaluate feedback actions using modeled, not realized, observations."""
     terminal = terminal_action_values(belief, config)
     if depth <= 1:
         return terminal
@@ -381,6 +389,8 @@ def belief_tree_action_values(
         branches = []
         expected_future_cost = 0.0
         for outcome, probability in outcome_probabilities.items():
+            # Each branch gets its own posterior and continuation; only the
+            # probability-weighted continuation cost affects the root choice.
             posterior = update_belief(
                 predicted,
                 action_name,
@@ -472,6 +482,7 @@ def execute_observation_action(
     *,
     negative_evidence_enabled: bool = True,
 ) -> dict[str, Any]:
+    """Advance belief after the selected action returns its actual outcome."""
     predicted = predict_belief(belief, action_name, config)
     posterior = update_belief(
         predicted,
@@ -505,6 +516,7 @@ def run_scripted_episode(
     *,
     negative_evidence_enabled: bool = True,
 ) -> dict[str, Any]:
+    """Exercise the replan loop while keeping scripted evidence causally late."""
     belief = normalize(config["initial_belief"])
     steps = []
     observation_index = 0
@@ -530,11 +542,13 @@ def run_scripted_episode(
             steps.append(step)
             break
         if observation_index >= len(episode["observations"]):
+            # A missing result is a failed episode, not evidence for any state.
             status = "failed_missing_scripted_observation"
             steps.append(step)
             break
         scripted = episode["observations"][observation_index]
         if selected != scripted["expected_action"]:
+            # Stop before consuming an outcome that belongs to another action.
             status = "failed_unexpected_planner_action"
             step["expected_action"] = scripted["expected_action"]
             steps.append(step)
