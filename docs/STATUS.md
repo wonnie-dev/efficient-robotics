@@ -3411,3 +3411,13 @@
   local environment paths are supplied through environment variables.
 - Model weights, caches, experiment outputs, and generated Isaac import
   payloads remain excluded from Git. The complete test suite passes `250/250`.
+
+## 2026-08-08 — Curate the repository landing page for later sharing
+
+- Confirmed that the current GitHub repository is a review staging area for a
+  separate lab-facing repository.
+- Removed the server-specific GPU index and local-path examples from the
+  README and share-facing setup documents.
+- Removed transient development status, calibration-only results, and
+  incomplete quick commands from the README. No implementation or experiment
+  behavior changed in this documentation-only update.

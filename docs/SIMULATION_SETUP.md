@@ -13,29 +13,9 @@ The imported UR10e and RG6 assets are under `assets/robots/`. Scene geometry and
 
 ## Environment
 
-Use an existing Isaac Sim virtual environment. Do not install Qwen or GroundingDINO packages into it.
-
-```bash
-export EFFICIENT_ROBOTICS_ISAACSIM_VENV=/path/to/isaacsim_venv
-export PHYSICAL_GPU=0
-```
-
-The launcher sets:
-
-```text
-CUDA_VISIBLE_DEVICES=<physical GPU>
-renderer active_gpu=<physical GPU>
-physics CUDA device=0
-multi-GPU=false
-```
-
-Vulkan device selection can behave differently on a shared bare-metal host. Check `nvidia-smi pmon` after launch. Use a device-isolated container when strict graphics-device isolation is required.
-
-## Run one episode
-
-```bash
-PHYSICAL_GPU=0 bash scripts/run_simulation_episode.sh 0
-```
+Use an existing Isaac Sim virtual environment. Do not install Qwen or
+GroundingDINO packages into it. Model paths and compute-device assignments are
+deployment-specific and must not be hard-coded in the repository.
 
 The episode writes RGB, metric depth, camera metadata, object records, action requests, belief updates, physics diagnostics, and a summary result under `outputs/`. Generated outputs are ignored by Git.
 
@@ -53,7 +33,7 @@ Each run must record:
 - seed and scene variant;
 - effective config files;
 - Isaac Sim and model versions;
-- physical GPU index and visible CUDA devices;
+- GPU model and runtime device visibility;
 - command line and runtime;
 - observation, action, belief, and physics result paths;
 - failure stage and reason.

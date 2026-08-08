@@ -1962,3 +1962,14 @@ Statements in older entries that call the robot stack provisional, pending confi
 - Decision: do not require ROS 2 inside the research method. Expose a stable
   RGB-D/state input and semantic-action/result boundary so the lab can provide
   a ROS 2, RTDE, or other hardware adapter.
+
+## 2026-08-08 — Keep the share-facing repository site-neutral
+
+- Decision: treat `wonnie-dev/efficient-robotics` as the review staging area
+  for a separate lab-facing repository.
+- Decision: do not place server-specific GPU indices, absolute local paths,
+  transient development status, or calibration-only result tables on the
+  repository landing page.
+- Decision: add a public quick start only after its command and dependencies
+  work from a clean, site-independent setup. Keep necessary technical detail
+  in focused setup and protocol documents rather than the README.

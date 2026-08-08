@@ -48,23 +48,11 @@ pip install -r requirements/perception-grounding-pilot.txt
 
 Install the official Grounded-SAM-2 source at the pinned commit into the grounding environment. Record local checkpoint hashes in each paper run because weights are stored outside Git.
 
-## Local paths
-
-```bash
-export EFFICIENT_ROBOTICS_VLM_VENV=/path/to/efficient-robotics-vlm
-export EFFICIENT_ROBOTICS_QWEN_MODEL=/path/to/Qwen3-VL-8B-Instruct
-export PHYSICAL_GPU=0
-```
-
-Model weights and Hugging Face caches are local files and must not be committed.
-
 ## Inference
 
-```bash
-PHYSICAL_GPU=0 bash scripts/run_perception_demo.sh path/to/input.json
-```
-
-Qwen runs in BF16 with one model instance, batch size one, and no distributed runtime. A selected physical GPU appears as `cuda:0` inside the process.
+Model paths, caches, and compute-device assignments are deployment-specific and
+must not be hard-coded or committed. Qwen runs in BF16 with one model instance,
+batch size one, and no distributed runtime.
 
 On an RTX A6000, Qwen scoring has used approximately `16.7-17.2 GiB` of peak allocated memory and roughly `10-18 s` per observation after model loading. Grounding and segmentation add separate runtime and memory use because the models run sequentially.
 
