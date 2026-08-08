@@ -43,7 +43,10 @@ from run_single_gpu_pilot import configured_physical_gpu
 
 
 PERCEPTION_PYTHON = Path(
-    "/data/wonheekoh/venvs/efficient-robotics-perception/bin/python"
+    os.environ.get(
+        "EFFICIENT_ROBOTICS_PERCEPTION_PYTHON",
+        ROOT / ".venv-perception" / "bin" / "python",
+    )
 )
 MODEL_CONFIG_SOURCE = (
     ROOT

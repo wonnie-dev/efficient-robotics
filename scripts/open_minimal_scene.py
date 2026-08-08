@@ -258,7 +258,7 @@ parser.add_argument(
     "--physics-gpu",
     type=int,
     default=0,
-    help="CUDA-visible GPU index used by PhysX; GPU 5 is cuda:0 when masked.",
+    help="CUDA-visible GPU index used by PhysX; normally cuda:0 after masking.",
 )
 parser.add_argument(
     "--capture-video",

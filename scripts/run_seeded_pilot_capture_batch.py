@@ -1,4 +1,4 @@
-"""Capture relation-preserving benchmark seeds sequentially on physical GPU 5."""
+"""Capture relation-preserving benchmark seeds on one configured GPU."""
 
 from __future__ import annotations
 
@@ -11,7 +11,12 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ISAAC_PYTHON = Path("/data/wonheekoh/isaacsim_venv/bin/python")
+ISAAC_PYTHON = Path(
+    os.environ.get(
+        "EFFICIENT_ROBOTICS_ISAAC_PYTHON",
+        ROOT / ".venv-isaac" / "bin" / "python",
+    )
+)
 VIEWS = ("left", "center", "right", "close_high")
 
 
@@ -90,7 +95,7 @@ def main() -> None:
                 **os.environ,
                 "CUDA_VISIBLE_DEVICES": os.environ.get("PHYSICAL_GPU", "5"),
                 "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
-                "NVIDIA_VISIBLE_DEVICES": "5",
+                "NVIDIA_VISIBLE_DEVICES": expected,
             },
         )
         stdout_path = log_root / f"{episode_id}.stdout.log"

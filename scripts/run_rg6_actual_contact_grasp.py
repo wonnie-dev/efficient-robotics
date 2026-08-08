@@ -30,22 +30,27 @@ IMPORT_RESULT = (
 )
 
 
-def require_gpu5() -> None:
-    if os.environ.get("CUDA_VISIBLE_DEVICES") != "5":
-        raise RuntimeError("CUDA_VISIBLE_DEVICES must be exactly 5")
+def configured_gpu() -> int:
+    value = (
+        os.environ.get("PHYSICAL_GPU")
+        or os.environ.get("CUDA_VISIBLE_DEVICES")
+        or "0"
+    )
+    if not value.isdigit():
+        raise RuntimeError("Configure exactly one integer GPU index")
+    return int(value)
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--headless", action="store_true")
-parser.add_argument("--renderer-gpu", type=int, default=5)
+parser.add_argument("--renderer-gpu", type=int, default=configured_gpu())
 parser.add_argument("--physics-gpu", type=int, default=0)
 parser.add_argument("--seed", type=int, default=0)
 parser.add_argument("--output-root", type=Path)
 parser.add_argument("--no-video", action="store_true")
 args = parser.parse_args()
-require_gpu5()
-if args.renderer_gpu != 5 or args.physics_gpu != 0:
-    raise ValueError("Required mapping is renderer physical GPU 5, physics cuda:0")
+if args.renderer_gpu != configured_gpu() or args.physics_gpu != 0:
+    raise ValueError("Renderer must use the configured GPU and physics must use cuda:0")
 if args.seed < 0:
     raise ValueError("seed must be non-negative")
 
@@ -63,7 +68,7 @@ if not RG6_ASSET.is_file():
 simulation_app = SimulationApp(
     {
         "headless": args.headless,
-        "active_gpu": 5,
+        "active_gpu": args.renderer_gpu,
         "physics_gpu": 0,
         "multi_gpu": False,
         "max_gpu_count": 1,

@@ -17,7 +17,7 @@ from qwen3_vl_logits import (
     local_hf_revision,
     permutation_debiased_scores,
     relation_question,
-    require_gpu5_only,
+    require_single_gpu_only,
 )
 
 
@@ -40,7 +40,7 @@ def main() -> None:
     parser.add_argument("--max-pixels", type=int, default=512 * 28 * 28)
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
-    require_gpu5_only()
+    require_single_gpu_only()
 
     import torch
     from transformers import AutoProcessor, Qwen3VLForConditionalGeneration

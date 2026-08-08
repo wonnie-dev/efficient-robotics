@@ -60,27 +60,27 @@
   "models": {
     "qwen": {
       "repository": "Qwen/Qwen3-VL-8B-Instruct",
-      "path": "/data/wonheekoh/models/Qwen3-VL-8B-Instruct",
+      "path": "models/Qwen3-VL-8B-Instruct",
       "dtype": "bfloat16",
       "max_pixels": 401408
     },
     "grounding_dino": {
       "repository": "IDEA-Research/grounding-dino-base",
       "revision": "12bdfa3120f3e7ec7b434d90674b3396eccf88eb",
-      "path": "/data/wonheekoh/models/grounding-dino-base",
+      "path": "models/grounding-dino-base",
       "box_threshold": 0.25,
       "text_threshold": 0.2
     },
     "sam2": {
       "repository": "facebook/sam2.1-hiera-large",
       "revision": "665f8e2ad61cf5f53d65644ff27c8ee525124610",
-      "path": "/data/wonheekoh/models/sam2.1-hiera-large/sam2.1_hiera_large.pt",
+      "path": "models/sam2.1-hiera-large/sam2.1_hiera_large.pt",
       "model_config": "configs/sam2.1/sam2.1_hiera_l.yaml"
     },
     "sam3": {
       "repository": "facebook/sam3",
       "revision": "3c879f39826c281e95690f02c7821c4de09afae7",
-      "path": "/data/wonheekoh/models/sam3/sam3.pt",
+      "path": "models/sam3/sam3.pt",
       "confidence_threshold": 0.25,
       "access_status": "checkpoint_gated_access_not_yet_granted"
     }

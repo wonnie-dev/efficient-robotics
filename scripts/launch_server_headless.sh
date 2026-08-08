@@ -2,7 +2,7 @@
 set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-isaacsim_venv="${EFFICIENT_ROBOTICS_ISAACSIM_VENV:-/data/wonheekoh/isaacsim_venv}"
+isaacsim_venv="${EFFICIENT_ROBOTICS_ISAACSIM_VENV:-${project_root}/.venv-isaac}"
 isaac_python="${isaacsim_venv}/bin/python"
 
 if [[ ! -x "${isaac_python}" ]]; then

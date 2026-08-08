@@ -1,93 +1,59 @@
 # Benchmark Environment
 
-## Purpose
+## Scenario families
 
-`open_container_benchmark.usda` is the paper-facing visual and scenario
-prototype. The original minimal scene remains the deterministic debugging
-environment.
+The simulator contains two task families for language-guided retrieval under
+partial observability:
 
-The benchmark scene is designed around the research question rather than
-decorative realism: a center observation should leave the red target partially
-occluded, while a right-side active observation should reveal more of it.
+1. **Open-container active view:** similar target candidates are placed inside,
+   outside, near, or behind an open basket. The initial view is intentionally
+   ambiguous and a wrist-camera action can reveal additional evidence.
+2. **Covered-container search:** a removable cover hides either the target or
+   an empty container. Cover removal produces a new observation, belief update,
+   and another planning step before retrieval.
 
-## Scene inventory
+## Robot and scene
 
-- UR10e, provisional OnRobot RG6, and wrist-mounted Zivid 2 camera
-- laboratory floor and walls
-- workbench, apron, legs, and dark work mat
-- blue-green open container with a defined rim
-- red cube target inside the container
-- orange cylindrical occluder in front of the target
-- yellow cylindrical distractor inside the container
-- blue cube and green sphere outside the container
-- purple object near the container boundary
-- red cylindrical target distractor behind the container
-- background storage box and spare can
+The environment contains a UR10e, OnRobot RG6, wrist-mounted RGB-D camera,
+table, basket or container, target mug, visually similar distractors, and
+controlled occluders. The current scanned-basket asset is imported from the
+locally installed LIBERO assets; its source and license are recorded in run
+metadata.
 
-## Profiles and commands
+## Observations
 
-Minimal debugging scene:
+The planner can select reachable semantic wrist views:
 
-```powershell
-.\scripts\launch_isaac_sim.ps1 -IsaacSimRoot D:\isaac-sim -SceneProfile minimal
-```
+- `center`: initial observation;
+- `close_high`: closer view of the container interior;
+- `right`: lateral view for rim and object occlusion.
 
-Benchmark visual prototype:
+An external overview camera is used only for diagnostics and videos. It is not
+available to the policy.
 
-```powershell
-.\scripts\launch_isaac_sim.ps1 -IsaacSimRoot D:\isaac-sim -SceneProfile benchmark
-```
+Each observation records RGB, metric depth, camera intrinsics and pose,
+anonymous instance records, and timestamps. Simulator labels are written to a
+separate evaluation record and are not provided to the VLM or planner.
 
-Benchmark captures are written separately under
-`outputs/benchmark_observations/{left,center,right}`.
+## Scene acceptance checks
 
-## Verified visual behavior
+Seeded scenes are accepted only when they satisfy the configured checks for:
 
-- Center: the orange cylinder heavily occludes the red target.
-- Right: more of the red target becomes visible.
-- Left: the target remains small and partially hidden.
-- Inside, outside-near, near-boundary, behind-container, and occluding objects
-  are visually represented in one controlled scene.
+- stable support on the table or inside the container;
+- no initial object-container interpenetration;
+- collision clearance for the robot, camera, cover, and gripper;
+- the intended visibility and occlusion pattern;
+- consistent world and camera-relative relation labels.
 
-## Provisional uncertainty and active-view interface
+Rejected scenes retain a failure reason and are not counted as evaluation
+episodes.
 
-Each left/center/right capture now produces `uncertainty_scene_graph_stub.json`.
-All eight task entities receive existence and task-conditioned target beliefs,
-and configured spatial edges receive relation-versus-unknown beliefs. The
-one-step controller record is written to
-`outputs/benchmark_active_view_controller/decision.json`; its selected motion
-request is written separately as `action_request.json`.
+## Physics
 
-These values exercise the full Scene Graph-to-controller interface only. They
-are deterministic, uncalibrated, ground-truth-derived stubs and must later be
-replaced by VLM/grounding outputs, calibration, an online observation model,
-and the approved task-risk-aware MPC formulation.
+Cover removal and target retrieval use articulated UR10e motion and bilateral
+RG6 contact. Evaluation does not attach objects to the gripper or copy object
+poses. A valid physical action must pass lift, contact, force, penetration,
+slip, joint-state, tracking, and unexpected-collision checks.
 
-## Current limitations
-
-- This is a visual/scenario prototype, not a finalized evaluation environment.
-- Native Isaac Sim instance segmentation still crashes in the current runtime.
-- A benchmark-specific simulator fallback now renders a temporary emissive
-  unique-color ID pass with all non-task geometry black, restores the visible
-  materials, and converts the pass to eight instance IDs.
-- The ID pass and masks were visually verified, but this remains a custom
-  simulator-only fallback rather than native RTX instance ground truth.
-- A deterministic benchmark Scene Graph includes all eight task entities and
-  configured relations. The uncertainty-aware graph still needs to be expanded.
-- Benchmark Active View execution remains disabled until the expanded
-  uncertainty graph consumes these instances.
-- Object geometry uses simulator primitives rather than finalized lab props.
-- Controlled randomization, physics properties, grasps, and real-lab dimension
-  matching remain pending.
-
-## Acceptance criteria before final experiments
-
-1. Replace or cross-check the custom ID pass with stable native instance IDs.
-2. Expand the uncertainty-aware graph to contain all target candidates,
-   distractors, occluders, and their task-relevant relation distributions.
-3. Center-to-selected-view execution uses only causally available observations.
-4. Object positions, lighting, clutter, and occlusion are generated from saved
-   seeded scenario configurations.
-5. Collision geometry includes the confirmed gripper and camera assembly.
-6. The scene dimensions and robot stack are reconciled with Professor Park's
-   physical setup.
+Mass, friction, fingertip, camera, and object geometry remain configurable so
+they can be replaced with measured hardware values for real-robot transfer.

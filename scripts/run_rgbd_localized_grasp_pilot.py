@@ -16,7 +16,12 @@ from run_single_gpu_pilot import require_single_gpu_policy
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ISAAC_PYTHON = Path("/data/wonheekoh/isaacsim_venv/bin/python")
+ISAAC_PYTHON = Path(
+    os.environ.get(
+        "EFFICIENT_ROBOTICS_ISAAC_PYTHON",
+        ROOT / ".venv-isaac" / "bin" / "python",
+    )
+)
 OUTPUT_ROOT = ROOT / "outputs" / "live_pipeline" / "rgbd_localized_grasp"
 
 
@@ -39,6 +44,7 @@ def write_json(path: Path, payload: dict) -> None:
 
 
 def run_logged(command: list[str], stdout_path: Path, stderr_path: Path) -> None:
+    physical_gpu = os.environ.get("PHYSICAL_GPU", "0")
     with stdout_path.open("w", encoding="utf-8") as stdout_stream, (
         stderr_path.open("w", encoding="utf-8")
     ) as stderr_stream:
@@ -47,9 +53,9 @@ def run_logged(command: list[str], stdout_path: Path, stderr_path: Path) -> None
             cwd=ROOT,
             env={
                 **os.environ,
-                "CUDA_VISIBLE_DEVICES": "5",
+                "CUDA_VISIBLE_DEVICES": physical_gpu,
                 "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
-                "NVIDIA_VISIBLE_DEVICES": "5",
+                "NVIDIA_VISIBLE_DEVICES": physical_gpu,
             },
             stdout=stdout_stream,
             stderr=stderr_stream,

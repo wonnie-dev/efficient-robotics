@@ -18,7 +18,12 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MODEL = Path("/data/wonheekoh/models/Qwen3-VL-8B-Instruct")
+DEFAULT_MODEL = Path(
+    os.environ.get(
+        "EFFICIENT_ROBOTICS_QWEN_MODEL",
+        ROOT / "models" / "Qwen3-VL-8B-Instruct",
+    )
+)
 MODEL_REPOSITORY = "Qwen/Qwen3-VL-8B-Instruct"
 PROMPT_VERSION = "qwen3-vl-joint-candidate-v6-rgb-box-crop-debiased"
 CHOICE_LETTERS = tuple("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -40,16 +45,21 @@ def parse_args() -> argparse.Namespace:
 
 
 def configured_physical_gpu() -> int:
-    value = os.environ.get("PHYSICAL_GPU", "5")
+    value = os.environ.get("PHYSICAL_GPU")
+    if value is None:
+        visible = os.environ.get("CUDA_VISIBLE_DEVICES")
+        value = visible if visible and "," not in visible else "0"
     if not value.isdigit():
         raise RuntimeError(f"PHYSICAL_GPU must be one integer index, got {value!r}")
     return int(value)
 
 
-def require_gpu5_only() -> None:
+def require_single_gpu_only() -> None:
     expected = str(configured_physical_gpu())
     visible = os.environ.get("CUDA_VISIBLE_DEVICES")
-    if visible != expected:
+    if visible is not None and ("," in visible or not visible.isdigit()):
+        raise RuntimeError("Exactly one integer CUDA device index may be visible.")
+    if os.environ.get("PHYSICAL_GPU") is not None and visible != expected:
         raise RuntimeError(
             f"This adapter requires CUDA_VISIBLE_DEVICES={expected}; "
             f"received {visible!r} for the configured single physical GPU."
@@ -477,7 +487,7 @@ def local_hf_revision(model_path: Path) -> str:
 
 
 def run_inference(args: argparse.Namespace) -> tuple[dict, dict]:
-    require_gpu5_only()
+    require_single_gpu_only()
 
     import torch
     from transformers import AutoProcessor, Qwen3VLForConditionalGeneration

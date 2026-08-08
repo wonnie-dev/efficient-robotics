@@ -2,7 +2,7 @@
   "schema_version": "qwen-multiview-postaction-ablation-config-v1",
   "experiment_id": "qwen_multiview_postaction_seed165_184_gpu5",
   "physical_gpu": 5,
-  "model_path": "/data/wonheekoh/models/Qwen3-VL-8B-Instruct",
+  "model_path": "models/Qwen3-VL-8B-Instruct",
   "max_pixels_per_image": 401408,
   "input_root": "outputs/calibration_pilot/reference_occlusion_seed165_184_gpu5/perception/grounded_sam2_qwen_inputs",
   "single_view_result_root": "outputs/calibration_pilot/reference_occlusion_seed165_184_gpu5/perception/grounded_sam2_qwen_rankings",

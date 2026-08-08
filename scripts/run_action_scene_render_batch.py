@@ -14,7 +14,12 @@ from scanned_basket_scene import ACTION_DIFFERENTIATING_SCENE_VARIANTS
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ISAAC_PYTHON = Path("/data/wonheekoh/isaacsim_venv/bin/python")
+ISAAC_PYTHON = Path(
+    os.environ.get(
+        "EFFICIENT_ROBOTICS_ISAAC_PYTHON",
+        ROOT / ".venv-isaac" / "bin" / "python",
+    )
+)
 DEFAULT_OUTPUT_ROOT = (
     ROOT / "outputs" / "live_pipeline" / "action_differentiating_scene_pilot"
 )

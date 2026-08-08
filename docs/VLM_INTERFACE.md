@@ -1,109 +1,81 @@
-# VLM Interface and Dataset Contract
+# VLM Interface
 
 ## Purpose
 
-This contract lets independent VLM implementations produce interchangeable
-raw logits for the same Isaac Sim samples. The user's model and Hansol's model
-must consume the same input files and emit the same output structure.
+The interface allows different pretrained VLMs to score the same anonymous
+object candidates and relation choices without changing the Scene Graph or
+planner code.
 
 ## Leakage boundary
 
-Model inputs use anonymous candidate IDs such as `object_001`. Semantic
-simulator names such as `target_red`, `rear_red_candidate`, and
-`occluder_orange` are forbidden in inference inputs.
+Inference inputs use anonymous candidate IDs such as `object_001`. Simulator
+names that reveal semantic identity are excluded. Ground truth is stored in a
+separate file and is available only to calibration and evaluation code.
 
-Ground truth is stored in a separate `ground_truth.json`. It must be used only
-by training, calibration, and evaluation code and must never be passed to the
-model inference prompt or planner.
-
-The natural-language instruction is not leakage. Color and spatial constraints
-in the instruction are the task specification the VLM is expected to ground.
+The language instruction is part of the task definition and is provided to the
+model.
 
 ## Input
 
 Each `input.json` contains:
 
-- the full RGB image;
+- an RGB observation;
 - the natural-language instruction;
-- anonymous candidate IDs;
-- candidate bounding boxes;
-- masked RGB crop paths;
-- binary mask paths;
-- relation queries and their ordered categorical label spaces.
+- anonymous candidate IDs and bounding boxes;
+- candidate crops and binary masks;
+- reference entities;
+- relation queries with ordered categorical label spaces.
 
-The input schema is `configs/vlm/vlm_input.schema.json`.
+The schema is `configs/vlm/vlm_input.schema.json`.
 
 ## Output
 
-Each model must output:
+Each implementation returns:
 
-- one raw target logit for every candidate, in the exact input order;
-- one raw relation logit for every label of every relation query;
-- model name and checkpoint;
-- prompt version, weight hash, and device.
+- one raw target-choice score for every candidate in input order;
+- one raw score for every label in each relation query;
+- model repository and checkpoint revision;
+- prompt version and input hashes;
+- runtime, device, and parse status.
 
-Do not output only softmax probabilities. Temperature scaling requires
-pre-softmax logits. The output schema is
-`configs/vlm/vlm_output.schema.json`.
+Pre-softmax logits are preferred because calibration requires a stable score
+space. Generated statements such as “80% confident” are not treated as
+probabilities. The schema is `configs/vlm/vlm_output.schema.json`.
 
 ## Ground truth
 
-The separate file contains the correct anonymous target candidate and one
-categorical label per relation query. Its schema is
+The separate ground-truth record contains the correct anonymous target and one
+categorical label per relation query. It is never included in the model prompt
+or root-action selection. Its schema is
 `configs/vlm/vlm_ground_truth.schema.json`.
 
-## Export and contract test
+## Contract validation
 
-```powershell
-D:\isaac-sim\python.bat scripts\export_vlm_dataset.py
-D:\isaac-sim\python.bat scripts\mock_vlm_logits.py `
-  outputs\vlm_dataset\samples\benchmark_seed000_center\input.json
-D:\isaac-sim\python.bat scripts\validate_vlm_contract.py `
-  outputs\vlm_dataset\samples\benchmark_seed000_center\input.json `
-  outputs\vlm_dataset\samples\benchmark_seed000_center\mock_output.json
-```
-
-Generated data is under `outputs/vlm_dataset/` and is intentionally ignored by
-Git. The current three left/center/right samples are development examples only.
-They are not a valid train/calibration/test dataset because they come from one
-fixed scene and seed.
-
-## Handoff requirement
-
-Any VLM implementation is compatible when this command succeeds:
-
-```powershell
-D:\isaac-sim\python.bat scripts\validate_vlm_contract.py INPUT_JSON OUTPUT_JSON
-```
-
-The deterministic mock adapter tests file compatibility only. It has no
-perception ability and must not be used as a baseline result.
-
-## Qwen3-VL implementation
-
-The first pretrained implementation uses
-`Qwen/Qwen3-VL-8B-Instruct`. Run it through the GPU-5-only launcher:
+Export a sample, produce an output with either a real adapter or the mock
+adapter, and validate it:
 
 ```bash
-scripts/run_qwen3_vl_gpu5.sh INPUT_JSON
+python scripts/export_vlm_dataset.py
+python scripts/mock_vlm_logits.py \
+  outputs/vlm_dataset/samples/example/input.json
+python scripts/validate_vlm_contract.py \
+  outputs/vlm_dataset/samples/example/input.json \
+  outputs/vlm_dataset/samples/example/mock_output.json
 ```
 
-It produces cyclic-letter permutation-averaged, pre-softmax next-token logits
-for each target candidate and relation label. These are uncalibrated raw
-scores. See `docs/QWEN3_VL_INTEGRATION.md` for the exact checkpoint revision,
-environment, prompt version, GPU boundary, measured resource use, and current
-development-only result.
+The mock adapter checks file compatibility only and is not a perception
+baseline.
 
-## Data strategy
+## Qwen3-VL adapter
 
-The project will not manually build and label a large VLM training dataset.
-Model training or adaptation should start from pretrained weights and suitable
-existing public datasets.
+The reference implementation uses `Qwen/Qwen3-VL-8B-Instruct` and
+permutation-averaged forced-choice logits. See
+[Qwen3-VL Integration](QWEN3_VL_INTEGRATION.md) for the scoring procedure and
+checkpoint revision.
 
-Project-specific data is still required for calibration and evaluation because
-the robot, camera, object candidates, relations, and active-view actions differ
-from public datasets. These samples will be generated and labeled
-automatically by Isaac Sim rather than manually annotated. They must be divided
-by scene seed and episode into disjoint train/adaptation (if needed),
-calibration, validation, and test groups. Different views of the same episode
-must never be split across calibration and test.
+## Data splits
+
+Model weights remain frozen. Project-specific simulator episodes are used for
+calibration and evaluation, with all views from one episode kept in the same
+split. Ground-truth labels are generated from simulator state; a manually
+annotated VLM training dataset is not required.

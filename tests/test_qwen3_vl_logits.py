@@ -14,7 +14,7 @@ from qwen3_vl_logits import (  # noqa: E402
     joint_candidate_question,
     letter_mapping,
     relation_question,
-    require_gpu5_only,
+    require_single_gpu_only,
     target_question,
 )
 
@@ -115,35 +115,34 @@ class Qwen3VlLogitTests(unittest.TestCase):
             },
         )
 
-    def test_gpu_guard_uses_default_physical_gpu5_mask(self) -> None:
+    def test_gpu_guard_accepts_one_visible_gpu(self) -> None:
         with mock.patch.dict(
             os.environ,
             {"CUDA_VISIBLE_DEVICES": "5"},
             clear=True,
         ):
-            require_gpu5_only()
+            require_single_gpu_only()
         with mock.patch.dict(
             os.environ,
             {"CUDA_VISIBLE_DEVICES": "0"},
             clear=True,
         ):
-            with self.assertRaises(RuntimeError):
-                require_gpu5_only()
+            require_single_gpu_only()
 
-    def test_gpu_guard_accepts_explicit_physical_gpu4_mask(self) -> None:
+    def test_gpu_guard_rejects_physical_visible_mismatch(self) -> None:
         with mock.patch.dict(
             os.environ,
             {"PHYSICAL_GPU": "4", "CUDA_VISIBLE_DEVICES": "4"},
             clear=True,
         ):
-            require_gpu5_only()
+            require_single_gpu_only()
         with mock.patch.dict(
             os.environ,
             {"PHYSICAL_GPU": "4", "CUDA_VISIBLE_DEVICES": "5"},
             clear=True,
         ):
             with self.assertRaises(RuntimeError):
-                require_gpu5_only()
+                require_single_gpu_only()
 
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ from qwen3_vl_logits import (
     local_hf_revision,
     permutation_debiased_scores,
     relation_question,
-    require_gpu5_only,
+    require_single_gpu_only,
     resolve_asset_path,
 )
 
@@ -324,11 +324,9 @@ def main() -> None:
     args = parse_args()
     config_path = resolve_path(args.config)
     config = json.loads(config_path.read_text(encoding="utf-8"))
-    if config["physical_gpu"] != 5:
-        raise RuntimeError("This approved experiment is fixed to physical GPU 5.")
     if config["reserved_test_seeds_used"]:
         raise RuntimeError("Reserved test seeds are forbidden in this diagnostic.")
-    require_gpu5_only()
+    require_single_gpu_only()
 
     import torch
     from transformers import AutoProcessor, Qwen3VLForConditionalGeneration

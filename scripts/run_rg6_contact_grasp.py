@@ -1,4 +1,4 @@
-"""Validate an RG6-sized bilateral contact grasp and lift on physical GPU 5.
+"""Validate an RG6-sized bilateral contact grasp and lift on one GPU.
 
 The imported RG6 visual asset is preserved, while its currently unstable
 Isaac Sim 6 finger articulation is disabled. Two kinematic collision pads,
@@ -22,7 +22,11 @@ OUTPUT_BASE = ROOT / "outputs" / "rg6_physics"
 
 
 def configured_gpu() -> int:
-    value = os.environ.get("PHYSICAL_GPU", "5")
+    value = (
+        os.environ.get("PHYSICAL_GPU")
+        or os.environ.get("CUDA_VISIBLE_DEVICES")
+        or "0"
+    )
     if not value.isdigit():
         raise RuntimeError("PHYSICAL_GPU must be one integer index")
     return int(value)
@@ -30,7 +34,7 @@ def configured_gpu() -> int:
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--headless", action="store_true")
-parser.add_argument("--renderer-gpu", type=int, default=5)
+parser.add_argument("--renderer-gpu", type=int, default=configured_gpu())
 parser.add_argument("--physics-gpu", type=int, default=0)
 parser.add_argument("--seed", type=int, default=0)
 parser.add_argument("--output-root", type=Path)

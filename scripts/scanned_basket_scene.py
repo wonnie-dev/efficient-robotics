@@ -8,11 +8,16 @@ experiment metadata so pilot outputs remain attributable and reproducible.
 from __future__ import annotations
 
 import math
+import os
 from pathlib import Path
 
 
+ROOT = Path(__file__).resolve().parents[1]
 LIBERO_ROOT = Path(
-    "/data/wonheekoh/OpenVLA/external/LIBERO"
+    os.environ.get(
+        "EFFICIENT_ROBOTICS_LIBERO_ROOT",
+        ROOT / "external" / "LIBERO",
+    )
 )
 BASKET_ASSET_DIR = (
     LIBERO_ROOT

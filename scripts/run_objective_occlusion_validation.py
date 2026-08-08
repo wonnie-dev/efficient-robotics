@@ -1,4 +1,4 @@
-"""Capture a small GPU-5-only validation batch for objective occlusion labels."""
+"""Capture a single-GPU validation batch for objective occlusion labels."""
 
 from __future__ import annotations
 
@@ -14,7 +14,12 @@ from run_live_single_gpu_pipeline import ROOT, write_json_atomic
 from run_single_gpu_pilot import configured_physical_gpu, require_single_gpu_policy
 
 
-ISAAC_PYTHON = Path("/data/wonheekoh/isaacsim_venv/bin/python")
+ISAAC_PYTHON = Path(
+    os.environ.get(
+        "EFFICIENT_ROBOTICS_ISAAC_PYTHON",
+        ROOT / ".venv-isaac" / "bin" / "python",
+    )
+)
 VALIDATION_VARIANT_PATTERN = (
     "inside_clear",
     "outside",
@@ -58,17 +63,14 @@ def validation_scenes(
 
 def single_gpu_environment() -> dict[str, str]:
     physical_gpu = configured_physical_gpu()
-    if physical_gpu != 5:
-        raise RuntimeError(
-            f"Objective occlusion validation requires physical GPU 5, got {physical_gpu}"
-        )
+    gpu_text = str(physical_gpu)
     environment = dict(os.environ)
     environment.update(
         {
-            "CUDA_VISIBLE_DEVICES": "5",
+            "CUDA_VISIBLE_DEVICES": gpu_text,
             "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
-            "NVIDIA_VISIBLE_DEVICES": "5",
-            "PHYSICAL_GPU": "5",
+            "NVIDIA_VISIBLE_DEVICES": gpu_text,
+            "PHYSICAL_GPU": gpu_text,
         }
     )
     for name in (
@@ -89,7 +91,8 @@ def capture_complete(capture_root: Path) -> bool:
     result = json.loads(result_path.read_text(encoding="utf-8"))
     return (
         result.get("status") == "completed"
-        and result.get("gpu_policy", {}).get("physical_gpu") == 5
+        and result.get("gpu_policy", {}).get("physical_gpu")
+        == configured_physical_gpu()
         and all(
             (
                 capture_root
@@ -293,7 +296,7 @@ def main() -> None:
             / "live_pipeline"
             / (
                 "objective_reference_occlusion_validation_"
-                f"seed{scenes[0][0]}_{scenes[-1][0]}_gpu5"
+                f"seed{scenes[0][0]}_{scenes[-1][0]}"
             )
         ).resolve()
     )

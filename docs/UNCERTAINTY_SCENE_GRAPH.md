@@ -1,8 +1,11 @@
-# Uncertainty-Aware Scene Graph Draft
+# Uncertainty-Aware Scene Graph
 
 ## Status
 
-This is a provisional interface draft pending Professor Shinkyu Park's Overleaf method definition. It defines where beliefs and uncertainty records are stored, but it intentionally does not fix the final uncertainty equation, calibration method, task-failure-risk equation, or MPC objective.
+The schema defines how task-conditioned object and relation beliefs are stored
+and exchanged between perception, calibration, and planning modules. Planner
+costs and calibrated likelihood parameters are supplied by experiment
+configuration rather than embedded in the graph format.
 
 ## Purpose
 
@@ -36,7 +39,7 @@ The distribution must remain available instead of immediately collapsing to one 
 
 ## Graph-level belief
 
-`graph_belief` contains the most likely target and separate records for target uncertainty, relation uncertainty, and task-failure risk. Values remain `null` with `status: pending_definition` until their equations are explicitly approved.
+`graph_belief` contains the most likely target and separate records for target uncertainty, relation uncertainty, and task-failure risk. Optional values remain `null` when the producing module does not provide them.
 
 For belief-space control with coupled task factors, the optional
 `joint_task_state_distribution` stores the exact discrete planner belief

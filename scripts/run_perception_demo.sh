@@ -12,4 +12,4 @@ if [[ -z "${PHYSICAL_GPU:-}" || ! "${PHYSICAL_GPU}" =~ ^[0-9]+$ ]]; then
     exit 2
 fi
 
-exec "${project_root}/scripts/run_qwen3_vl_gpu5.sh" "$1"
+exec "${project_root}/scripts/run_qwen3_vl_single_gpu.sh" "$1"

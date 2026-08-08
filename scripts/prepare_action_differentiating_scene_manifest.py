@@ -80,7 +80,7 @@ def build_scene_manifest(config: dict[str, Any]) -> dict[str, Any]:
                 ],
                 "generator_ground_truth": ground_truth,
                 "future_capture_command": [
-                    "/data/wonheekoh/isaacsim_venv/bin/python",
+                    "python",
                     str(
                         ROOT
                         / config["future_capture"]["script"]

@@ -51,7 +51,10 @@ def parse_args() -> argparse.Namespace:
 
 
 def configured_physical_gpu() -> int:
-    value = os.environ.get("PHYSICAL_GPU", "5")
+    value = os.environ.get("PHYSICAL_GPU")
+    if value is None:
+        visible = os.environ.get("CUDA_VISIBLE_DEVICES")
+        value = visible if visible and "," not in visible else "0"
     if not value.isdigit():
         raise RuntimeError(f"PHYSICAL_GPU must be one integer index, got {value!r}")
     return int(value)
@@ -59,7 +62,10 @@ def configured_physical_gpu() -> int:
 
 def require_single_gpu_policy() -> None:
     expected = str(configured_physical_gpu())
-    if os.environ.get("CUDA_VISIBLE_DEVICES") != expected:
+    visible = os.environ.get("CUDA_VISIBLE_DEVICES")
+    if visible is not None and ("," in visible or not visible.isdigit()):
+        raise RuntimeError("Exactly one integer CUDA device index may be visible")
+    if os.environ.get("PHYSICAL_GPU") is not None and visible != expected:
         raise RuntimeError(
             f"CUDA_VISIBLE_DEVICES must be exactly {expected} for this run"
         )
@@ -212,7 +218,7 @@ def run_cache_miss(
 ) -> None:
     cache_dir.mkdir(parents=True, exist_ok=True)
     command = [
-        str(ROOT / "scripts" / "run_qwen3_vl_gpu5.sh"),
+        str(ROOT / "scripts" / "run_qwen3_vl_single_gpu.sh"),
         str(input_path),
         "--output",
         str(cache_dir / "output.json"),

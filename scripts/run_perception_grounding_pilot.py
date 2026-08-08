@@ -34,11 +34,14 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def require_gpu5_only() -> None:
-    expected = os.environ.get("PHYSICAL_GPU", "5")
+def require_single_gpu_only() -> None:
+    visible = os.environ.get("CUDA_VISIBLE_DEVICES")
+    expected = os.environ.get("PHYSICAL_GPU") or visible or "0"
     if not expected.isdigit():
         raise RuntimeError(f"PHYSICAL_GPU must be one integer index: {expected!r}")
-    if os.environ.get("CUDA_VISIBLE_DEVICES") != expected:
+    if visible is not None and ("," in visible or not visible.isdigit()):
+        raise RuntimeError("Exactly one integer CUDA device index may be visible.")
+    if os.environ.get("PHYSICAL_GPU") is not None and visible != expected:
         raise RuntimeError(
             f"CUDA_VISIBLE_DEVICES must equal physical GPU {expected}."
         )
@@ -595,7 +598,7 @@ def run_sam3_segment(
 
 def main() -> None:
     args = parse_args()
-    require_gpu5_only()
+    require_single_gpu_only()
     config = load_config(args.config.resolve())
     samples = sample_items(config, args.limit)
     stage_functions = {
@@ -613,7 +616,11 @@ def main() -> None:
         "sample_count": len(stage_result["results"]),
         "model_load_seconds": stage_result["model_load_seconds"],
         "total_runtime_seconds": time.perf_counter() - run_started,
-        "physical_gpu": int(os.environ.get("PHYSICAL_GPU", "5")),
+        "physical_gpu": int(
+            os.environ.get("PHYSICAL_GPU")
+            or os.environ.get("CUDA_VISIBLE_DEVICES")
+            or "0"
+        ),
         "logical_gpu": "cuda:0",
         "single_model_instance": True,
         "batch_size": 1,

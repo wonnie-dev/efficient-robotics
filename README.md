@@ -1,8 +1,6 @@
 # Efficient Robotics
 
-Research code for language-guided object retrieval under partial observability. The robot maintains beliefs over target identity and spatial relations, chooses a camera or manipulation action, updates the Scene Graph from the next RGB-D observation, and replans before committing to a grasp.
-
-The current paper target is ICRA 2027. The main scenario is a covered tabletop container with an uncertain target location.
+Research code for language-guided object retrieval under partial observability. The robot maintains beliefs over target identity and spatial relations, chooses a sensing or manipulation action, updates the Scene Graph from the next RGB-D observation, and replans before committing to a grasp. The benchmark uses a covered tabletop container with an uncertain target location.
 
 ## System
 
@@ -53,7 +51,6 @@ Grounding and segmentation use the pinned environment described in [Model Setup]
 - [Simulation setup](docs/SIMULATION_SETUP.md)
 - [Real-robot transfer](docs/REAL_ROBOT_TRANSFER.md)
 - [Experiment protocol](docs/EXPERIMENT_PROTOCOL.md)
-- [Current limitations](docs/CURRENT_LIMITATIONS.md)
 - [Code map](docs/CODE_MAP.md)
 - [VLM interface](docs/VLM_INTERFACE.md)
 

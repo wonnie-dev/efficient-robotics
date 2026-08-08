@@ -1,7 +1,7 @@
 """Validate lab measurements before claiming RG6 lid-transfer readiness.
 
-This module is deliberately independent of Isaac Sim so the handoff package
-and calibration records can be checked on a CPU-only machine.  It separates a
+This module is deliberately independent of Isaac Sim so the transfer package
+and calibration records can be checked on a CPU-only machine. It separates a
 valid *worksheet* from a completed, lab-measured calibration that may supply
 parameters to the simulator.
 """

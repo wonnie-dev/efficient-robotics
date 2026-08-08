@@ -2,8 +2,8 @@
 set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-vlm_venv="${EFFICIENT_ROBOTICS_VLM_VENV:-/data/wonheekoh/venvs/efficient-robotics-vlm}"
-model_path="${EFFICIENT_ROBOTICS_QWEN_MODEL:-/data/wonheekoh/models/Qwen3-VL-8B-Instruct}"
+vlm_venv="${EFFICIENT_ROBOTICS_VLM_VENV:-${project_root}/.venv-vlm}"
+model_path="${EFFICIENT_ROBOTICS_QWEN_MODEL:-${project_root}/models/Qwen3-VL-8B-Instruct}"
 vlm_python="${vlm_venv}/bin/python"
 
 if [[ ! -x "${vlm_python}" ]]; then
@@ -16,10 +16,10 @@ if [[ $# -lt 1 ]]; then
 fi
 
 export CUDA_DEVICE_ORDER=PCI_BUS_ID
-physical_gpu="${PHYSICAL_GPU:-5}"
+physical_gpu="${PHYSICAL_GPU:-${CUDA_VISIBLE_DEVICES:-0}}"
 export CUDA_VISIBLE_DEVICES="${physical_gpu}"
 export TOKENIZERS_PARALLELISM=false
-export HF_HOME=/data/wonheekoh/.cache/efficient-robotics/huggingface
+export HF_HOME="${HF_HOME:-${project_root}/.cache/huggingface}"
 export HF_HUB_DISABLE_TELEMETRY=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 

@@ -1,53 +1,36 @@
-# Qwen3-VL-8B-Instruct Integration
+# Qwen3-VL Integration
 
-## Scope
+## Model
 
-This integration connects the pretrained
-`Qwen/Qwen3-VL-8B-Instruct` checkpoint to the shared `vlm-input-v1` and
-`vlm-output-v1` contract. It is an initial perception implementation, not a
-calibrated model or a final paper result.
-
-The Isaac Sim environment remains unchanged. Model inference uses the separate
-environment:
+The language-conditioned target selector uses
+`Qwen/Qwen3-VL-8B-Instruct` with pretrained inference only. The reference
+checkpoint revision is:
 
 ```text
-/data/wonheekoh/venvs/efficient-robotics-vlm
+0c351dd01ed87e9c1b53cbc748cba10e6187ff3b
 ```
 
-The downloaded checkpoint is:
+Model weights and caches are stored outside Git. The model path is supplied at
+runtime with `--model-path` or `EFFICIENT_ROBOTICS_QWEN_MODEL`.
 
-```text
-/data/wonheekoh/models/Qwen3-VL-8B-Instruct
-Hugging Face revision: 0c351dd01ed87e9c1b53cbc748cba10e6187ff3b
-```
+## Input
 
-## GPU boundary
+The adapter consumes the shared VLM contract:
 
-Always use the launcher rather than calling the adapter directly:
+- the unmodified RGB observation;
+- an overlay with anonymous candidate IDs and bounding boxes;
+- anonymous candidate crops and masks;
+- the language instruction;
+- an ordered set of target or relation choices.
 
-```bash
-scripts/run_qwen3_vl_gpu5.sh INPUT_JSON
-```
+Simulator object names and ground-truth labels are not provided to the model.
 
-The launcher enforces:
+## Forced-choice scoring
 
-- `CUDA_VISIBLE_DEVICES=5`;
-- physical GPU 5 appears inside PyTorch as `cuda:0`;
-- exactly one CUDA device is visible;
-- no `device_map="auto"`, DataParallel, DDP, or distributed initialization;
-- BF16 inference with PyTorch SDPA.
-
-## Raw-score definition
-
-The adapter does not use generated confidence text or post-softmax
-probabilities. It maps every requested class to a single-token uppercase
-letter and reads the corresponding next-token language-model logit.
-
-Choice letters have non-semantic prior biases. To avoid treating those biases
-as class evidence, the adapter cyclically permutes the labels so every class
-occupies every letter position once, then averages its pre-softmax logits.
-This score is still uncalibrated. Temperature scaling and conformal fitting
-must use held-out, episode-separated calibration data.
+Each requested class is mapped to a single-token letter. The adapter records
+the corresponding next-token language-model logit before softmax. To reduce
+letter-position bias, it cyclically permutes the labels across the available
+letters and averages each class score across permutations.
 
 Prompt version:
 
@@ -55,69 +38,28 @@ Prompt version:
 qwen3-vl-forced-choice-v3-permutation-debiased
 ```
 
-The visual prompt contains:
+These values are raw ranking scores, not probabilities. Calibration is fitted
+only on episode-disjoint calibration data.
 
-- the unmodified full RGB scene;
-- a derived full-scene overlay of anonymous candidate IDs and input bboxes;
-- every anonymous masked candidate crop;
-- normalized bbox coordinates;
-- the instruction or ordered relation query and its exact label space.
+## Inference
 
-No `ground_truth.json` file is opened by the inference adapter.
-
-## Reproduce the development smoke test
-
-Generate benchmark observations on physical GPU 5:
+Run one model instance with a single visible CUDA device:
 
 ```bash
-CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=5 \
-  /data/wonheekoh/isaacsim_venv/bin/python \
-  scripts/open_minimal_scene.py \
-  --scene-profile benchmark \
-  --headless \
-  --renderer-gpu 5 \
-  --physics-gpu 0
+python scripts/qwen3_vl_logits.py \
+  outputs/vlm_dataset/samples/example/input.json \
+  --model-path /path/to/Qwen3-VL-8B-Instruct
 ```
 
-Export anonymous samples:
+The adapter rejects distributed initialization and more than one visible CUDA
+device. It uses BF16 inference, PyTorch SDPA, and batch size one.
 
-```bash
-/data/wonheekoh/venvs/efficient-robotics-vlm/bin/python \
-  scripts/export_vlm_dataset.py
-```
+## Output and caching
 
-Run one sample and validate the output:
+The output follows `configs/vlm/vlm_output.schema.json` and records model
+revision, prompt version, raw logits, input hashes, runtime, and peak CUDA
+memory. Cache keys include the image and mask hashes, normalized prompt,
+checkpoint revision, and inference settings so identical observations are not
+processed twice.
 
-```bash
-scripts/run_qwen3_vl_gpu5.sh \
-  outputs/vlm_dataset/samples/benchmark_seed000_right/input.json
-
-/data/wonheekoh/venvs/efficient-robotics-vlm/bin/python \
-  scripts/validate_vlm_contract.py \
-  outputs/vlm_dataset/samples/benchmark_seed000_right/input.json \
-  outputs/vlm_dataset/samples/benchmark_seed000_right/qwen3_vl_output.json
-```
-
-## Measured smoke-test result
-
-On the RTX A6000, the final permutation-debiased adapter measured:
-
-| View | Peak allocated VRAM | Scoring time | Target result | Relation result |
-| --- | ---: | ---: | --- | ---: |
-| center | 16.698 GiB | 12.808 s | `object_007` (incorrect) | 2/7 |
-| right | 16.700 GiB | 13.067 s | `object_007` (incorrect) | 3/7 |
-
-Model loading took approximately 8.3 seconds in each fresh process. On the
-right view, the correct `object_001` target score rose to within 1.0 raw-logit
-point of `object_007`, and the `object_001 inside container` relation became
-correct. These two views come from one fixed seed and are only an interface
-smoke test. They must not be reported as model accuracy, a baseline, or
-calibration evidence.
-
-## Next data step
-
-Generate a 50--100 episode pilot with episode-level split isolation and
-variation in candidate identity, object layout, viewpoint, height, distance,
-occlusion severity, and lighting. Use that pilot to audit prompts and label
-balance before producing the held-out calibration, validation, IID test, and
-viewpoint-shift test sets.
+See [VLM Interface](VLM_INTERFACE.md) for the complete data contract.

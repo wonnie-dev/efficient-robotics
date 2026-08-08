@@ -40,7 +40,7 @@ ISAAC_PYTHON = Path(
             Path(
                 os.environ.get(
                     "EFFICIENT_ROBOTICS_ISAACSIM_VENV",
-                    "/data/wonheekoh/isaacsim_venv",
+                    ROOT / ".venv-isaac",
                 )
             )
             / "bin"
