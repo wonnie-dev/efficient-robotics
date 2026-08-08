@@ -1,0 +1,18 @@
+{
+  "schema_version": "action-conditioned-observation-likelihood-config-v1",
+  "experiment_id": "reference_occlusion_seed165_184_action_conditioned_observation",
+  "calibration_root": "outputs/calibration_pilot/reference_occlusion_seed165_184_gpu5",
+  "hybrid_audit_csv": "outputs/calibration_pilot/reference_occlusion_seed165_184_gpu5/hybrid_rgbd_relation/audit_rows.csv",
+  "output_path": "outputs/calibration_pilot/reference_occlusion_seed165_184_gpu5/action_conditioned_observation_likelihood/fit.json",
+  "view_to_action": {
+    "center": "initial_observation",
+    "close_high": "viewpoint_close_high",
+    "right": "viewpoint_right"
+  },
+  "dirichlet_alpha": 1.0,
+  "minimum_cell_episode_count": 5,
+  "minimum_calibration_episode_count": 20,
+  "training_performed": false,
+  "testing_performed": false,
+  "apply_to_mpc": false
+}

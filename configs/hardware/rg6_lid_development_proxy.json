@@ -1,0 +1,128 @@
+{
+  "schema_version": "rg6-lid-transfer-calibration-v1",
+  "calibration_status": "provisional_public_spec",
+  "measurement": {
+    "lab_name": null,
+    "measured_by": null,
+    "measured_at": null,
+    "notes": "Development proxy only. RG6 public specifications are mixed with current scene geometry and simulation assumptions; none are lab measurements."
+  },
+  "sources": [
+    {
+      "field": "controller.commanded_grip_force_n",
+      "source_type": "manufacturer_datasheet_minimum",
+      "url": "https://onrobot.com/sites/default/files/documents/RG6_Datasheet_V1.9.1.pdf",
+      "note": "RG6 adjustable gripping-force range is 25-120 N; the conservative 25 N endpoint is used."
+    },
+    {
+      "field": "hardware.fingertip_model, hardware.fingertip_material",
+      "source_type": "manufacturer_standard_part_assumption",
+      "url": "https://onrobot.com/storage/datasheets/rg6.pdf",
+      "note": "Standard RG6 Fingertip Set PN 100670 uses an EPDM rubber contact area. The lab may use customized fingertips, so this remains unconfirmed."
+    },
+    {
+      "field": "hardware.arm_model",
+      "source_type": "manufacturer_specification",
+      "url": "https://www.universal-robots.com/manuals/EN/HTML/SW5_19/Content/prod-usr-man/complianceUR10e/H_g5_sections/appendix_g5/tech_spec_sheet.htm",
+      "note": "UR10e model identity only; the lab arm revision and payload configuration remain unconfirmed."
+    }
+  ],
+  "hardware": {
+    "arm_model": "Universal Robots UR10e",
+    "gripper_model": "OnRobot RG6",
+    "gripper_serial_or_asset_id": "unknown_lab_unit",
+    "fingertip_model": "RG6 standard fingertip set PN 100670 (assumed)",
+    "fingertip_material": "EPDM rubber contact area (standard-part assumption)",
+    "fingertip_geometry_confirmed": false
+  },
+  "public_specifications": {
+    "ur10e": {
+      "degrees_of_freedom": 6,
+      "reach_m": 1.3,
+      "maximum_payload_kg": 12.5,
+      "note": "Public model specification; verify the rating on the lab arm and include RG6/tool payload and center of gravity."
+    },
+    "rg6": {
+      "adjustable_gripping_force_range_n": [25.0, 120.0],
+      "datasheet_total_stroke_m": 0.16,
+      "product_page_maximum_stroke_m": 0.15,
+      "product_weight_kg": 1.0,
+      "standard_fingertip_part_number": "100670",
+      "standard_contact_material": "EPDM rubber",
+      "note": "The manufacturer datasheet and current product page disagree on 160 mm versus 150 mm stroke; verify the lab unit before real execution."
+    }
+  },
+  "lid": {
+    "mass_kg": 0.55,
+    "plate_center_local_m": [0.0, 0.0, 0.166],
+    "plate_full_extents_m": [0.354, 0.330, 0.014],
+    "handle_full_extents_m": [0.08, 0.03, 0.035],
+    "handle_center_local_m": [0.0, 0.0, 0.1905],
+    "handle_material": "generic rigid polymer proxy"
+  },
+  "controller": {
+    "commanded_grip_force_n": 25.0,
+    "closing_speed_m_s": 0.02,
+    "command_interface": "simulation RG6 master-joint position drive with torque-limit proxy"
+  },
+  "simulation_mapping": {
+    "initial_drive_torque_nm": 2.0,
+    "maximum_drive_torque_nm": 6.0,
+    "minimum_force_per_finger_n": 8.0,
+    "minimum_combined_force_n": 25.0,
+    "geometric_handle_contact_master_rad": 0.4354874250632994,
+    "geometric_handle_contact_source": "outputs/rg6_jaw_width_calibration/run001/jaw_width_calibration.json",
+    "static_friction": 1.0,
+    "dynamic_friction": 0.8,
+    "compliant_contact_stiffness_n_m": 25000.0,
+    "compliant_contact_damping_n_s_m": 80.0,
+    "mapping_source": "provisional_simulation_fit",
+    "fit_notes": "Torque and friction are provisional development settings. Compliant stiffness is derived from 12.5 N per finger divided by a provisional 0.5 mm pad deflection; damping is a conservative development value. The manipulable plate is 354 x 330 mm, leaving approximately 5 mm clearance from the collision-box outer perimeter and a 9 mm support ledge over the inner opening per side. Run030 tested a 374 x 350 mm overhang plate, but its micro-lift failure was unchanged from run029, so the unvalidated geometry change was reverted. Runs020/021/026/028/029/030 failed the 5 mm micro-lift slip gate; run027 stopped safely below the 25 N gate. Isolated jaw-width run001 measured true 30 mm handle contact at master 0.435487 rad; collision-pair presence near 0.398 rad was still a 5.53 mm surface gap and must not enable the force controller. None of these values are validated lab parameters."
+  },
+  "acceptance": {
+    "requested_micro_lift_m": 0.01,
+    "minimum_measured_lift_m": 0.007,
+    "maximum_relative_translation_m": 0.005,
+    "maximum_penetration_m": 0.003,
+    "maximum_contact_force_per_finger_n": 60.0,
+    "minimum_trial_count": 5,
+    "minimum_pass_rate": 0.8,
+    "unexpected_environment_collision_allowed": false
+  },
+  "micro_lift_trials": [],
+  "known_failure": {
+    "artifact": "outputs/live_pipeline/remove_cover_physics_smoke/seed188/run028/persistent_remove_cover/failure_diagnostics.json",
+    "phase": "persistent_contact_micro_lift",
+    "reason": "relative_translation_gate_exceeded",
+    "measured_relative_translation_m": 0.02195916837796921
+  },
+  "isolated_contact_failure": {
+    "jaw_width_artifact": "outputs/rg6_jaw_width_calibration/run001/jaw_width_calibration.json",
+    "fixture_artifact": "outputs/rg6_handle_contact_fixture/run007/result.json",
+    "phase": "bilateral_force_closure",
+    "reason": "unilateral_loaded_mimic_response",
+    "left_maximum_force_n": 0.0,
+    "right_maximum_force_n": 47.0643374681914,
+    "right_maximum_penetration_m": 0.0010290015488862991,
+    "micro_lift_executed": false
+  },
+  "isolated_contact_development_success": {
+    "artifact": "outputs/rg6_handle_contact_fixture/run011/result.json",
+    "coupling_mode": "coordinated_six_joint_drives_no_mimic",
+    "fixture_vertical_guide_used": true,
+    "provisional_aggregate_drive_effort_limit_nm": 18.0,
+    "measured_gripper_lift_m": 0.009367108345031794,
+    "measured_cover_lift_m": 0.007622063159942627,
+    "maximum_relative_translation_m": 0.0018016408262773091,
+    "maximum_force_per_finger_n": 24.871434608047423,
+    "maximum_penetration_m": 0.0005121570429764688,
+    "bilateral_contact_maintained": true,
+    "unexpected_robot_contact_free": true,
+    "transfer_ready": false,
+    "valid_for_final_evaluation": false
+  },
+  "training_performed": false,
+  "calibration_performed": false,
+  "testing_performed": false,
+  "valid_for_final_evaluation": false
+}

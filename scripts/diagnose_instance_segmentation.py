@@ -1,6 +1,7 @@
 """Minimal Isaac Sim 6.0 instance-segmentation smoke test."""
 
 import json
+import os
 from pathlib import Path
 
 from isaacsim import SimulationApp
@@ -8,7 +9,22 @@ from isaacsim import SimulationApp
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RESULT_PATH = PROJECT_ROOT / "instance_segmentation_diagnostic.json"
-app = SimulationApp({"headless": True, "renderer": "RaytracedLighting", "active_gpu": 0})
+if os.environ.get("CUDA_VISIBLE_DEVICES") != "5":
+    raise RuntimeError("CUDA_VISIBLE_DEVICES must be exactly 5")
+app = SimulationApp(
+    {
+        "headless": True,
+        "renderer": "RaytracedLighting",
+        "active_gpu": 5,
+        "physics_gpu": 0,
+        "multi_gpu": False,
+        "extra_args": [
+            "--/renderer/multiGpu/autoEnable=false",
+            "--/renderer/multiGpu/maxGpuCount=1",
+            "--no-window",
+        ],
+    }
+)
 
 try:
     import omni.replicator.core as rep

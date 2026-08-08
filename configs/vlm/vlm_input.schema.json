@@ -37,7 +37,28 @@
             "maxItems": 4
           },
           "crop_path": {"type": "string", "minLength": 1},
-          "mask_path": {"type": "string", "minLength": 1}
+          "mask_path": {"type": "string", "minLength": 1},
+          "context_path": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "reference_entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["reference_id", "bbox_xyxy", "description"],
+        "properties": {
+          "reference_id": {"type": "string", "minLength": 1},
+          "bbox_xyxy": {
+            "type": "array",
+            "prefixItems": [{"type": "integer"}, {"type": "integer"}, {"type": "integer"}, {"type": "integer"}],
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "description": {"type": "string", "minLength": 1},
+          "mask_path": {"type": "string", "minLength": 1},
+          "overlay_path": {"type": "string", "minLength": 1}
         }
       }
     },

@@ -13,7 +13,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://onrobot_rg6_visualization/meshes/visual/base_link.stl"/>
+        <mesh filename="meshes/visual/base_link.stl"/>
       </geometry>
       <material name="">
         <color rgba="0.8 0.8 0.8 1"/>
@@ -22,7 +22,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://onrobot_rg6_visualization/meshes/collision/base_link.stl"/>
+        <mesh filename="meshes/collision/base_link.stl"/>
       </geometry>
     </collision>
   </link>
@@ -35,7 +35,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://onrobot_rg6_visualization/meshes/visual/outer_knuckle.stl"/>
+        <mesh filename="meshes/visual/outer_knuckle.stl"/>
       </geometry>
       <material name="">
         <color rgba="0.8 0.8 0.8 1"/>
@@ -44,7 +44,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://onrobot_rg6_visualization/meshes/collision/outer_knuckle.stl"/>
+        <mesh filename="meshes/collision/outer_knuckle.stl"/>
       </geometry>
     </collision>
   </link>
@@ -57,7 +57,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://onrobot_rg6_visualization/meshes/visual/inner_knuckle.stl"/>
+        <mesh filename="meshes/visual/inner_knuckle.stl"/>
       </geometry>
       <material name="">
         <color rgba="0.8 0.8 0.8 1"/>
@@ -66,7 +66,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://onrobot_rg6_visualization/meshes/collision/inner_knuckle.stl"/>
+        <mesh filename="meshes/collision/inner_knuckle.stl"/>
       </geometry>
     </collision>
   </link>
@@ -79,7 +79,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://onrobot_rg6_visualization/meshes/visual/inner_finger.stl"/>
+        <mesh filename="meshes/visual/inner_finger.stl"/>
       </geometry>
       <material name="">
         <color rgba="0.1 0.1 0.1 1"/>
@@ -88,7 +88,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://onrobot_rg6_visualization/meshes/collision/inner_finger.stl"/>
+        <mesh filename="meshes/collision/inner_finger.stl"/>
       </geometry>
     </collision>
   </link>
@@ -101,7 +101,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://onrobot_rg6_visualization/meshes/visual/outer_knuckle.stl"/>
+        <mesh filename="meshes/visual/outer_knuckle.stl"/>
       </geometry>
       <material name="">
         <color rgba="0.8 0.8 0.8 1"/>
@@ -110,7 +110,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://onrobot_rg6_visualization/meshes/collision/outer_knuckle.stl"/>
+        <mesh filename="meshes/collision/outer_knuckle.stl"/>
       </geometry>
     </collision>
   </link>
@@ -123,7 +123,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://onrobot_rg6_visualization/meshes/visual/inner_knuckle.stl"/>
+        <mesh filename="meshes/visual/inner_knuckle.stl"/>
       </geometry>
       <material name="">
         <color rgba="0.8 0.8 0.8 1"/>
@@ -132,7 +132,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://onrobot_rg6_visualization/meshes/collision/inner_knuckle.stl"/>
+        <mesh filename="meshes/collision/inner_knuckle.stl"/>
       </geometry>
     </collision>
   </link>
@@ -145,7 +145,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://onrobot_rg6_visualization/meshes/visual/inner_finger.stl"/>
+        <mesh filename="meshes/visual/inner_finger.stl"/>
       </geometry>
       <material name="">
         <color rgba="0.1 0.1 0.1 1"/>
@@ -154,7 +154,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://onrobot_rg6_visualization/meshes/collision/inner_finger.stl"/>
+        <mesh filename="meshes/collision/inner_finger.stl"/>
       </geometry>
     </collision>
   </link>

@@ -191,7 +191,10 @@
         "target_uncertainty": {"$ref": "#/$defs/uncertaintyRecord"},
         "relation_uncertainty": {"$ref": "#/$defs/uncertaintyRecord"},
         "task_failure_risk": {"$ref": "#/$defs/uncertaintyRecord"},
-        "observation_count": {"type": "integer", "minimum": 1}
+        "observation_count": {"type": "integer", "minimum": 1},
+        "joint_task_state_distribution": {
+          "$ref": "#/$defs/probabilityDistribution"
+        }
       }
     },
     "provenance": {

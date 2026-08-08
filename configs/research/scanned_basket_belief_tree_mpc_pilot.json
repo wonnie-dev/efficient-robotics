@@ -1,0 +1,170 @@
+{
+  "design_status": "discrete_action_observation_belief_tree_mpc_pilot",
+  "evaluation_status": "deterministic_debug_only_not_final_paper_evaluation",
+  "planner_mode": "belief_tree_mpc",
+  "scenario": {
+    "name": "scanned_basket_rim_active_reobservation",
+    "seed": 111,
+    "instruction": "Find the red mug with the white logo inside the open basket.",
+    "current_observation": "center",
+    "target_candidates": [
+      "track_001",
+      "track_002"
+    ],
+    "relations": [
+      "inside",
+      "outside",
+      "unknown"
+    ],
+    "perception_config": "runtime_generated_from_live_rgbd"
+  },
+  "horizon": 2,
+  "completed_reobservations": 0,
+  "commitment_policy": {
+    "maximum_task_failure_risk": 0.06,
+    "minimum_completed_reobservations": 0,
+    "status": "uncalibrated_pilot_task_risk_chance_constraint",
+    "rejected_calibration_pilot": "outputs/calibration_pilot/scanned_basket_phase1_seed120_123_gpu0/calibration_fit.json",
+    "rejection_reason": "four easy scenes cannot calibrate a final task-risk gate"
+  },
+  "qwen_belief_adapter": {
+    "raw_logit_temperature": 4.0,
+    "observation_log_weight": 0.5,
+    "status": "fixed_debug_tempering_not_fitted_calibration",
+    "rejected_calibration_pilot": "outputs/calibration_pilot/scanned_basket_phase1_seed120_123_gpu0/calibration_fit.json",
+    "rejection_reason": "temperature hit the lower search boundary and relation labels lacked behind/unknown"
+  },
+  "initial_belief": {
+    "source": "replaced_at_runtime_from_current_grounded_qwen_output",
+    "calibrated": false,
+    "target": {
+      "track_001": 0.5,
+      "track_002": 0.5
+    },
+    "relation": {
+      "inside": 0.34,
+      "outside": 0.33,
+      "unknown": 0.33
+    }
+  },
+  "observation_model": {
+    "status": "pre_action_geometry_informed_hand_specified_debug_likelihood",
+    "future_capture_files_used": false,
+    "derivation": "The lower center wrist view is partly blocked by the scanned basket rim; close_high views the container more vertically.",
+    "target_outcomes": [
+      "detected",
+      "not_detected"
+    ],
+    "relation_outcomes": [
+      "inside_evidence",
+      "outside_evidence",
+      "unknown_evidence"
+    ],
+    "viewpoint_center_repeat": {
+      "target_detection_probability": {
+        "track_001": 0.55,
+        "track_002": 0.55
+      },
+      "relation_likelihood": {
+        "inside": {
+          "inside_evidence": 0.45,
+          "outside_evidence": 0.20,
+          "unknown_evidence": 0.35
+        },
+        "outside": {
+          "inside_evidence": 0.20,
+          "outside_evidence": 0.45,
+          "unknown_evidence": 0.35
+        },
+        "unknown": {
+          "inside_evidence": 0.20,
+          "outside_evidence": 0.20,
+          "unknown_evidence": 0.60
+        }
+      }
+    },
+    "viewpoint_right": {
+      "target_detection_probability": {
+        "track_001": 0.80,
+        "track_002": 0.80
+      },
+      "relation_likelihood": {
+        "inside": {
+          "inside_evidence": 0.70,
+          "outside_evidence": 0.15,
+          "unknown_evidence": 0.15
+        },
+        "outside": {
+          "inside_evidence": 0.15,
+          "outside_evidence": 0.70,
+          "unknown_evidence": 0.15
+        },
+        "unknown": {
+          "inside_evidence": 0.20,
+          "outside_evidence": 0.20,
+          "unknown_evidence": 0.60
+        }
+      }
+    },
+    "viewpoint_close_high": {
+      "target_detection_probability": {
+        "track_001": 0.95,
+        "track_002": 0.90
+      },
+      "relation_likelihood": {
+        "inside": {
+          "inside_evidence": 0.90,
+          "outside_evidence": 0.05,
+          "unknown_evidence": 0.05
+        },
+        "outside": {
+          "inside_evidence": 0.05,
+          "outside_evidence": 0.90,
+          "unknown_evidence": 0.05
+        },
+        "unknown": {
+          "inside_evidence": 0.15,
+          "outside_evidence": 0.15,
+          "unknown_evidence": 0.70
+        }
+      }
+    }
+  },
+  "actions": {
+    "viewpoint_center_repeat": {
+      "kind": "viewpoint",
+      "enabled": false,
+      "motion_cost": 0.0,
+      "collision_cost": 0.0,
+      "disabled_reason": "identical_static_view_has_no_new_observation_evidence"
+    },
+    "viewpoint_right": {
+      "kind": "viewpoint",
+      "enabled": true,
+      "motion_cost": 0.0935,
+      "collision_cost": 0.01
+    },
+    "viewpoint_close_high": {
+      "kind": "viewpoint",
+      "enabled": true,
+      "motion_cost": 0.12,
+      "collision_cost": 0.015
+    },
+    "grasp": {
+      "kind": "grasp",
+      "enabled": true,
+      "motion_cost": 0.15,
+      "collision_cost": 0.03
+    }
+  },
+  "objective": {
+    "task_failure_risk_weight": 1.0,
+    "task_conditioned_information_gain_weight": 0.35,
+    "motion_cost_weight": 0.08,
+    "collision_cost_weight": 1.0,
+    "target_id": "runtime_selected_track",
+    "required_relation": "inside"
+  },
+  "task_failure_risk_definition": "1-max_h_P_target_times_P_required_relation_debug_factorization",
+  "output_root": "outputs/scanned_basket_belief_tree_mpc_pilot"
+}

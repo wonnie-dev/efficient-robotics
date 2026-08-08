@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,7 +46,7 @@ def save_candidate_assets(
     bbox: list[int],
     sample_dir: Path,
     candidate_id: str,
-) -> tuple[Path, Path]:
+) -> tuple[Path, Path, Path]:
     mask = instance_ids == instance_id
     mask_path = sample_dir / f"{candidate_id}_mask.png"
     Image.fromarray((mask * 255).astype(np.uint8), "L").save(mask_path)
@@ -56,7 +56,74 @@ def save_candidate_assets(
     crop[~crop_mask] = 0
     crop_path = sample_dir / f"{candidate_id}_crop.png"
     Image.fromarray(crop, "RGB").save(crop_path)
-    return crop_path, mask_path
+
+    height, width = rgb.shape[:2]
+    object_width = x1 - x0 + 1
+    object_height = y1 - y0 + 1
+    padding = max(40, 2 * max(object_width, object_height))
+    context_x0 = max(0, x0 - padding)
+    context_y0 = max(0, y0 - padding)
+    context_x1 = min(width - 1, x1 + padding)
+    context_y1 = min(height - 1, y1 + padding)
+    context = Image.fromarray(
+        rgb[context_y0 : context_y1 + 1, context_x0 : context_x1 + 1],
+        "RGB",
+    )
+    context_draw = ImageDraw.Draw(context)
+    context_draw.rectangle(
+        (
+            x0 - context_x0,
+            y0 - context_y0,
+            x1 - context_x0,
+            y1 - context_y0,
+        ),
+        outline=(0, 255, 255),
+        width=3,
+    )
+    context_path = sample_dir / f"{candidate_id}_context.png"
+    context.save(context_path)
+    return crop_path, mask_path, context_path
+
+
+def save_reference_assets(
+    rgb: np.ndarray,
+    instance_ids: np.ndarray,
+    instance_id: int,
+    sample_dir: Path,
+) -> tuple[Path, Path]:
+    """Save an anonymous container mask and a human-readable RGB overlay."""
+    mask = instance_ids == instance_id
+    mask_path = sample_dir / f"{CONTAINER_ID}_mask.png"
+    Image.fromarray((mask * 255).astype(np.uint8), "L").save(mask_path)
+
+    overlay = rgb.astype(np.float32).copy()
+    cyan = np.asarray([0, 255, 255], dtype=np.float32)
+    overlay[mask] = 0.72 * overlay[mask] + 0.28 * cyan
+    overlay_image = Image.fromarray(
+        np.clip(overlay, 0, 255).astype(np.uint8),
+        "RGB",
+    )
+    overlay_draw = ImageDraw.Draw(overlay_image)
+    try:
+        overlay_font = ImageFont.truetype(
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 16
+        )
+    except OSError:
+        overlay_font = ImageFont.load_default()
+    overlay_draw.rounded_rectangle(
+        (12, 12, 282, 44),
+        radius=6,
+        fill=(0, 0, 0),
+    )
+    overlay_draw.text(
+        (20, 19),
+        "cyan = container_001 surface",
+        fill=(0, 255, 255),
+        font=overlay_font,
+    )
+    overlay_path = sample_dir / f"{CONTAINER_ID}_overlay.png"
+    overlay_image.save(overlay_path)
+    return mask_path, overlay_path
 
 
 def relation_queries() -> list[dict]:
@@ -83,12 +150,17 @@ def relation_queries() -> list[dict]:
     return queries
 
 
-def export_view(view: str, output_root: Path) -> tuple[Path, Path]:
-    source_dir = OBSERVATION_ROOT / view
+def export_view(
+    view: str,
+    output_root: Path,
+    observation_root: Path = OBSERVATION_ROOT,
+    episode_id: str = "benchmark_seed000",
+) -> tuple[Path, Path]:
+    source_dir = observation_root / view
     objects = json.loads((source_dir / "objects.json").read_text(encoding="utf-8"))
     rgb = np.asarray(Image.open(source_dir / "rgb.png").convert("RGB"))
     instance_ids = np.load(source_dir / "instance_ids.npy")
-    sample_id = f"benchmark_seed000_{view}"
+    sample_id = f"{episode_id}_{view}"
     sample_dir = output_root / "samples" / sample_id
     sample_dir.mkdir(parents=True, exist_ok=True)
     rgb_path = sample_dir / "rgb.png"
@@ -99,7 +171,7 @@ def export_view(view: str, output_root: Path) -> tuple[Path, Path]:
         observation = objects[semantic_id]
         if not observation["visible"] or observation["bbox_xyxy"] is None:
             continue
-        crop_path, mask_path = save_candidate_assets(
+        crop_path, mask_path, context_path = save_candidate_assets(
             rgb,
             instance_ids,
             observation["instance_ids"][0],
@@ -113,14 +185,22 @@ def export_view(view: str, output_root: Path) -> tuple[Path, Path]:
                 "bbox_xyxy": observation["bbox_xyxy"],
                 "crop_path": relative(crop_path),
                 "mask_path": relative(mask_path),
+                "context_path": relative(context_path),
             }
         )
 
     queries = relation_queries()
+    container_observation = objects["container"]
+    container_mask_path, container_overlay_path = save_reference_assets(
+        rgb,
+        instance_ids,
+        container_observation["instance_ids"][0],
+        sample_dir,
+    )
     model_input = {
         "schema_version": "vlm-input-v1",
         "sample_id": sample_id,
-        "episode_id": "benchmark_seed000",
+        "episode_id": episode_id,
         "view_id": view,
         "instruction": INSTRUCTION,
         "image": {
@@ -129,6 +209,15 @@ def export_view(view: str, output_root: Path) -> tuple[Path, Path]:
             "height": int(rgb.shape[0]),
         },
         "candidates": candidates,
+        "reference_entities": [
+            {
+                "reference_id": CONTAINER_ID,
+                "bbox_xyxy": container_observation["bbox_xyxy"],
+                "description": "open container reference region",
+                "mask_path": relative(container_mask_path),
+                "overlay_path": relative(container_overlay_path),
+            }
+        ],
         "relation_queries": queries,
     }
     ground_truth_relations = [
@@ -160,10 +249,28 @@ def export_view(view: str, output_root: Path) -> tuple[Path, Path]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--observation-root",
+        type=Path,
+        default=OBSERVATION_ROOT,
+    )
+    parser.add_argument("--episode-id", default="benchmark_seed000")
+    parser.add_argument(
+        "--views",
+        nargs="+",
+        default=list(VIEWS),
+        help="Observation directories to export (default: left center right).",
+    )
     args = parser.parse_args()
+    output_root = args.output_root.resolve()
     manifest = {"schema_version": "vlm-dataset-manifest-v1", "samples": []}
-    for view in VIEWS:
-        input_path, ground_truth_path = export_view(view, args.output_root)
+    for view in args.views:
+        input_path, ground_truth_path = export_view(
+            view,
+            output_root,
+            observation_root=args.observation_root.resolve(),
+            episode_id=args.episode_id,
+        )
         manifest["samples"].append(
             {
                 "input": relative(input_path),
@@ -172,7 +279,7 @@ def main() -> None:
             }
         )
         print(f"EXPORTED={input_path}")
-    manifest_path = args.output_root / "manifest.json"
+    manifest_path = output_root / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(f"MANIFEST={manifest_path}")
 

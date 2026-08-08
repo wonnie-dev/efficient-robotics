@@ -11,8 +11,22 @@
   "poses_rad": {
     "home": [-1.5708, -1.5708, 1.5708, -1.5708, -1.5708, 0.0],
     "left": [-1.8500, -1.4500, 1.7500, -1.8708, -1.5708, -0.2800],
-    "center": [-1.5708, -1.4500, 1.7500, -1.8708, -1.5708, 0.0],
-    "right": [-1.2900, -1.4500, 1.7500, -1.8708, -1.5708, 0.2800]
+    "center_high_legacy": [-1.5708, -1.4500, 1.7500, -1.8708, -1.5708, 0.0],
+    "center_low_candidate1": [-1.5584534, -1.4308400, 1.8388793, -1.8708, -1.5708, 0.0],
+    "center": [-1.5416379, -1.3170297, 1.8950480, -1.8708, -1.5708, 0.0],
+    "right": [-1.2900, -1.4500, 1.7500, -1.8708, -1.5708, 0.2800],
+    "close_high": [-0.8542, -1.7044, 1.8396, -1.6733, -1.5708, 0.0]
+  },
+  "candidate_views": {
+    "poses": ["close_high", "overhead"],
+    "status": "simulation_provisional_not_approved_for_real_robot",
+    "purpose": "reduce_container_occlusion_with_a_closer_higher_wrist_view",
+    "required_before_real_robot_use": [
+      "verify_physical_camera_mount_and_intrinsics",
+      "complete_hand_eye_calibration",
+      "check_lab_joint_workspace_and_self_collision_limits",
+      "validate_a_collision_free_real_robot_trajectory"
+    ]
   },
   "camera": {
     "resolution": [640, 480],
@@ -22,6 +36,26 @@
     "focal_length_mm": 24.0,
     "horizontal_aperture_mm": 36.0,
     "clipping_range_m": [0.05, 5.0]
+  },
+  "overview_camera": {
+    "path": "/World/OverviewCamera",
+    "resolution": [960, 540],
+    "position_world_m": [2.80, -3.00, 2.45],
+    "look_at_world_m": [0.20, 0.05, 0.85],
+    "up_axis": [0.0, 0.0, 1.0],
+    "focal_length_mm": 24.0,
+    "horizontal_aperture_mm": 36.0,
+    "clipping_range_m": [0.1, 10.0],
+    "purpose": "human_debugging_and_paper_video_only",
+    "used_by_vlm_or_planner": false,
+    "paper_quality": {
+      "resolution": [1920, 1080],
+      "focal_length_mm": 38.0
+    },
+    "meeting_quality": {
+      "resolution": [1920, 1080],
+      "focal_length_mm": 42.0
+    }
   },
   "capture": {
     "poses": ["left", "center", "right"],

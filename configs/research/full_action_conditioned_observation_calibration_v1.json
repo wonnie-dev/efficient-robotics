@@ -1,0 +1,27 @@
+{
+  "schema_version": "full-action-conditioned-observation-calibration-config-v1",
+  "experiment_id": "full_action_conditioned_observation_calibration_v1",
+  "scene_conditioned_view_model_source": "outputs/offline_mpc/scene_conditioned_future_belief_neutral_seed185_196/result.json",
+  "cover_calibration_readiness_source": "outputs/final_evaluation/icra_protocol_v1/cover_calibration_readiness.json",
+  "output_path": "outputs/offline_mpc/full_action_conditioned_observation_calibration_v1/result.json",
+  "dirichlet_pseudocount": 1.0,
+  "minimum_view_episode_count": 10,
+  "minimum_view_variant_episode_count": 2,
+  "minimum_cover_episode_count_per_outcome": 5,
+  "minimum_right_after_empty_episode_count": 10,
+  "reserved_test_seeds": [
+    200,
+    201,
+    202,
+    203,
+    204,
+    205,
+    206,
+    207,
+    208,
+    209
+  ],
+  "training_performed": false,
+  "testing_performed": false,
+  "apply_to_mpc": false
+}

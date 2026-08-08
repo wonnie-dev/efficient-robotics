@@ -73,6 +73,11 @@ def validate(graph: dict) -> None:
 
     for field in ("target_uncertainty", "relation_uncertainty", "task_failure_risk"):
         validate_uncertainty(f"graph_belief.{field}", graph["graph_belief"][field])
+    joint = graph["graph_belief"].get("joint_task_state_distribution")
+    if joint is not None:
+        validate_distribution(
+            "graph_belief.joint_task_state_distribution", joint
+        )
 
 
 def main() -> None:

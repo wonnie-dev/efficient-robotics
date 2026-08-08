@@ -1,0 +1,63 @@
+{
+  "schema_version": "negative-evidence-live-development-config-v1",
+  "experiment_id": "empty_cover_then_right_live_development",
+  "purpose": "close_the_physical_negative_evidence_two_update_loop_before_final_test_freeze",
+  "seed": 197,
+  "scene_variant": "empty_cover_then_right",
+  "base_planner_config": "configs/research/cover_search_belief_mpc_cpu_pilot.json",
+  "planner_overrides": {
+    "minimum_grasp_success_probability": 0.95,
+    "viewpoint_close_high_open_likelihood": {
+      "inside|open": {
+        "inside_evidence": 0.05,
+        "outside_evidence": 0.05,
+        "unknown_evidence": 0.9
+      },
+      "outside_near|open": {
+        "inside_evidence": 0.05,
+        "outside_evidence": 0.05,
+        "unknown_evidence": 0.9
+      }
+    },
+    "viewpoint_right_open_likelihood": {
+      "inside|open": {
+        "inside_evidence": 0.93,
+        "outside_evidence": 0.03,
+        "unknown_evidence": 0.04
+      },
+      "outside_near|open": {
+        "inside_evidence": 0.03,
+        "outside_evidence": 0.93,
+        "unknown_evidence": 0.04
+      }
+    }
+  },
+  "expected_action_sequence": [
+    "remove_cover",
+    "viewpoint_right",
+    "grasp_outside"
+  ],
+  "minimum_belief_updates": 2,
+  "minimum_target_pixels_for_nonempty": 100,
+  "rgbd_relation_config": "configs/perception/hybrid_rgbd_relation_pilot.json",
+  "rg6_lid_calibration_config": "configs/hardware/rg6_lid_development_proxy.json",
+  "rg6_coupling_mode": "coordinated_drives",
+  "coordinated_rg6_total_drive_effort_limit_nm": 18.0,
+  "negative_evidence_source": "qwen_relation_and_learned_mask_rgbd_geometry_agreement_development_only",
+  "perception_task_overrides": {
+    "instruction": "Find and pick up the red mug with the white logo.",
+    "target_description": "the red mug with the white logo",
+    "qwen_direct_prompt": "Find the single red mug with the white logo. If it cannot be located reliably, return []. Return JSON only."
+  },
+  "post_reobservation_perception": [
+    "GroundingDINO-Base",
+    "SAM2.1-Large",
+    "Qwen3-VL-8B-Instruct",
+    "RGB-D backprojection"
+  ],
+  "training_performed": false,
+  "calibration_performed": true,
+  "testing_performed": false,
+  "reserved_test_seeds_used": false,
+  "valid_for_final_evaluation": false
+}

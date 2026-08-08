@@ -1,0 +1,47 @@
+{
+  "schema_version": "action-differentiating-scene-pilot-config-v1",
+  "experiment_id": "action_differentiating_scene_pilot_seed185_196",
+  "purpose": "prepare_balanced_causal_view_action_scenes_before_gpu_capture",
+  "seed_start": 185,
+  "seed_stop_exclusive": 197,
+  "reserved_test_seeds": [200, 201, 202, 203, 204, 205, 206, 207, 208, 209],
+  "variant_cycle": [
+    "close_high_only",
+    "right_only",
+    "either_view",
+    "cover_removal_required"
+  ],
+  "nominal_basket_center_world_m": [0.48, 0.1, 0.755],
+  "initial_observation": "center",
+  "candidate_actions": [
+    "viewpoint_close_high",
+    "viewpoint_right",
+    "remove_cover",
+    "grasp",
+    "defer"
+  ],
+  "required_observations": ["center", "close_high", "right"],
+  "render_acceptance": {
+    "measurement": "simulator_target_visible_fraction_of_amodal",
+    "resolved_minimum": 0.65,
+    "gain_over_center_minimum": 0.15,
+    "winning_view_dominance_minimum": 0.15,
+    "covered_hidden_maximum": 0.02,
+    "reject_failed_scene_instead_of_relabeling": true
+  },
+  "future_capture": {
+    "script": "scripts/run_actual_view_motion_smoke.py",
+    "requested_views": ["close_high", "right"],
+    "isaac_sim_launch_now": false,
+    "gpu_launch_now": false,
+    "required_physical_gpu_when_resumed": 5,
+    "renderer_active_gpu_when_resumed": 5,
+    "physics_cuda_device_when_resumed": 0,
+    "multi_gpu": false
+  },
+  "output_root": "outputs/scene_design/action_differentiating_pilot_seed185_196",
+  "training_performed": false,
+  "calibration_performed": false,
+  "testing_performed": false,
+  "valid_for_final_evaluation": false
+}

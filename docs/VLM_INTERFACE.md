@@ -79,6 +79,21 @@ D:\isaac-sim\python.bat scripts\validate_vlm_contract.py INPUT_JSON OUTPUT_JSON
 The deterministic mock adapter tests file compatibility only. It has no
 perception ability and must not be used as a baseline result.
 
+## Qwen3-VL implementation
+
+The first pretrained implementation uses
+`Qwen/Qwen3-VL-8B-Instruct`. Run it through the GPU-5-only launcher:
+
+```bash
+scripts/run_qwen3_vl_gpu5.sh INPUT_JSON
+```
+
+It produces cyclic-letter permutation-averaged, pre-softmax next-token logits
+for each target candidate and relation label. These are uncalibrated raw
+scores. See `docs/QWEN3_VL_INTEGRATION.md` for the exact checkpoint revision,
+environment, prompt version, GPU boundary, measured resource use, and current
+development-only result.
+
 ## Data strategy
 
 The project will not manually build and label a large VLM training dataset.

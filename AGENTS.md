@@ -8,12 +8,20 @@ This repository is the `efficient-robotics` research project targeting an ICRA 2
 
 Before planning, editing, or running experiments, read these files completely:
 
-1. `docs/FINAL_RESEARCH_SPEC.md`
-2. `docs/PROJECT_CONTEXT.md`
-3. `docs/LITERATURE_NOVELTY_AUDIT.md`
-4. `docs/STATUS.md` and `docs/DECISIONS.md`, if present
+1. `efficient_robotics_final_project_plan_KO.docx`
+2. `docs/FINAL_RESEARCH_SPEC.md`
+3. `docs/PROJECT_CONTEXT.md`
+4. `docs/LITERATURE_NOVELTY_AUDIT.md`
+5. `docs/STATUS.md` and `docs/DECISIONS.md`, if present
 
-`docs/FINAL_RESEARCH_SPEC.md` is authoritative. If an older note conflicts with it, follow the final specification and record the conflict in `docs/DECISIONS.md`.
+`efficient_robotics_final_project_plan_KO.docx` is the authoritative and most
+recent project specification. `docs/FINAL_RESEARCH_SPEC.md` is a secondary
+implementation-oriented summary and applies only where it does not conflict
+with the Word document. If any repository document or older note conflicts
+with the Word document, follow the Word document, record the conflict in
+`docs/DECISIONS.md`, and synchronize the affected Markdown documentation. Do
+not silently fall back to an older specification if the Word document is
+missing or unreadable.
 
 ## Fixed simulation embodiment
 

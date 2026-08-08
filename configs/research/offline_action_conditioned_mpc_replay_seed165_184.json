@@ -1,0 +1,80 @@
+{
+  "schema_version": "offline-action-conditioned-mpc-replay-config-v1",
+  "experiment_id": "offline_action_conditioned_mpc_replay_seed165_184",
+  "calibration_root": "outputs/calibration_pilot/reference_occlusion_seed165_184_gpu5",
+  "output_root": "outputs/offline_mpc/action_conditioned_replay_seed165_184",
+  "evaluation_protocol": "leave_one_episode_out_calibration_replay",
+  "views": {
+    "center": "initial_observation",
+    "close_high": "viewpoint_close_high",
+    "right": "viewpoint_right"
+  },
+  "reachable_view_actions": [
+    "viewpoint_close_high",
+    "viewpoint_right"
+  ],
+  "target_temperature": 5.825,
+  "identity_confidence_bins": [
+    {
+      "name": "very_low",
+      "maximum_exclusive": 0.2
+    },
+    {
+      "name": "low",
+      "maximum_exclusive": 0.5
+    },
+    {
+      "name": "medium",
+      "maximum_exclusive": 0.8
+    },
+    {
+      "name": "high",
+      "maximum_exclusive": 1.0000001
+    }
+  ],
+  "dirichlet_alpha": 1.0,
+  "beta_alpha": 1.0,
+  "beta_beta": 1.0,
+  "candidate_tracking": {
+    "method": "nearest_learned_rgbd_candidate_center",
+    "maximum_center_distance_m": 0.12,
+    "simulator_ids_used": false
+  },
+  "task_cost": {
+    "wrong_target_weight": 1.0,
+    "hidden_target_weight": 0.5,
+    "reference_occlusion_weight": 0.25,
+    "membership_entropy_weight": 0.1,
+    "grasp_motion_cost": 0.04,
+    "task_noncompletion_cost": 0.45,
+    "task_noncompletion_cost_sensitivity_grid": [
+      0.35,
+      0.45,
+      0.55,
+      0.65,
+      0.8
+    ],
+    "view_action_cost": {
+      "viewpoint_close_high": 0.08,
+      "viewpoint_right": 0.06
+    }
+  },
+  "commitment_gate": {
+    "minimum_selected_target_correct_probability": 0.8,
+    "maximum_fully_hidden_probability": 0.25,
+    "maximum_reference_occlusion_probability": 0.6,
+    "status": "provisional_calibration_replay_gate_not_final"
+  },
+  "methods": [
+    "immediate_grasp",
+    "fixed_close_high_then_grasp",
+    "fixed_right_then_grasp",
+    "confidence_only_fixed_reobservation",
+    "action_agnostic_belief_mpc",
+    "action_conditioned_belief_mpc"
+  ],
+  "training_performed": false,
+  "testing_performed": false,
+  "reserved_test_seeds_used": false,
+  "valid_for_final_evaluation": false
+}

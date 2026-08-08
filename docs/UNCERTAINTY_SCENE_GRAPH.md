@@ -38,6 +38,14 @@ The distribution must remain available instead of immediately collapsing to one 
 
 `graph_belief` contains the most likely target and separate records for target uncertainty, relation uncertainty, and task-failure risk. Values remain `null` with `status: pending_definition` until their equations are explicitly approved.
 
+For belief-space control with coupled task factors, the optional
+`joint_task_state_distribution` stores the exact discrete planner belief
+instead of reconstructing it from independent marginals. For example, the
+removable-cover pilot uses states such as `inside|covered` and
+`outside_near|open`. This is an interface field; its state vocabulary,
+transition model, calibration, and final paper equations remain scenario
+specific.
+
 ## Provenance and ground truth
 
 Every graph identifies its perception source. `ground_truth_used_for_control` prevents evaluation ground truth from being silently used by the proposed controller. Ground truth may be stored separately for scoring, but it must not be represented as a VLM prediction.

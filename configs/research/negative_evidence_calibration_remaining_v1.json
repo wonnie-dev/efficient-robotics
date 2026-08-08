@@ -1,0 +1,14 @@
+{
+  "schema_version": "negative-evidence-calibration-batch-v1",
+  "experiment_id": "negative_evidence_remaining_seed190_199_gpu0",
+  "episode_config": "configs/research/negative_evidence_live_calibration_frozen_relation_v1.json",
+  "seeds": [190, 191, 192, 193, 194, 195, 196, 199],
+  "stop_on_first_failure": true,
+  "output_root": "outputs/calibration_pilot/negative_evidence_remaining_seed190_199_gpu0",
+  "expected_runtime_hours": 6.0,
+  "physical_gpu": 0,
+  "forbidden_gpus": [1, 2, 3, 4, 5],
+  "training_performed": false,
+  "testing_performed": false,
+  "reserved_test_seeds_used": false
+}
