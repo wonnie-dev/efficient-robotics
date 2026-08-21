@@ -18,7 +18,7 @@ Find and pick up the red mug with the white logo.
 
 The target may be inside the container, outside it, behind it, or hidden by a cover. Similar objects create identity ambiguity.
 
-Development proceeds in three stages:
+The benchmark increases partial observability in three stages:
 
 1. Open container: target ranking and `inside`, `outside`, and `near` evidence.
 2. Active re-observation: wrist-camera motion for `behind` and `occluded_by` ambiguity.
@@ -30,18 +30,22 @@ The state is a probabilistic Scene Graph. Object nodes hold target-identity beli
 
 For each feasible action, the planner predicts a distribution over the next observation and posterior belief. It compares action sequences using wrong-commitment loss, execution risk, motion or interaction cost, and noncompletion cost. It executes the first action, receives a new RGB-D observation, updates the graph, and replans.
 
-## Intended contribution
+## Method focus
 
-The contribution is not the use of a VLM or Scene Graph alone. The intended contribution is the action layer:
+The method is not defined by the use of a VLM or Scene Graph alone. Its distinguishing elements are:
 
-- one semantic action representation for camera motion, cover interaction, and grasp;
+- a calibrated joint belief over target identity, container membership, and target absence;
+- one semantic action representation for camera motion, cover interaction, grasp, and safe deferral;
 - action-conditioned future-belief prediction;
-- task-risk-aware action selection;
+- task-risk-aware receding-horizon action selection;
 - closed-loop positive and negative evidence updates;
-- fewer wrong grasps and unnecessary actions than fixed-view or confidence-only policies.
 
-## Current implementation boundary
+These elements are evaluated against fixed-view, confidence-only, information-gain, open-loop, direct-VLM, and component-ablation policies. The primary outcomes are semantic task success, wrong commitment, target-absent safe deferral, and realized task cost.
 
-The simulator uses UR10e, RG6, and a wrist RGB-D camera. Qwen is used for instruction-conditioned target ranking. Learned masks and RGB-D geometry provide relation evidence. A discrete belief-tree planner selects semantic actions.
+## Scope and assumptions
 
-The current viewpoint library is fixed. The cover and gripper physics use provisional parameters pending lab measurements. Final paper testing and real-robot validation are not complete.
+The reference embodiment is a UR10e with an RG6 gripper and wrist RGB-D camera. Qwen provides instruction-conditioned evidence over anonymous candidates. Learned masks and RGB-D geometry provide object location and relation evidence. A discrete belief-tree planner selects semantic actions.
+
+Viewpoint actions use a fixed library of reachable wrist poses. Continuous camera-pose optimization is outside the method scope. Robot geometry, tool and camera transforms, contact parameters, and controller limits are configuration inputs that must be replaced by measured values for a different physical system.
+
+See [Related Work](RELATED_WORK.md) for the boundary between this formulation and closely related belief-space and VLM-guided active-perception systems.

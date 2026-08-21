@@ -32,7 +32,7 @@ The episode writes RGB, metric depth, camera metadata, object records, action re
 
 Contact-based evaluation does not attach an object to the gripper or copy its pose. A successful lift requires bilateral contact, bounded force and penetration, stable object-to-gripper motion, finite joint state, and no unexpected environment collision.
 
-The current RG6 fingertip, friction, lid mass, handle geometry, and drive mapping are provisional simulation values. They are suitable for development but are not real-robot calibration.
+The RG6 fingertip, friction, lid mass, handle geometry, and drive mapping are simulation parameters. They must not be used as real-robot calibration values.
 
 ## Reproducibility
 

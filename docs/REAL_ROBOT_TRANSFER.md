@@ -1,13 +1,13 @@
 # Real-Robot Transfer
 
-## Lab hardware currently reported
+## Reference embodiment
 
-- Universal Robots UR10 arm; exact revision must be confirmed
+- Universal Robots UR-series manipulator
 - OnRobot RG6 gripper
-- lab camera configuration not yet measured
-- 3D-printed cylindrical container and matching lid
+- wrist-mounted RGB-D camera
+- tabletop container with a removable cover
 
-Simulation currently uses UR10e and a rectangular scanned-basket setup. The robot model, tool transform, camera transform, and container geometry must remain configurable.
+The simulation configuration uses a UR10e and a scanned-basket setup. Robot revision, tool transform, camera transform, and container geometry remain configuration inputs rather than planner assumptions.
 
 ## Measurements required before motion
 
@@ -67,4 +67,4 @@ The hardware adapter must return measured execution status and a new observation
 
 ## Transfer constraints
 
-No real-robot motion has been executed from this repository. The supplied transfer calibration contains placeholders or public-spec proxies and is not transfer-ready.
+Hardware-specific values in the supplied worksheet are placeholders. A hardware adapter must not enable motion until measured values, frame transforms, communication limits, and emergency-stop procedures pass the validation sequence above.

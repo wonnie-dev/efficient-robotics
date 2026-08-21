@@ -1,6 +1,6 @@
 # Uncertainty-Aware Scene Graph
 
-## Status
+## Interface
 
 The schema defines how task-conditioned object and relation beliefs are stored
 and exchanged between perception, calibration, and planning modules. Planner
@@ -46,8 +46,7 @@ For belief-space control with coupled task factors, the optional
 instead of reconstructing it from independent marginals. For example, the
 removable-cover scenario uses states such as `inside|covered` and
 `outside_near|open`. This is an interface field; its state vocabulary,
-transition model, calibration, and final paper equations remain scenario
-specific.
+transition model, and calibration are supplied by the scenario configuration.
 
 ## Provenance and ground truth
 

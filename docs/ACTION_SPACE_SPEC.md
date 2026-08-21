@@ -69,7 +69,7 @@ The observation model represents `P(observation | state, action)`. The posterior
 
 All physical actions require finite joint states, joint-limit checks, collision checks, and bounded tracking error. Contact actions additionally require bilateral finger contact, force and penetration limits, and an unexpected-contact check. Object attachment and pose copying are forbidden in physical evaluation.
 
-Current simulation evaluation limits are:
+The simulation evaluation limits are:
 
 - minimum verified lift: `0.15 m`;
 - maximum force per finger: `60 N`;
@@ -79,6 +79,6 @@ Current simulation evaluation limits are:
 
 These are evaluation gates, not permission to use the same values on the real robot.
 
-## Current and proposed representations
+## Viewpoint representation
 
-The current implementation uses a semantic viewpoint library backed by fixed poses. The next representation may generate poses from container geometry and filter them by IK and collision. Continuous camera-pose optimization is not implemented and is not claimed.
+The action space uses a semantic viewpoint library backed by fixed, reachable wrist poses. Each pose must pass IK, joint-limit, camera-clearance, and collision checks. Continuous camera-pose optimization is outside the evaluation scope.

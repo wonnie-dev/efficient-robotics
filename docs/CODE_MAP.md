@@ -9,7 +9,9 @@
 | Cached-observation belief-planner evaluation | `scripts/run_offline_action_conditioned_mpc_replay.py` |
 | No-motion hardware configuration check | `scripts/validate_real_robot_configuration.sh` |
 | One closed-loop simulation episode | `scripts/run_closed_loop_episode.py` |
-| Multi-GPU episode batch | `scripts/run_episode_batch.py` |
+| Independent episode batch across GPUs | `scripts/run_episode_batch.py` |
+
+Batch execution assigns one independent process and one model instance to each GPU. It does not use DDP, NCCL, DataParallel, or model sharding.
 
 ## Simulation and robot execution
 

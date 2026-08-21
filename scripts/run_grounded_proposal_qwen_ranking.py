@@ -16,9 +16,11 @@ from pathlib import Path
 
 from qwen3_vl_logits import (
     DEFAULT_MODEL,
+    GROUNDED_RANKING_PROMPT_VERSION,
     MODEL_REPOSITORY,
     build_visual_content,
     candidate_identity_question,
+    configured_physical_gpu,
     letter_mapping,
     local_hf_revision,
     permutation_debiased_scores,
@@ -29,9 +31,7 @@ from qwen3_vl_logits import (
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "configs/perception/grounded_segmentation.json"
-RANKING_PROMPT_VERSION = (
-    "grounded-qwen-factorized-identity-relation-v2-conservative-unknown"
-)
+RANKING_PROMPT_VERSION = GROUNDED_RANKING_PROMPT_VERSION
 
 
 def resolve_path(value: str | Path) -> Path:
@@ -262,7 +262,7 @@ def main() -> None:
             item["peak_gpu_memory_gib"] for item in sample_metrics
         ),
         "sample_metrics": sample_metrics,
-        "physical_gpu": int(os.environ.get("PHYSICAL_GPU", "5")),
+        "physical_gpu": configured_physical_gpu(),
         "logical_gpu": "cuda:0",
         "single_model_instance": True,
         "batch_size": 1,

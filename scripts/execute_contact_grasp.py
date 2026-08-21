@@ -534,7 +534,7 @@ result = {
     "lift_verified": success,
     "video": video,
     "gpu_policy": {
-        "physical_gpu": 5,
+        "physical_gpu": configured_gpu(),
         "physics_cuda_device": 0,
         "multi_gpu": False,
     },

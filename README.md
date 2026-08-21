@@ -1,8 +1,8 @@
-# Efficient Robotics
+# Risk-Aware Active Perception for Robotic Retrieval
 
 Research code for language-guided object retrieval under partial observability. The system combines open-vocabulary perception, a probabilistic Scene Graph, and task-risk-aware belief-space planning. Instead of committing to the first plausible object, the robot can acquire another wrist-camera observation, remove a cover, grasp a candidate, or defer when the remaining uncertainty makes manipulation unsafe.
 
-The central question is not only *which object matches the instruction*, but also *whether the target is inside or outside the container, occluded, or absent*, and which action should be executed next to reduce task risk.
+The central question is not only *which object matches the instruction*, but also *whether the target is inside or outside the container, occluded, or absent*, and which action should be executed next to reduce task risk. The method maintains these coupled uncertainties across observations instead of treating a VLM score as a grasp probability.
 
 ## Method overview
 
@@ -99,6 +99,6 @@ scripts/       perception, belief update, planning, simulation, and evaluation c
 tests/         CPU regression and protocol tests
 ```
 
-The main implementation files are indexed in [Code Map](docs/CODE_MAP.md). The action definitions and safety contract are in [Action Space](docs/ACTION_SPACE_SPEC.md), and the experimental split, comparisons, and metrics are in [Experiment Protocol](docs/EXPERIMENT_PROTOCOL.md).
+The main implementation files are indexed in [Code Map](docs/CODE_MAP.md). The action definitions and safety contract are in [Action Space](docs/ACTION_SPACE_SPEC.md), the experimental split, comparisons, and metrics are in [Experiment Protocol](docs/EXPERIMENT_PROTOCOL.md), and the distinction from closely related active-perception systems is summarized in [Related Work](docs/RELATED_WORK.md).
 
 Generated RGB-D observations, videos, model weights, inference caches, and experiment outputs are excluded from Git.

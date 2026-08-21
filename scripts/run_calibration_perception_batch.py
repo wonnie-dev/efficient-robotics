@@ -84,8 +84,8 @@ def main() -> None:
     gpu_ids = list(args.gpu_ids)
     if not gpu_ids or len(gpu_ids) != len(set(gpu_ids)):
         raise ValueError("gpu-ids must be a non-empty unique list")
-    if any(gpu < 0 or gpu > 5 for gpu in gpu_ids):
-        raise ValueError("gpu-ids must be host indices in [0, 5]")
+    if any(gpu < 0 for gpu in gpu_ids):
+        raise ValueError("gpu-ids must contain non-negative host indices")
     if not PERCEPTION_PYTHON.is_file():
         raise FileNotFoundError(PERCEPTION_PYTHON)
 

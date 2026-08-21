@@ -16,9 +16,25 @@ from run_grounded_segmentation import (  # noqa: E402
     cached_result_matches_image,
     sha256,
 )
+from qwen3_vl_logits import (  # noqa: E402
+    GROUNDED_RANKING_PROMPT_VERSION,
+    candidate_identity_question,
+)
 
 
 class PerceptionCacheProvenanceTests(unittest.TestCase):
+    def test_grounded_ranking_uses_shared_prompt_version(self) -> None:
+        self.assertEqual(RANKING_PROMPT_VERSION, GROUNDED_RANKING_PROMPT_VERSION)
+
+    def test_identity_prompt_rejects_unverified_distinctive_attributes(self) -> None:
+        model_input = {
+            "instruction": "Find and pick up the red mug with the white logo.",
+            "target_description": "red mug with the white logo",
+        }
+        question, _mapping = candidate_identity_question(model_input, "object_001")
+        self.assertIn("All distinctive visible attributes", question)
+        self.assertIn("plain object does not match", question)
+
     def test_image_cache_is_invalidated_when_rgb_bytes_change(self) -> None:
         with self.subTest("same path, changed RGB bytes"):
             import tempfile

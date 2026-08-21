@@ -115,8 +115,10 @@ def main() -> None:
     args = parser.parse_args()
     config = load_json(args.config.resolve())
     gpu_ids = [int(value) for value in config["gpu_ids"]]
-    if not gpu_ids or any(gpu not in {0, 1, 2, 3} for gpu in gpu_ids):
-        raise ValueError("Live development batch is restricted to GPUs 0-3")
+    if not gpu_ids or len(gpu_ids) != len(set(gpu_ids)) or any(
+        gpu < 0 for gpu in gpu_ids
+    ):
+        raise ValueError("gpu_ids must contain unique non-negative indices")
     require_gpu_devices(gpu_ids)
     device_minors = gpu_device_minors(gpu_ids)
     assignments = list(config["assignments"])

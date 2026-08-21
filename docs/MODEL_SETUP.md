@@ -54,7 +54,7 @@ Model paths, caches, and compute-device assignments are deployment-specific and
 must not be hard-coded or committed. Qwen runs in BF16 with one model instance,
 batch size one, and no distributed runtime.
 
-On an RTX A6000, Qwen scoring has used approximately `16.7-17.2 GiB` of peak allocated memory and roughly `10-18 s` per observation after model loading. Grounding and segmentation add separate runtime and memory use because the models run sequentially.
+On an RTX A6000, Qwen scoring uses approximately `16.7-17.2 GiB` of peak allocated memory. Observation runtime depends on the candidate count, number of relation queries, image resolution, cache state, and prompt version, so it is recorded per request rather than represented by one fixed latency. Grounding and segmentation run sequentially and report their runtime and memory separately.
 
 ## Input and output
 
@@ -63,3 +63,17 @@ The VLM receives an RGB image, anonymous candidate IDs, candidate masks or boxes
 The output contains raw target-choice logits, relation-choice logits, selected candidate ID, model revision, prompt version, input hash, and cache metadata. Raw logits are not probabilities. See [VLM Interface](VLM_INTERFACE.md).
 
 Cache identity includes the image and mask hashes, normalized prompt payload, model revision, prompt version, and inference settings. Repeated requests reuse an exact cache match.
+
+## Perception model selection
+
+The reference stack remains fixed during calibration and reserved testing. Alternative models are compared only on the development or calibration split, using identical RGB inputs, text queries, candidate definitions, and ground truth.
+
+The model-selection report includes:
+
+- every proposal, confidence score, mask, and rejection reason;
+- proposal recall and false proposals per image;
+- mask IoU and candidate-selection accuracy;
+- identity, membership, and absence calibration metrics;
+- runtime and peak memory measured without video encoding.
+
+`GroundingDINO-Base + SAM2.1-Large` is the two-stage reference. `SAM 3.1` is evaluated as a unified text-prompted detection and segmentation alternative rather than silently replacing one stage. VLM alternatives use the same forced-choice contract and anonymous candidates. A replacement is accepted only if it improves the declared selection metrics without using reserved-test episodes.

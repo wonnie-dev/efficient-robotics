@@ -20,6 +20,7 @@ from single_gpu_runtime import (
     DEFAULT_CACHE_ROOT,
     DEFAULT_MODEL,
     cached_inference,
+    configured_physical_gpu,
     evaluate_debug_only,
     fuse_beliefs,
     output_belief,
@@ -138,7 +139,7 @@ def main() -> None:
     )
     args = parser.parse_args()
     require_single_gpu_policy()
-    physical_gpu = int(os.environ.get("PHYSICAL_GPU", "5"))
+    physical_gpu = configured_physical_gpu()
     if physical_gpu < 0:
         raise ValueError("PHYSICAL_GPU must be non-negative")
     if args.execute_contact_grasp and args.execute_persistent_composite_grasp:
@@ -510,7 +511,7 @@ def main() -> None:
                 str(ROOT / "scripts" / "execute_contact_grasp.py"),
                 "--headless",
                 "--renderer-gpu",
-                "5",
+                str(physical_gpu),
                 "--physics-gpu",
                 "0",
                 "--seed",
@@ -532,9 +533,10 @@ def main() -> None:
                     text=True,
                     env={
                         **os.environ,
-                        "CUDA_VISIBLE_DEVICES": "5",
+                        "CUDA_VISIBLE_DEVICES": str(physical_gpu),
                         "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
-                        "NVIDIA_VISIBLE_DEVICES": "5",
+                        "NVIDIA_VISIBLE_DEVICES": str(physical_gpu),
+                        "PHYSICAL_GPU": str(physical_gpu),
                     },
                     timeout=600.0,
                     check=False,
@@ -587,7 +589,7 @@ def main() -> None:
             "debug_ground_truth_after_planning": debug_results,
             "runtime_seconds": time.perf_counter() - started,
             "gpu_policy": {
-                "physical_gpu": 5,
+                "physical_gpu": physical_gpu,
                 "visible_cuda_devices": 1,
                 "batch_size": 1,
                 "parallel_vlm_jobs": False,

@@ -50,9 +50,10 @@ def main() -> None:
     config_path = args.config.resolve()
     config = load_json(config_path)
     gpu_ids = args.gpu_ids or [int(value) for value in config["gpu_ids"]]
-    allowed = {0, 2, 4, 5}
-    if not gpu_ids or len(gpu_ids) != len(set(gpu_ids)) or not set(gpu_ids) <= allowed:
-        raise ValueError("Only unique physical GPUs 0, 2, 4, and 5 are allowed")
+    if not gpu_ids or len(gpu_ids) != len(set(gpu_ids)) or any(
+        gpu < 0 for gpu in gpu_ids
+    ):
+        raise ValueError("gpu_ids must contain unique non-negative indices")
     output_root = resolve_path(config["output_root"])
     logs = output_root / "logs"
     logs.mkdir(parents=True, exist_ok=True)

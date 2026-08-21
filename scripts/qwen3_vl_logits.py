@@ -26,6 +26,9 @@ DEFAULT_MODEL = Path(
 )
 MODEL_REPOSITORY = "Qwen/Qwen3-VL-8B-Instruct"
 PROMPT_VERSION = "qwen3-vl-joint-candidate-v6-rgb-box-crop-debiased"
+GROUNDED_RANKING_PROMPT_VERSION = (
+    "grounded-qwen-factorized-identity-relation-v3-explicit-attributes"
+)
 CHOICE_LETTERS = tuple("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 
@@ -311,6 +314,11 @@ def candidate_identity_question(
         f"Evaluate only candidate {candidate_id} for visual identity.\n"
         "Use the original scene, bounding-box RGB crop, and candidate context. "
         "Judge color, shape, logo, texture, and other visible appearance cues. "
+        "All distinctive visible attributes named in the target description must "
+        "be supported by visual evidence. If a requested logo, marking, texture, "
+        "or other attribute is absent, hidden, or too unclear to verify, choose "
+        "does_not_match_target_description. In particular, a plain object does "
+        "not match a description that requires a visible logo or marking. "
         "Do not use inside/outside/behind location for this identity score; "
         "spatial relation is evaluated by a separate question.\n"
         f"{choices}\n"
