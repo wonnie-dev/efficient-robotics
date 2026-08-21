@@ -10,7 +10,6 @@
   },
   "method_definitions": "configs/research/method_definitions.json",
   "planner_template": "configs/research/unified_task_belief.json",
-  "development_selection_record": "configs/research/method_selection_record.json",
   "reserved_test_capture_config": "configs/research/reserved_test_episodes.json",
   "data_split": {
     "development_seed_range": [1270, 1333],

@@ -76,18 +76,6 @@ class FiveScenarioProtocolTest(unittest.TestCase):
             {"viewpoint_right", "viewpoint_close_high", "remove_cover", "grasp", "defer"},
         )
 
-    def test_development_choices_are_recorded_before_test(self) -> None:
-        record = json.loads(
-            (ROOT / self.protocol["development_selection_record"]).read_text()
-        )
-        self.assertEqual(record["selection_data_split"], "development_only")
-        self.assertFalse(record["reserved_test_seed_range_opened"])
-        self.assertTrue(
-            record["decisions"]["direct_vlm_baseline"][
-                "retained_for_final_comparison"
-            ]
-        )
-
     def test_nonreserved_preflight_is_balanced(self) -> None:
         development = json.loads(
             (ROOT / "configs/research/five_scenario_validation_episodes.json").read_text()

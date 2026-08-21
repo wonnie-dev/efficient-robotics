@@ -1,17 +1,15 @@
 {
   "schema_version": "closed-loop-episode-config-v1",
-  "status": "nonreserved_validation_ready",
+  "status": "configuration_template",
   "experiment_id": "closed_loop_episode",
-  "seed": 1370,
-  "scene_variant": "right_only",
+  "seed": 0,
+  "scene_variant": "inside_clear",
   "initial_task_state": "open",
   "validation_scope": "unified_root_action_dispatch",
-  "frozen_cover_planner": "artifacts/calibration/frozen_cover_planner.json",
   "joint_model_config": "configs/research/joint_observation_model_config.json",
-  "joint_observation_model": "artifacts/calibration/joint_observation_model.json",
-  "unified_joint_model": "artifacts/calibration/calibration_candidate_model.json",
-  "unified_view_model": "artifacts/calibration/scene_conditioned_view_model_candidate.json",
-  "unified_resolution_likelihoods": "artifacts/calibration/resolution_likelihoods_candidate.json",
+  "unified_joint_model": "outputs/calibration/frozen/joint_observation_and_mpc_model.json",
+  "unified_view_model": "outputs/calibration/frozen/scene_conditioned_view_model.json",
+  "unified_resolution_likelihoods": "outputs/calibration/frozen/resolution_likelihoods.json",
   "target_temperature": 5.825,
   "maximum_track_center_distance_m": 0.12,
   "maximum_target_localization_extent_m": 0.18,
@@ -20,7 +18,7 @@
   "rg6_coupling_mode": "coordinated_drives",
   "coordinated_rg6_total_drive_effort_limit_nm": 18,
   "record_debug_video": false,
-  "collect_development_failures": true,
+  "collect_development_failures": false,
   "perception_task_overrides": {
     "instruction": "Find and pick up the red mug with the white rectangular logo.",
     "target_description": "red mug with a white rectangular logo",
@@ -47,8 +45,5 @@
     "grounding_dino_prompt": "red object. orange object. yellow object. blue object. green object. purple object. open container. lid or cover."
   },
   "training_performed": false,
-  "calibration_performed": true,
-  "testing_performed": false,
-  "reserved_test_seed_used": false,
-  "valid_for_final_evaluation": false
+  "requires_frozen_calibration": true
 }

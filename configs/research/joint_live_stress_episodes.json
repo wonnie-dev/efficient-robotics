@@ -1,7 +1,7 @@
 {
   "schema_version": "joint-live-stress-episodes-v1",
   "status": "development_only_predeclared_before_live_outcomes",
-  "base_episode_config": "configs/research/closed_loop_episode_template.json",
+  "base_episode_config": "configs/research/closed_loop_episode.json",
   "output_root": "outputs/live_pipeline/joint_live_stress_episodes",
   "assignments": [
     {"physical_gpu": 0, "seed": 820, "family": "covered_target_inside", "scene_variant": "cover_removal_required"},
@@ -28,8 +28,6 @@
   "multi_gpu_inside_process": false,
   "ddp_used": false,
   "nccl_used": false,
-  "expected_runtime_hours": [2.5, 4.0],
-  "expected_peak_memory_gib_per_gpu": [22.0, 26.0],
   "training_performed": false,
   "calibration_performed": false,
   "testing_performed": false,

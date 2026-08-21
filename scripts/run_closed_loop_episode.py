@@ -53,8 +53,8 @@ from task_belief_runtime import (
 )
 
 
-DEFAULT_CONFIG = ROOT / "configs/research/closed_loop_episode_template.json"
-OUTPUT_ROOT = ROOT / "outputs/live_pipeline/closed_loop_episode_template"
+DEFAULT_CONFIG = ROOT / "configs/research/closed_loop_episode.json"
+OUTPUT_ROOT = ROOT / "outputs/live_pipeline/closed_loop_episode"
 TRACK_IDS = ["track_center_selected", "track_other_target"]
 
 
@@ -476,7 +476,9 @@ def main() -> None:
         )
     if joint_model.get("valid_for_final_evaluation"):
         raise ValueError("Development runner cannot consume a final-test model")
-    cover_config = load_json(resolve_path(config["frozen_cover_planner"]))
+    cover_config = None
+    if not calibrated_mode:
+        cover_config = load_json(resolve_path(config["frozen_cover_planner"]))
     view_model = None
     if calibrated_mode:
         view_model = load_json(
@@ -505,6 +507,7 @@ def main() -> None:
             unified_root_model,
         )
     elif not calibrated_mode:
+        assert cover_config is not None
         root_policy = cover_plan(
             normalize(cover_config["initial_belief"]), cover_config
         )

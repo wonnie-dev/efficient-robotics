@@ -1,7 +1,6 @@
 {
   "schema_version": "multiview-belief-config-v1",
-  "design_status": "integration_template",
-  "evaluation_status": "not_a_reserved_test_configuration",
+  "scope": "causal_integration_fixture",
   "scenario": {
     "name": "scanned_basket_controlled_occlusion_active_reobservation",
     "seed": 0,
@@ -22,13 +21,12 @@
   "completed_reobservations": 0,
   "commitment_policy": {
     "maximum_task_failure_risk": 0.15,
-    "minimum_completed_reobservations": 1,
-    "status": "integration_safety_constraint"
+    "minimum_completed_reobservations": 1
   },
   "qwen_belief_adapter": {
     "raw_logit_temperature": 4.0,
     "observation_log_weight": 0.5,
-    "status": "replace_with_frozen_calibration_for_evaluation"
+    "parameter_source": "integration_fixture_values"
   },
   "initial_belief": {
     "source": "replaced_at_runtime_from_center_grounded_qwen_output",
@@ -44,7 +42,7 @@
     }
   },
   "observation_model": {
-    "status": "hand_specified_interface_likelihood",
+    "parameter_source": "integration_fixture_values",
     "future_capture_files_used": false,
     "derivation": "The raised occluder lies near the center/right target line of sight; close_high views the container more vertically.",
     "target_outcomes": [

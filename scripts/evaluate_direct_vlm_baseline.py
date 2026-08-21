@@ -25,7 +25,7 @@ from evaluate_scene_conditioned_planner import replace_symbols
 
 
 DEFAULT_CONFIG = ROOT / "configs/research/direct_vlm_action_baseline.json"
-MODEL = ROOT / "artifacts/calibration/calibration_candidate_model.json"
+DEFAULT_MODEL = ROOT / "outputs/calibration/frozen/joint_observation_and_mpc_model.json"
 
 
 def resolve_path(value: str | Path) -> Path:
@@ -150,6 +150,7 @@ def replay(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument("--model", type=Path, default=DEFAULT_MODEL)
     args = parser.parse_args()
     config = load_json(args.config.resolve())
     perception_root = resolve_path(config["source_perception_root"])
@@ -158,7 +159,7 @@ def main() -> None:
         build_rows(perception_root, minimum_iou=0.25, maximum_track_distance_m=0.12)
     )
     rankings = result_index(output_root)
-    model = load_json(MODEL)
+    model = load_json(args.model.resolve())
     rows = [replay(episode, rankings, model) for _, episode in sorted(episodes.items())]
     for row in rows:
         write_json(output_root / "episodes" / f"seed{int(row['seed']):04d}.json", row)

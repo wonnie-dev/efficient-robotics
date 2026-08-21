@@ -31,7 +31,7 @@ class CoveredViewCalibrationTests(unittest.TestCase):
     def test_covered_rows_are_added_without_replacing_open_rows(self) -> None:
         base = json.loads(
             (
-                ROOT / "artifacts/calibration/calibration_candidate_model.json"
+                ROOT / "configs/research/unified_task_belief.json"
             ).read_text(encoding="utf-8")
         )
         calibration = {"schema_version": "test", "episode_count": 4, "actions": {}}
