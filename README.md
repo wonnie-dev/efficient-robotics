@@ -99,6 +99,6 @@ scripts/       perception, belief update, planning, simulation, and evaluation c
 tests/         CPU regression and protocol tests
 ```
 
-The main implementation files are indexed in [Code Map](docs/CODE_MAP.md). The action definitions and safety contract are in [Action Space](docs/ACTION_SPACE_SPEC.md), the experimental split, comparisons, and metrics are in [Experiment Protocol](docs/EXPERIMENT_PROTOCOL.md), and the distinction from closely related active-perception systems is summarized in [Related Work](docs/RELATED_WORK.md).
+The main implementation files are indexed in [Code Map](docs/CODE_MAP.md). The action definitions and safety contract are in [Action Space](docs/ACTION_SPACE_SPEC.md), and the experimental split, comparisons, and metrics are in [Experiment Protocol](docs/EXPERIMENT_PROTOCOL.md).
 
 Generated RGB-D observations, videos, model weights, inference caches, and experiment outputs are excluded from Git.

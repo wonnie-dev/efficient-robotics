@@ -47,5 +47,3 @@ These elements are evaluated against fixed-view, confidence-only, information-ga
 The reference embodiment is a UR10e with an RG6 gripper and wrist RGB-D camera. Qwen provides instruction-conditioned evidence over anonymous candidates. Learned masks and RGB-D geometry provide object location and relation evidence. A discrete belief-tree planner selects semantic actions.
 
 Viewpoint actions use a fixed library of reachable wrist poses. Continuous camera-pose optimization is outside the method scope. Robot geometry, tool and camera transforms, contact parameters, and controller limits are configuration inputs that must be replaced by measured values for a different physical system.
-
-See [Related Work](RELATED_WORK.md) for the boundary between this formulation and closely related belief-space and VLM-guided active-perception systems.
