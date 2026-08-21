@@ -1,0 +1,138 @@
+{
+  "schema_version": "icra-v20-five-scenario-reserved-test-60episode-v1",
+  "status": "blocked_until_method_and_calibration_freeze",
+  "data_split": "test",
+  "seed_start": 1100,
+  "episode_count": 60,
+  "episodes_per_headline_scenario": 12,
+  "gpu_ids": [0, 2, 4, 5],
+  "output_root": "outputs/final_evaluation/icra_v20_reserved_test/observation_cache",
+  "final_evaluation_protocol": "outputs/calibration/icra_v20_frozen_before_test/frozen_final_evaluation_protocol.json",
+  "freeze_manifest": "outputs/calibration/icra_v20_frozen_before_test/freeze_manifest.json",
+  "reserved_test_opened": false,
+  "launch_authorized": false,
+  "family_schedule_design": "six predeclared blocks; each non-absence subcondition appears once and target-absent appears twice per block",
+  "family_schedule": [
+    8, 3, 0, 5, 1, 8, 7, 2, 6, 4,
+    2, 8, 6, 1, 4, 0, 8, 7, 5, 3,
+    5, 1, 8, 3, 7, 4, 2, 8, 0, 6,
+    7, 4, 0, 8, 2, 5, 6, 3, 8, 1,
+    1, 6, 8, 0, 3, 7, 5, 8, 4, 2,
+    4, 2, 7, 5, 8, 6, 1, 0, 3, 8
+  ],
+  "expected_family_counts": {
+    "visible_inside_clear": 6,
+    "visible_outside_clear": 6,
+    "partial_close_high_resolving": 6,
+    "partial_right_resolving": 6,
+    "covered_close_high_resolving": 6,
+    "covered_right_resolving": 6,
+    "ambiguous_inside_rim": 6,
+    "ambiguous_outside_behind": 6,
+    "target_absent_covered": 12
+  },
+  "views": ["center", "post_remove", "close_high", "right"],
+  "counterfactual_post_remove_views": ["close_high", "right"],
+  "disable_manipulation_video": true,
+  "physics_only_manipulation_steps": true,
+  "startup_timeout_seconds": 1200.0,
+  "family_cycle": [
+    {
+      "headline_scenario": "visible_open",
+      "family": "visible_inside_clear",
+      "scene_variant": "inside_clear",
+      "collector": "static_reachable_views",
+      "resolving_view": "center",
+      "blocked_view": null,
+      "expected_membership": "inside"
+    },
+    {
+      "headline_scenario": "visible_open",
+      "family": "visible_outside_clear",
+      "scene_variant": "outside",
+      "collector": "static_reachable_views",
+      "resolving_view": "center",
+      "blocked_view": null,
+      "expected_membership": "outside"
+    },
+    {
+      "headline_scenario": "partially_occluded",
+      "family": "partial_close_high_resolving",
+      "scene_variant": "close_high_only",
+      "collector": "static_reachable_views",
+      "resolving_view": "close_high",
+      "blocked_view": "right",
+      "expected_membership": "inside"
+    },
+    {
+      "headline_scenario": "partially_occluded",
+      "family": "partial_right_resolving",
+      "scene_variant": "right_only",
+      "collector": "static_reachable_views",
+      "resolving_view": "right",
+      "blocked_view": "close_high",
+      "expected_membership": "inside"
+    },
+    {
+      "headline_scenario": "covered_container",
+      "family": "covered_close_high_resolving",
+      "scene_variant": "covered_center_ambiguous_then_close_high_logo_v2",
+      "collector": "remove_cover_counterfactual",
+      "resolving_view": "close_high",
+      "blocked_view": "right",
+      "expected_membership": "inside"
+    },
+    {
+      "headline_scenario": "covered_container",
+      "family": "covered_right_resolving",
+      "scene_variant": "covered_center_ambiguous_then_right_only",
+      "collector": "remove_cover_counterfactual",
+      "resolving_view": "right",
+      "blocked_view": "close_high",
+      "expected_membership": "inside"
+    },
+    {
+      "headline_scenario": "ambiguous_inside_outside",
+      "family": "ambiguous_inside_rim",
+      "scene_variant": "rim_occluded",
+      "collector": "static_reachable_views",
+      "resolving_view": "close_high_or_right",
+      "blocked_view": "center",
+      "expected_membership": "inside"
+    },
+    {
+      "headline_scenario": "ambiguous_inside_outside",
+      "family": "ambiguous_outside_behind",
+      "scene_variant": "behind_ambiguous",
+      "collector": "static_reachable_views",
+      "resolving_view": "close_high_or_right",
+      "blocked_view": "center",
+      "expected_membership": "outside"
+    },
+    {
+      "headline_scenario": "target_absent",
+      "family": "target_absent_covered",
+      "scene_variant": "target_absent_covered",
+      "collector": "remove_cover_counterfactual",
+      "resolving_view": "post_remove_empty",
+      "blocked_view": null,
+      "expected_membership": "not_applicable"
+    }
+  ],
+  "required_policy_actions": [
+    "viewpoint_right",
+    "viewpoint_close_high",
+    "remove_cover",
+    "grasp",
+    "defer"
+  ],
+  "one_process_per_gpu": true,
+  "multi_gpu_inside_process": false,
+  "ddp_used": false,
+  "nccl_used": false,
+  "training_performed": false,
+  "calibration_performed": true,
+  "testing_performed": false,
+  "reserved_test_seeds_used": false,
+  "valid_for_final_evaluation": false
+}

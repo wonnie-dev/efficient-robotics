@@ -1,0 +1,134 @@
+{
+  "schema_version": "icra-v16-resolution-likelihoods-candidate-v1",
+  "status": "calibration_candidate_not_frozen",
+  "dirichlet_alpha": 0.05,
+  "actions": {
+    "viewpoint_close_high": {
+      "vocabulary": [
+        "center_target|inside",
+        "center_target|outside",
+        "no_target_evidence",
+        "other_target|inside",
+        "unseen"
+      ],
+      "resolved": {
+        "track_center_selected|inside": {
+          "center_target|inside": 0.2,
+          "center_target|outside": 0.2,
+          "no_target_evidence": 0.2,
+          "other_target|inside": 0.2,
+          "unseen": 0.2
+        },
+        "track_center_selected|outside": {
+          "center_target|inside": 0.2,
+          "center_target|outside": 0.2,
+          "no_target_evidence": 0.2,
+          "other_target|inside": 0.2,
+          "unseen": 0.2
+        },
+        "track_other_target|inside": {
+          "center_target|inside": 0.004878048780487805,
+          "center_target|outside": 0.004878048780487805,
+          "no_target_evidence": 0.004878048780487805,
+          "other_target|inside": 0.9804878048780489,
+          "unseen": 0.004878048780487805
+        },
+        "track_other_target|outside": {
+          "center_target|inside": 0.2,
+          "center_target|outside": 0.2,
+          "no_target_evidence": 0.2,
+          "other_target|inside": 0.2,
+          "unseen": 0.2
+        },
+        "target_absent|not_applicable": {
+          "center_target|inside": 0.2,
+          "center_target|outside": 0.2,
+          "no_target_evidence": 0.2,
+          "other_target|inside": 0.2,
+          "unseen": 0.2
+        }
+      },
+      "unresolved": {
+        "center_target|inside": 0.07634069400630915,
+        "center_target|outside": 0.41703470031545736,
+        "no_target_evidence": 0.5053627760252366,
+        "other_target|inside": 0.0006309148264984228,
+        "unseen": 0.0006309148264984228
+      },
+      "resolved_support_by_hypothesis": {
+        "track_other_target|inside": 10
+      },
+      "unresolved_support": 79
+    },
+    "viewpoint_right": {
+      "vocabulary": [
+        "center_target|inside",
+        "center_target|outside",
+        "no_target_evidence",
+        "other_target|inside",
+        "other_target|outside",
+        "unseen"
+      ],
+      "resolved": {
+        "track_center_selected|inside": {
+          "center_target|inside": 0.16666666666666666,
+          "center_target|outside": 0.16666666666666666,
+          "no_target_evidence": 0.16666666666666666,
+          "other_target|inside": 0.16666666666666666,
+          "other_target|outside": 0.16666666666666666,
+          "unseen": 0.16666666666666666
+        },
+        "track_center_selected|outside": {
+          "center_target|inside": 0.16666666666666666,
+          "center_target|outside": 0.16666666666666666,
+          "no_target_evidence": 0.16666666666666666,
+          "other_target|inside": 0.16666666666666666,
+          "other_target|outside": 0.16666666666666666,
+          "unseen": 0.16666666666666666
+        },
+        "track_other_target|inside": {
+          "center_target|inside": 0.0048543689320388345,
+          "center_target|outside": 0.0048543689320388345,
+          "no_target_evidence": 0.0048543689320388345,
+          "other_target|inside": 0.9757281553398058,
+          "other_target|outside": 0.0048543689320388345,
+          "unseen": 0.0048543689320388345
+        },
+        "track_other_target|outside": {
+          "center_target|inside": 0.006024096385542168,
+          "center_target|outside": 0.006024096385542168,
+          "no_target_evidence": 0.006024096385542168,
+          "other_target|inside": 0.006024096385542168,
+          "other_target|outside": 0.9698795180722891,
+          "unseen": 0.006024096385542168
+        },
+        "target_absent|not_applicable": {
+          "center_target|inside": 0.16666666666666666,
+          "center_target|outside": 0.16666666666666666,
+          "no_target_evidence": 0.16666666666666666,
+          "other_target|inside": 0.16666666666666666,
+          "other_target|outside": 0.16666666666666666,
+          "unseen": 0.16666666666666666
+        }
+      },
+      "unresolved": {
+        "center_target|inside": 0.26718092566619916,
+        "center_target|outside": 0.26718092566619916,
+        "no_target_evidence": 0.4635343618513324,
+        "other_target|inside": 0.0007012622720897617,
+        "other_target|outside": 0.0007012622720897617,
+        "unseen": 0.0007012622720897617
+      },
+      "resolved_support_by_hypothesis": {
+        "track_other_target|outside": 8,
+        "track_other_target|inside": 10
+      },
+      "unresolved_support": 71
+    }
+  },
+  "policy_override_used": false,
+  "training_performed": false,
+  "calibration_performed": true,
+  "testing_performed": false,
+  "valid_for_final_evaluation": false
+}

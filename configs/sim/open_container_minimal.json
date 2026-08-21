@@ -1,0 +1,24 @@
+{
+  "scene_id": "open_container_minimal_v1",
+  "stage_units_meters": 1.0,
+  "physics_dt_seconds": 0.0166666667,
+  "robot": {
+    "model": "Universal Robots UR10e",
+    "gripper": "OnRobot RG6",
+    "camera": "Zivid 2 wrist-mounted RGB-D",
+    "status": "paper_based_provisional_stack",
+    "robot_prim": "/World/RobotSystem/UR10e",
+    "gripper_prim": "/World/RobotSystem/RG6",
+    "camera_prim": "/World/RobotSystem/RG6/Zivid2Camera"
+  },
+  "camera": {
+    "prim": "/World/ObservationCamera",
+    "position_m": [1.35, -1.35, 1.25],
+    "target_m": [0.45, 0.0, 0.82]
+  },
+  "objects": [
+    {"id": "target_red", "shape": "cube", "size_m": 0.045, "relation": "inside", "position_m": [0.48, 0.02, 0.82]},
+    {"id": "distractor_blue", "shape": "cube", "size_m": 0.055, "relation": "outside_near", "position_m": [0.50, -0.30, 0.82]}
+  ],
+  "seed": 0
+}

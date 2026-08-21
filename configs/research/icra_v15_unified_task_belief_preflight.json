@@ -1,0 +1,133 @@
+{
+  "schema_version": "icra-v15-unified-task-belief-preflight-v1",
+  "status": "development_preflight_not_final_calibration_or_test",
+  "semantic_hypotheses": [
+    "track_center_selected|inside",
+    "track_center_selected|outside",
+    "track_other_target|inside",
+    "track_other_target|outside",
+    "target_absent|not_applicable"
+  ],
+  "observable_task_states": ["covered", "open"],
+  "initial_task_state": "covered",
+  "initial_semantic_belief": {
+    "track_center_selected|inside": 0.30,
+    "track_center_selected|outside": 0.15,
+    "track_other_target|inside": 0.25,
+    "track_other_target|outside": 0.20,
+    "target_absent|not_applicable": 0.10
+  },
+  "horizon": 3,
+  "costs": {
+    "wrong_commitment": 1.0,
+    "execution_failure": 0.5,
+    "defer": 0.8
+  },
+  "terminal_grasp_actions": {
+    "grasp:track_center_selected:inside": {
+      "semantic_hypothesis": "track_center_selected|inside",
+      "allowed_task_states": ["open"],
+      "stage_cost": 0.12,
+      "conditional_execution_success_probability": 0.95
+    },
+    "grasp:track_center_selected:outside": {
+      "semantic_hypothesis": "track_center_selected|outside",
+      "allowed_task_states": ["covered", "open"],
+      "stage_cost": 0.12,
+      "conditional_execution_success_probability": 0.95
+    },
+    "grasp:track_other_target:inside": {
+      "semantic_hypothesis": "track_other_target|inside",
+      "allowed_task_states": ["open"],
+      "stage_cost": 0.12,
+      "conditional_execution_success_probability": 0.95
+    },
+    "grasp:track_other_target:outside": {
+      "semantic_hypothesis": "track_other_target|outside",
+      "allowed_task_states": ["covered", "open"],
+      "stage_cost": 0.12,
+      "conditional_execution_success_probability": 0.95
+    }
+  },
+  "information_actions": {
+    "remove_cover": {
+      "kind": "interaction_observation",
+      "allowed_task_states": ["covered"],
+      "stage_cost": 0.16,
+      "outcomes": ["opened_target_visible", "opened_empty", "removal_failed"],
+      "next_task_state_by_outcome": {
+        "covered": {
+          "opened_target_visible": "open",
+          "opened_empty": "open",
+          "removal_failed": "covered"
+        }
+      },
+      "observation_likelihood": {
+        "covered": {
+          "track_center_selected|inside": {"opened_target_visible": 0.82, "opened_empty": 0.08, "removal_failed": 0.10},
+          "track_center_selected|outside": {"opened_target_visible": 0.08, "opened_empty": 0.82, "removal_failed": 0.10},
+          "track_other_target|inside": {"opened_target_visible": 0.82, "opened_empty": 0.08, "removal_failed": 0.10},
+          "track_other_target|outside": {"opened_target_visible": 0.08, "opened_empty": 0.82, "removal_failed": 0.10},
+          "target_absent|not_applicable": {"opened_target_visible": 0.02, "opened_empty": 0.88, "removal_failed": 0.10}
+        }
+      }
+    },
+    "viewpoint_close_high": {
+      "kind": "observation",
+      "allowed_task_states": ["covered", "open"],
+      "stage_cost": 0.08,
+      "outcomes": ["center_inside", "other_inside", "outside_or_absent", "unresolved"],
+      "next_task_state_by_outcome": {
+        "covered": {"center_inside": "covered", "other_inside": "covered", "outside_or_absent": "covered", "unresolved": "covered"},
+        "open": {"center_inside": "open", "other_inside": "open", "outside_or_absent": "open", "unresolved": "open"}
+      },
+      "observation_likelihood": {
+        "covered": {
+          "track_center_selected|inside": {"center_inside": 0.44, "other_inside": 0.05, "outside_or_absent": 0.06, "unresolved": 0.45},
+          "track_center_selected|outside": {"center_inside": 0.05, "other_inside": 0.05, "outside_or_absent": 0.45, "unresolved": 0.45},
+          "track_other_target|inside": {"center_inside": 0.05, "other_inside": 0.44, "outside_or_absent": 0.06, "unresolved": 0.45},
+          "track_other_target|outside": {"center_inside": 0.05, "other_inside": 0.05, "outside_or_absent": 0.45, "unresolved": 0.45},
+          "target_absent|not_applicable": {"center_inside": 0.02, "other_inside": 0.02, "outside_or_absent": 0.51, "unresolved": 0.45}
+        },
+        "open": {
+          "track_center_selected|inside": {"center_inside": 0.82, "other_inside": 0.04, "outside_or_absent": 0.04, "unresolved": 0.10},
+          "track_center_selected|outside": {"center_inside": 0.04, "other_inside": 0.04, "outside_or_absent": 0.82, "unresolved": 0.10},
+          "track_other_target|inside": {"center_inside": 0.04, "other_inside": 0.82, "outside_or_absent": 0.04, "unresolved": 0.10},
+          "track_other_target|outside": {"center_inside": 0.04, "other_inside": 0.04, "outside_or_absent": 0.82, "unresolved": 0.10},
+          "target_absent|not_applicable": {"center_inside": 0.01, "other_inside": 0.01, "outside_or_absent": 0.88, "unresolved": 0.10}
+        }
+      }
+    },
+    "viewpoint_right": {
+      "kind": "observation",
+      "allowed_task_states": ["covered", "open"],
+      "stage_cost": 0.06,
+      "outcomes": ["center_target", "other_target", "target_missing", "unresolved"],
+      "next_task_state_by_outcome": {
+        "covered": {"center_target": "covered", "other_target": "covered", "target_missing": "covered", "unresolved": "covered"},
+        "open": {"center_target": "open", "other_target": "open", "target_missing": "open", "unresolved": "open"}
+      },
+      "observation_likelihood": {
+        "covered": {
+          "track_center_selected|inside": {"center_target": 0.38, "other_target": 0.06, "target_missing": 0.06, "unresolved": 0.50},
+          "track_center_selected|outside": {"center_target": 0.78, "other_target": 0.06, "target_missing": 0.06, "unresolved": 0.10},
+          "track_other_target|inside": {"center_target": 0.06, "other_target": 0.38, "target_missing": 0.06, "unresolved": 0.50},
+          "track_other_target|outside": {"center_target": 0.06, "other_target": 0.78, "target_missing": 0.06, "unresolved": 0.10},
+          "target_absent|not_applicable": {"center_target": 0.02, "other_target": 0.02, "target_missing": 0.86, "unresolved": 0.10}
+        },
+        "open": {
+          "track_center_selected|inside": {"center_target": 0.76, "other_target": 0.06, "target_missing": 0.08, "unresolved": 0.10},
+          "track_center_selected|outside": {"center_target": 0.76, "other_target": 0.06, "target_missing": 0.08, "unresolved": 0.10},
+          "track_other_target|inside": {"center_target": 0.06, "other_target": 0.76, "target_missing": 0.08, "unresolved": 0.10},
+          "track_other_target|outside": {"center_target": 0.06, "other_target": 0.76, "target_missing": 0.08, "unresolved": 0.10},
+          "target_absent|not_applicable": {"center_target": 0.02, "other_target": 0.02, "target_missing": 0.86, "unresolved": 0.10}
+        }
+      }
+    }
+  },
+  "probability_source": "provisional_preflight_values_require_new_disjoint_calibration",
+  "training_performed": false,
+  "calibration_performed": false,
+  "testing_performed": false,
+  "valid_for_final_evaluation": false
+}

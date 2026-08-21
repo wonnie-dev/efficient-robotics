@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://efficient-robotics.local/schemas/vlm-ground-truth-v1.json",
+  "title": "Efficient Robotics VLM Ground Truth",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "sample_id", "target_candidate_id", "relations", "leakage_policy"],
+  "properties": {
+    "schema_version": {"const": "vlm-ground-truth-v1"},
+    "sample_id": {"type": "string", "minLength": 1},
+    "target_candidate_id": {"type": "string", "pattern": "^object_[0-9]{3}$"},
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["query_id", "label"],
+        "properties": {
+          "query_id": {"type": "string"},
+          "label": {"type": "string"}
+        }
+      }
+    },
+    "leakage_policy": {"const": "never_expose_to_model_inference"}
+  }
+}

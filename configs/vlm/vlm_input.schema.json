@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://efficient-robotics.local/schemas/vlm-input-v1.json",
+  "title": "Efficient Robotics VLM Input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "sample_id", "episode_id", "view_id", "instruction", "image", "candidates", "relation_queries"],
+  "properties": {
+    "schema_version": {"const": "vlm-input-v1"},
+    "sample_id": {"type": "string", "minLength": 1},
+    "episode_id": {"type": "string", "minLength": 1},
+    "view_id": {"type": "string", "minLength": 1},
+    "instruction": {"type": "string", "minLength": 1},
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rgb_path", "width", "height"],
+      "properties": {
+        "rgb_path": {"type": "string", "minLength": 1},
+        "width": {"type": "integer", "minimum": 1},
+        "height": {"type": "integer", "minimum": 1}
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["candidate_id", "bbox_xyxy", "crop_path", "mask_path"],
+        "properties": {
+          "candidate_id": {"type": "string", "pattern": "^object_[0-9]{3}$"},
+          "bbox_xyxy": {
+            "type": "array",
+            "prefixItems": [{"type": "integer"}, {"type": "integer"}, {"type": "integer"}, {"type": "integer"}],
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "crop_path": {"type": "string", "minLength": 1},
+          "mask_path": {"type": "string", "minLength": 1},
+          "context_path": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "reference_entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["reference_id", "bbox_xyxy", "description"],
+        "properties": {
+          "reference_id": {"type": "string", "minLength": 1},
+          "bbox_xyxy": {
+            "type": "array",
+            "prefixItems": [{"type": "integer"}, {"type": "integer"}, {"type": "integer"}, {"type": "integer"}],
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "description": {"type": "string", "minLength": 1},
+          "mask_path": {"type": "string", "minLength": 1},
+          "overlay_path": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "relation_queries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["query_id", "source_id", "target_id", "label_space"],
+        "properties": {
+          "query_id": {"type": "string", "minLength": 1},
+          "source_id": {"type": "string", "minLength": 1},
+          "target_id": {"type": "string", "minLength": 1},
+          "label_space": {
+            "type": "array",
+            "minItems": 2,
+            "items": {"type": "string", "minLength": 1},
+            "uniqueItems": true
+          }
+        }
+      }
+    }
+  }
+}

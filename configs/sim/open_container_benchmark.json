@@ -1,0 +1,32 @@
+{
+  "scene_id": "open_container_benchmark_v1",
+  "status": "paper_benchmark_visual_prototype",
+  "stage_units_meters": 1.0,
+  "physics_dt_seconds": 0.0166666667,
+  "robot": {
+    "model": "Universal Robots UR10e",
+    "gripper": "OnRobot RG6",
+    "camera": "Zivid 2 wrist-mounted RGB-D",
+    "status": "paper_based_provisional_stack",
+    "robot_prim": "/World/RobotSystem/UR10e",
+    "gripper_prim": "/World/RobotSystem/RG6",
+    "camera_prim": "/World/RobotSystem/RG6/Zivid2Camera"
+  },
+  "scenario": {
+    "family": "open_container_active_reobservation",
+    "variant": "inside_partial_occlusion_with_clutter",
+    "target_id": "target_red",
+    "required_relation": "inside"
+  },
+  "objects": [
+    {"id": "target_red", "prim": "/World/TargetRed", "role": "target", "shape": "cube", "relation": "inside", "position_m": [0.49, 0.025, 0.795]},
+    {"id": "occluder_orange", "prim": "/World/OccluderOrange", "role": "occluder", "shape": "cylinder", "relation": "in_front_of_target", "position_m": [0.43, -0.035, 0.805]},
+    {"id": "distractor_yellow", "prim": "/World/DistractorYellow", "role": "distractor", "shape": "cylinder", "relation": "inside", "position_m": [0.30, 0.14, 0.80]},
+    {"id": "distractor_blue", "prim": "/World/DistractorBlue", "role": "distractor", "shape": "cube", "relation": "outside_near", "position_m": [0.51, -0.31, 0.79]},
+    {"id": "distractor_green", "prim": "/World/DistractorGreen", "role": "distractor", "shape": "sphere", "relation": "outside_near", "position_m": [0.79, -0.17, 0.80]},
+    {"id": "boundary_purple", "prim": "/World/BoundaryPurple", "role": "relation_distractor", "shape": "cuboid", "relation": "near_boundary", "position_m": [0.80, 0.10, 0.805]},
+    {"id": "rear_red_candidate", "prim": "/World/RearRedCandidate", "role": "target_distractor", "shape": "cylinder", "relation": "behind_container", "position_m": [0.66, 0.31, 0.80]}
+  ],
+  "randomization_status": "relation_preserving_seeded_pilot_generator_implemented_not_final_evaluation",
+  "seed": 0
+}

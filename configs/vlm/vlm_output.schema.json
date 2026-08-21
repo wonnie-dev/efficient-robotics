@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://efficient-robotics.local/schemas/vlm-output-v1.json",
+  "title": "Efficient Robotics VLM Raw-Logit Output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "sample_id", "model", "target", "relations", "provenance"],
+  "properties": {
+    "schema_version": {"const": "vlm-output-v1"},
+    "sample_id": {"type": "string", "minLength": 1},
+    "model": {
+      "type": "object",
+      "required": ["name", "checkpoint"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "checkpoint": {"type": "string", "minLength": 1}
+      }
+    },
+    "target": {
+      "type": "object",
+      "required": ["candidate_ids", "raw_logits"],
+      "properties": {
+        "candidate_ids": {"type": "array", "minItems": 2, "items": {"type": "string"}},
+        "raw_logits": {"type": "array", "minItems": 2, "items": {"type": "number"}}
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["query_id", "labels", "raw_logits"],
+        "properties": {
+          "query_id": {"type": "string"},
+          "labels": {"type": "array", "minItems": 2, "items": {"type": "string"}},
+          "raw_logits": {"type": "array", "minItems": 2, "items": {"type": "number"}}
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["prompt_version", "weights_hash", "device"],
+      "properties": {
+        "prompt_version": {"type": "string"},
+        "weights_hash": {"type": "string"},
+        "device": {"type": "string"}
+      }
+    }
+  }
+}

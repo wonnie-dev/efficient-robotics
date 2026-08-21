@@ -1,0 +1,75 @@
+{
+  "schema_version": "icra-v6-stress-scene-smoke-v1",
+  "status": "development_before_calibration_and_test_freeze",
+  "purpose": "Reject scenes that are geometrically valid but semantically solvable from a fixed post-cover view.",
+  "output_root": "outputs/live_pipeline/icra_v6_stress_scene_smoke",
+  "physics_config": "configs/hardware/rg6_lid_development_proxy.json",
+  "views": ["center", "post_remove", "close_high", "right"],
+  "smoke_assignments": [
+    {
+      "physical_gpu": 0,
+      "seed": 500,
+      "family": "close_high_resolving",
+      "scene_variant": "covered_center_ambiguous_then_close_high_only",
+      "resolving_view": "close_high",
+      "blocked_view": "right"
+    },
+    {
+      "physical_gpu": 1,
+      "seed": 501,
+      "family": "right_resolving",
+      "scene_variant": "covered_center_ambiguous_then_right_only",
+      "resolving_view": "right",
+      "blocked_view": "close_high"
+    },
+    {
+      "physical_gpu": 2,
+      "seed": 502,
+      "family": "empty_container_negative_evidence",
+      "scene_variant": "empty_cover_then_right",
+      "resolving_view": "right",
+      "blocked_view": "close_high"
+    },
+    {
+      "physical_gpu": 3,
+      "seed": 503,
+      "family": "close_high_resolving",
+      "scene_variant": "covered_center_ambiguous_then_close_high_only",
+      "resolving_view": "close_high",
+      "blocked_view": "right"
+    },
+    {
+      "physical_gpu": 4,
+      "seed": 504,
+      "family": "right_resolving",
+      "scene_variant": "covered_center_ambiguous_then_right_only",
+      "resolving_view": "right",
+      "blocked_view": "close_high"
+    },
+    {
+      "physical_gpu": 5,
+      "seed": 505,
+      "family": "empty_container_negative_evidence",
+      "scene_variant": "empty_cover_then_right",
+      "resolving_view": "right",
+      "blocked_view": "close_high"
+    }
+  ],
+  "acceptance": {
+    "physical_cover_removal_required": true,
+    "bilateral_contact_required": true,
+    "unexpected_environment_collision_allowed": false,
+    "resolving_view_must_select_visible_target": true,
+    "blocked_view_must_not_resolve_target": true,
+    "post_remove_view_must_remain_unresolved": true
+  },
+  "future_frozen_protocol": {
+    "calibration_episode_count": 24,
+    "reserved_test_episode_count": 60,
+    "test_seed_labels_hidden_until_method_freeze": true,
+    "test_seed_reuse_for_tuning_forbidden": true
+  },
+  "training_performed": false,
+  "calibration_performed": false,
+  "testing_performed": false
+}

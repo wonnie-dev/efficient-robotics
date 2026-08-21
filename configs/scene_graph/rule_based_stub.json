@@ -1,0 +1,36 @@
+{
+  "status": "provisional_interface_test_not_model_output",
+  "description": "Deterministic probabilities for testing the Scene Graph-to-policy interface before VLM inference and calibration are implemented.",
+  "input_root": "outputs/observations",
+  "views": ["left", "center", "right"],
+  "sequence_indices": {"left": 0, "center": 1, "right": 2},
+  "task": {
+    "instruction": "Find the red target object in the open container and retrieve it.",
+    "target_condition": "red target object",
+    "allowed_relations": ["inside", "outside", "near", "behind", "occluded_by", "on"]
+  },
+  "target_probability": {
+    "base": 0.5,
+    "visible_fraction_gain": 50.0,
+    "minimum": 0.5,
+    "maximum": 0.95,
+    "candidate_ids": ["target_red", "distractor_blue"]
+  },
+  "relation_probability": {
+    "base": 0.45,
+    "visible_fraction_gain": 60.0,
+    "minimum": 0.45,
+    "maximum": 0.95,
+    "labels": ["inside", "outside", "near", "behind", "occluded_by", "on"]
+  },
+  "uncertainty": {
+    "method": "one_minus_max_probability_stub",
+    "calibrated": false,
+    "units": "normalized_score"
+  },
+  "ground_truth_usage": {
+    "configured_object_identity": true,
+    "configured_nominal_relation": true,
+    "allowed_for_final_evaluation": false
+  }
+}

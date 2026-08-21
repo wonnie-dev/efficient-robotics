@@ -1,0 +1,131 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "URDF USD Converter v0.1.2"
+    }
+    defaultPrim = "onrobot_rg6_model"
+    doc = """Generated from Composed Stage of root layer D:\\isaac_project\\.tmp\\rg6_import\\tmpa5wmyygi\\onrobot_rg6_model.usdc
+
+
+Generated from Composed Stage of root layer D:\\isaac_project\\assets\\robots\\onrobot_rg6\\usd\\_debug_onrobot_rg6\\usdex_onrobot_rg6\\onrobot_rg6_model.usdc
+
+
+Generated from Composed Stage of root layer D:\\isaac_project\\assets\\robots\\onrobot_rg6\\usd\\_debug_onrobot_rg6\\temp_onrobot_rg6\\onrobot_rg6.usd
+"""
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+over "onrobot_rg6_model" (
+    prepend apiSchemas = ["IsaacRobotAPI"]
+)
+{
+    prepend rel isaac:physics:robotJoints = [
+        </onrobot_rg6_model/Physics/root_joint>,
+        </onrobot_rg6_model/Physics/finger_joint>,
+        </onrobot_rg6_model/Physics/left_inner_knuckle_joint>,
+        </onrobot_rg6_model/Physics/right_outer_knuckle_joint>,
+        </onrobot_rg6_model/Physics/right_inner_knuckle_joint>,
+        </onrobot_rg6_model/Physics/left_inner_finger_joint>,
+        </onrobot_rg6_model/Physics/right_inner_finger_joint>,
+    ]
+    prepend rel isaac:physics:robotLinks = [
+        </onrobot_rg6_model/Geometry/onrobot_rg6_base_link>,
+        </onrobot_rg6_model/Geometry/onrobot_rg6_base_link/left_outer_knuckle>,
+        </onrobot_rg6_model/Geometry/onrobot_rg6_base_link/left_outer_knuckle/left_inner_finger>,
+        </onrobot_rg6_model/Geometry/onrobot_rg6_base_link/left_inner_knuckle>,
+        </onrobot_rg6_model/Geometry/onrobot_rg6_base_link/right_outer_knuckle>,
+        </onrobot_rg6_model/Geometry/onrobot_rg6_base_link/right_outer_knuckle/right_inner_finger>,
+        </onrobot_rg6_model/Geometry/onrobot_rg6_base_link/right_inner_knuckle>,
+    ]
+    token isaac:robotType = "Default"
+
+    over "Geometry"
+    {
+        over "onrobot_rg6_base_link" (
+            prepend apiSchemas = ["IsaacLinkAPI"]
+        )
+        {
+            over "left_outer_knuckle" (
+                prepend apiSchemas = ["IsaacLinkAPI"]
+            )
+            {
+                over "left_inner_finger" (
+                    prepend apiSchemas = ["IsaacLinkAPI"]
+                )
+                {
+                }
+            }
+
+            over "left_inner_knuckle" (
+                prepend apiSchemas = ["IsaacLinkAPI"]
+            )
+            {
+            }
+
+            over "right_outer_knuckle" (
+                prepend apiSchemas = ["IsaacLinkAPI"]
+            )
+            {
+                over "right_inner_finger" (
+                    prepend apiSchemas = ["IsaacLinkAPI"]
+                )
+                {
+                }
+            }
+
+            over "right_inner_knuckle" (
+                prepend apiSchemas = ["IsaacLinkAPI"]
+            )
+            {
+            }
+        }
+    }
+
+    over "Physics"
+    {
+        over "root_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "finger_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "left_inner_knuckle_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "left_inner_finger_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "right_outer_knuckle_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "right_inner_knuckle_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "right_inner_finger_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+}
+

@@ -1,0 +1,58 @@
+{
+  "schema_version": "rg6-lid-transfer-calibration-v1",
+  "calibration_status": "pending_lab_measurement",
+  "measurement": {
+    "lab_name": null,
+    "measured_by": null,
+    "measured_at": null,
+    "notes": "Fill this file from the real RG6 and lid calibration; do not copy provisional simulation values."
+  },
+  "hardware": {
+    "arm_model": "Universal Robots UR10e",
+    "gripper_model": "OnRobot RG6",
+    "gripper_serial_or_asset_id": null,
+    "fingertip_model": null,
+    "fingertip_material": null,
+    "fingertip_geometry_confirmed": false
+  },
+  "lid": {
+    "mass_kg": null,
+    "plate_center_local_m": null,
+    "plate_full_extents_m": null,
+    "handle_full_extents_m": null,
+    "handle_center_local_m": null,
+    "handle_material": null
+  },
+  "controller": {
+    "commanded_grip_force_n": null,
+    "closing_speed_m_s": null,
+    "command_interface": null
+  },
+  "simulation_mapping": {
+    "initial_drive_torque_nm": null,
+    "maximum_drive_torque_nm": null,
+    "minimum_force_per_finger_n": null,
+    "minimum_combined_force_n": null,
+    "static_friction": null,
+    "dynamic_friction": null,
+    "compliant_contact_stiffness_n_m": null,
+    "compliant_contact_damping_n_s_m": null,
+    "mapping_source": null,
+    "fit_notes": null
+  },
+  "acceptance": {
+    "requested_micro_lift_m": 0.01,
+    "minimum_measured_lift_m": 0.007,
+    "maximum_relative_translation_m": 0.005,
+    "maximum_penetration_m": 0.003,
+    "maximum_contact_force_per_finger_n": 60.0,
+    "minimum_trial_count": 5,
+    "minimum_pass_rate": 0.8,
+    "unexpected_environment_collision_allowed": false
+  },
+  "micro_lift_trials": [],
+  "training_performed": false,
+  "calibration_performed": false,
+  "testing_performed": false,
+  "valid_for_final_evaluation": false
+}
