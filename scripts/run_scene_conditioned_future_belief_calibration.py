@@ -1,4 +1,4 @@
-"""Calibrate a center-scene-conditioned future-visibility MPC smoke.
+"""Calibrate a center-scene-conditioned future-visibility model.
 
 The model is a small distance-weighted nonparametric calibrator.  It uses
 only learned center-observation features.  Every reported decision is made
@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = (
     ROOT
     / "outputs"
-    / "perception_grounding_pilot"
+    / "perception/grounded_segmentation"
     / "action_differentiating_seed185_196"
     / "perception_config.json"
 )
@@ -410,7 +410,7 @@ def main() -> None:
         "limitations": [
             "Only eleven development episodes are available.",
             "Scene geometry is intentionally structured and easy to separate.",
-            "The calibrated predictor is a pilot, not a final learned observation model.",
+            "The calibrated predictor is not a learned dynamics model.",
             "Cover removal and post-removal negative evidence were not executed.",
         ],
     }

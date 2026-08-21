@@ -133,7 +133,7 @@
         "target_probability": {"$ref": "#/$defs/probability"},
         "target_uncertainty": {"$ref": "#/$defs/uncertaintyRecord"},
         "source": {
-          "enum": ["ground_truth_stub", "rule_based_stub", "vlm", "grounding_model", "multi_view_fusion"]
+          "enum": ["ground_truth_fixture", "rule_based_fixture", "vlm", "grounding_model", "multi_view_fusion"]
         }
       }
     },
@@ -159,7 +159,7 @@
         "relation_distribution": {"$ref": "#/$defs/probabilityDistribution"},
         "relation_uncertainty": {"$ref": "#/$defs/uncertaintyRecord"},
         "source": {
-          "enum": ["ground_truth_stub", "rule_based_stub", "vlm", "grounding_model", "geometry", "multi_view_fusion"]
+          "enum": ["ground_truth_fixture", "rule_based_fixture", "vlm", "grounding_model", "geometry", "multi_view_fusion"]
         }
       }
     },

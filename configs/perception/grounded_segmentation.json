@@ -1,0 +1,75 @@
+{
+  "schema_version": "grounded-segmentation-config-v1",
+  "experiment_id": "grounded_segmentation",
+  "output_root": "outputs/perception/grounded_segmentation",
+  "training_performed": false,
+  "calibration_performed": false,
+  "valid_for_final_evaluation": false,
+  "motion_result": null,
+  "samples": [],
+  "excluded_observations": [],
+  "task": {
+    "instruction": "Find the red mug with the white logo inside the open basket.",
+    "target_description": "the red mug with the white logo",
+    "qwen_direct_prompt": "Find the single red mug with the white logo that is physically inside the open basket. If it cannot be located reliably, return []. Return JSON only.",
+    "qwen_candidate_concept": "red mug",
+    "qwen_reference_concept": "open basket",
+    "relation_label_space": [
+      "inside",
+      "outside",
+      "behind",
+      "unknown"
+    ],
+    "open_vocabulary_concepts": [
+      "red mug",
+      "open basket"
+    ],
+    "grounding_dino_prompt": "red mug. open basket."
+  },
+  "models": {
+    "qwen": {
+      "repository": "Qwen/Qwen3-VL-8B-Instruct",
+      "path": "models/Qwen3-VL-8B-Instruct",
+      "dtype": "bfloat16",
+      "max_pixels": 401408
+    },
+    "grounding_dino": {
+      "repository": "IDEA-Research/grounding-dino-base",
+      "revision": "12bdfa3120f3e7ec7b434d90674b3396eccf88eb",
+      "path": "models/grounding-dino-base",
+      "box_threshold": 0.2,
+      "text_threshold": 0.2
+    },
+    "sam2": {
+      "repository": "facebook/sam2.1-hiera-large",
+      "revision": "665f8e2ad61cf5f53d65644ff27c8ee525124610",
+      "path": "models/sam2.1-hiera-large/sam2.1_hiera_large.pt",
+      "model_config": "configs/sam2.1/sam2.1_hiera_l.yaml"
+    },
+    "sam3": {
+      "repository": "facebook/sam3",
+      "revision": "3c879f39826c281e95690f02c7821c4de09afae7",
+      "path": "models/sam3/sam3.pt",
+      "confidence_threshold": 0.25,
+      "access_status": "checkpoint_gated_access_not_yet_granted"
+    }
+  },
+  "evaluation": {
+    "mask_iou_recall_threshold": 0.5,
+    "bbox_iou_recall_threshold": 0.5,
+    "expected_selected_relation": "inside",
+    "semantic_groups": {
+      "red mug": [
+        "target_red",
+        "rear_red_candidate"
+      ],
+      "open basket": [
+        "container"
+      ]
+    }
+  },
+  "notes": [
+    "Qwen logits require the frozen calibration model before policy evaluation.",
+    "Evaluation records must preserve every detector proposal and confidence score."
+  ]
+}

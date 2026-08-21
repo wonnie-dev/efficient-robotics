@@ -51,19 +51,19 @@ or root-action selection. Its schema is
 
 ## Contract validation
 
-Export a sample, produce an output with either a real adapter or the mock
-adapter, and validate it:
+Export a sample, produce an output with either a real adapter or the synthetic
+interface fixture, and validate it:
 
 ```bash
 python scripts/export_vlm_dataset.py
-python scripts/mock_vlm_logits.py \
+python scripts/synthetic_vlm_output.py \
   outputs/vlm_dataset/samples/example/input.json
 python scripts/validate_vlm_contract.py \
   outputs/vlm_dataset/samples/example/input.json \
-  outputs/vlm_dataset/samples/example/mock_output.json
+  outputs/vlm_dataset/samples/example/synthetic_output.json
 ```
 
-The mock adapter checks file compatibility only and is not a perception
+The synthetic fixture checks file compatibility only and is not a perception
 baseline.
 
 ## Qwen3-VL adapter

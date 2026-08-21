@@ -1,0 +1,125 @@
+{
+  "schema_version": "calibration-test-protocol-v1",
+  "status": "predeclared_before_calibration_or_test",
+  "method_claim": "task_risk_aware_joint_semantic_belief_receding_horizon_planning",
+  "state_representation": {
+    "latent_semantic_belief": "persistent_candidate_track_x_membership_plus_target_absent",
+    "observable_task_state": ["covered", "open"],
+    "cover_state_in_semantic_belief": false,
+    "view_conditioned_relations": ["visible", "behind_from_current_view", "occluded_by"],
+    "world_relations_used_by_planner": ["inside", "outside"]
+  },
+  "action_set": [
+    "viewpoint_close_high",
+    "viewpoint_right",
+    "remove_cover",
+    "grasp_candidate_inside",
+    "grasp_candidate_outside",
+    "defer"
+  ],
+  "calibration": {
+    "seed_range_inclusive": [900, 935],
+    "episode_count": 36,
+    "episodes_per_family": 6,
+    "uses_automatic_simulator_labels": true,
+    "fit_targets": [
+      "direct_joint_observation_likelihood",
+      "view_resolution_probability",
+      "conditional_physical_execution_success"
+    ],
+    "metrics": ["negative_log_likelihood", "brier_score", "reliability_diagram"],
+    "test_outcomes_visible_during_fit": false
+  },
+  "test": {
+    "seed_range_inclusive": [1000, 1059],
+    "episode_count": 60,
+    "episodes_per_family": 10,
+    "unopened_until_parameters_frozen": true,
+    "parameter_selection_allowed": false
+  },
+  "scene_families": [
+    {
+      "name": "inside_close_high_resolving",
+      "required_scene_variant": "covered_center_ambiguous_then_close_high_logo_v2",
+      "implementation_ready": true
+    },
+    {
+      "name": "inside_right_resolving",
+      "required_scene_variant": "covered_center_ambiguous_then_right_only",
+      "implementation_ready": true
+    },
+    {
+      "name": "outside_immediate_grasp",
+      "required_scene_variant": "outside",
+      "implementation_ready": true
+    },
+    {
+      "name": "outside_reobservation_required",
+      "required_scene_variant": "behind_ambiguous",
+      "implementation_ready": true
+    },
+    {
+      "name": "target_absent_negative_evidence",
+      "required_scene_variant": "target_absent_covered",
+      "implementation_ready": true
+    },
+    {
+      "name": "remove_cover_failure_or_no_gain",
+      "required_scene_variant": "covered_target_outside_visible_no_gain",
+      "implementation_ready": true
+    }
+  ],
+  "baselines": [
+    "immediate_grasp",
+    "fixed_right_view",
+    "fixed_close_high_view",
+    "confidence_greedy",
+    "myopic_information_gain",
+    "oracle_simulator_ground_truth"
+  ],
+  "ablations": [
+    "no_joint_belief",
+    "no_calibration",
+    "no_negative_evidence",
+    "no_action_conditioned_future_belief",
+    "no_task_risk_cost",
+    "no_persistent_tracking",
+    "no_scene_conditioned_view_model"
+  ],
+  "primary_metrics": [
+    "end_to_end_task_success",
+    "wrong_commitment_rate",
+    "noncompletion_rate",
+    "mean_total_task_cost"
+  ],
+  "secondary_metrics": [
+    "physical_grasp_success",
+    "observation_action_count",
+    "interaction_action_count",
+    "vlm_runtime_seconds",
+    "perception_runtime_seconds",
+    "planning_runtime_seconds",
+    "physics_runtime_seconds"
+  ],
+  "runtime_policy": {
+    "video_encoding_excluded_from_online_runtime": true,
+    "media_generation_reported_separately": true
+  },
+  "statistics": {
+    "confidence_level": 0.95,
+    "paired_seed_comparison": true,
+    "success_rate_interval": "wilson",
+    "continuous_metric_interval": "paired_bootstrap"
+  },
+  "freeze_requirements": [
+    "all_scene_families_implemented",
+    "calibration_complete",
+    "costs_and_risk_policy_frozen",
+    "model_revisions_and_prompts_frozen",
+    "test_split_hash_recorded_before_opening"
+  ],
+  "training_performed": false,
+  "calibration_performed": false,
+  "testing_performed": false,
+  "valid_for_final_evaluation": false
+}

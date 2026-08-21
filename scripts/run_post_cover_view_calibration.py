@@ -115,7 +115,7 @@ def run(output: Path) -> dict[str, Any]:
     started = time.perf_counter()
     rows = []
     for seed, variant, root_name in EPISODES:
-        perception_root = ROOT / "outputs/calibration_pilot" / root_name
+        perception_root = ROOT / "outputs/calibration" / root_name
         analysis = load_json(perception_root / "calibration_perception_analysis.json")
         episode = next(item for item in analysis["episode_checks"] if int(item["seed"]) == seed)
         rows.append(

@@ -1408,7 +1408,7 @@ def execute_persistent_composite_grasp(
                 else None
             ),
             "grasp_planning_position_source": (
-                "simulator_cover_handle_pose_physics_pilot"
+                "simulator_cover_handle_pose_physics_validation"
                 if planning_target_world_m is not None
                 else "qwen_selected_candidate_masked_rgbd"
             ),
@@ -1545,7 +1545,12 @@ def execute_persistent_composite_grasp(
             / "import_result.json"
         ).read_text(encoding="utf-8")
     )
-    asset = Path(import_result["output_usd"]).resolve()
+    asset_value = Path(import_result["output_usd"])
+    asset = (
+        asset_value.resolve()
+        if asset_value.is_absolute()
+        else (project_root / asset_value).resolve()
+    )
 
     def world_position(prim) -> np.ndarray:
         return np.asarray(
@@ -1881,7 +1886,7 @@ def execute_persistent_composite_grasp(
         )
         target_position_semantics = "existing_dynamic_assembly_root"
     elif household_mug_physics_proxy:
-        # The household pilot keeps the visible mug mesh as children of this
+        # The tabletop scene keeps the visible mug mesh as children of this
         # Xform.  Author a collision child and a rigid body on the root so the
         # rendered mug and physical body move together.  The prior code wrapped
         # this Xform in UsdGeom.Cube without changing its type, leaving no real
@@ -3885,7 +3890,7 @@ def execute_persistent_composite_grasp(
             fps=10,
             crf=17,
             preset="slow",
-            purpose="same_process_composite_grasp_physics_pilot",
+            purpose="same_process_composite_grasp_physics_validation",
         )
         video_encoding_seconds = time.perf_counter() - video_started
     else:
@@ -3897,7 +3902,7 @@ def execute_persistent_composite_grasp(
         }
     execution_seconds = time.perf_counter() - execution_started
     result = {
-        "schema_version": "persistent-composite-grasp-pilot-v3",
+        "schema_version": "persistent-composite-grasp-v3",
         "status": "completed" if success else "failed",
         "seed": seed,
         "timing": {

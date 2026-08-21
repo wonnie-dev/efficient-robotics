@@ -2,15 +2,14 @@
 
 ## Scenario families
 
-The simulator contains two task families for language-guided retrieval under
+The simulator contains five task families for language-guided retrieval under
 partial observability:
 
-1. **Open-container active view:** similar target candidates are placed inside,
-   outside, near, or behind an open basket. The initial view is intentionally
-   ambiguous and a wrist-camera action can reveal additional evidence.
-2. **Covered-container search:** a removable cover hides either the target or
-   an empty container. Cover removal produces a new observation, belief update,
-   and another planning step before retrieval.
+1. **Visible/Open:** the target is visible inside or outside the container.
+2. **Partially Occluded:** a reachable wrist-camera view resolves target identity.
+3. **Covered Container:** cover removal changes the observable scene before replanning.
+4. **Ambiguous Inside/Outside:** similar candidates require joint identity and membership reasoning.
+5. **Target Absent:** negative evidence should produce a safe deferral rather than a distractor grasp.
 
 ## Robot and scene
 

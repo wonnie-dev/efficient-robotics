@@ -13,7 +13,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from run_live_learned_scanned_basket_pipeline import (  # noqa: E402
+from run_scanned_basket_pipeline import (  # noqa: E402
     apply_external_model_root,
     grounded_qwen_cache_key,
     make_perception_config,
@@ -58,7 +58,7 @@ class LiveLearnedScannedBasketPipelineTest(unittest.TestCase):
         )
 
     def test_incremental_config_uses_no_removed_occluder_concept(self):
-        with tempfile.TemporaryDirectory(dir=ROOT / "outputs") as temporary:
+        with tempfile.TemporaryDirectory(dir=ROOT / "tests/fixtures") as temporary:
             session = Path(temporary)
             observation = session / "observations" / "center"
             observation.mkdir(parents=True)
@@ -82,7 +82,7 @@ class LiveLearnedScannedBasketPipelineTest(unittest.TestCase):
             self.assertFalse(config["calibration_performed"])
 
     def test_incremental_config_accepts_factorized_relation_fields(self):
-        with tempfile.TemporaryDirectory(dir=ROOT / "outputs") as temporary:
+        with tempfile.TemporaryDirectory(dir=ROOT / "tests/fixtures") as temporary:
             session = Path(temporary)
             observation = session / "observations" / "post_remove"
             observation.mkdir(parents=True)
@@ -104,7 +104,7 @@ class LiveLearnedScannedBasketPipelineTest(unittest.TestCase):
             self.assertEqual(task["membership_label_space"][0], "inside")
 
     def test_incremental_config_applies_frozen_detector_threshold(self):
-        with tempfile.TemporaryDirectory(dir=ROOT / "outputs") as temporary:
+        with tempfile.TemporaryDirectory(dir=ROOT / "tests/fixtures") as temporary:
             session = Path(temporary)
             observation = session / "observations" / "post_remove"
             observation.mkdir(parents=True)
@@ -126,7 +126,7 @@ class LiveLearnedScannedBasketPipelineTest(unittest.TestCase):
             self.assertEqual(model["box_threshold"], 0.25)
 
     def test_selected_target_mask_uses_track_mapping(self):
-        with tempfile.TemporaryDirectory(dir=ROOT / "outputs") as temporary:
+        with tempfile.TemporaryDirectory(dir=ROOT / "tests/fixtures") as temporary:
             root = Path(temporary)
             mask = root / "candidate_002_mask.png"
             mask.touch()
@@ -232,7 +232,7 @@ class LiveLearnedScannedBasketPipelineTest(unittest.TestCase):
         )
 
     def test_mask_iou_rejects_duplicate_semantic_proposal(self):
-        with tempfile.TemporaryDirectory(dir=ROOT / "outputs") as temporary:
+        with tempfile.TemporaryDirectory(dir=ROOT / "tests/fixtures") as temporary:
             root = Path(temporary)
             target = np.zeros((8, 8), dtype=np.uint8)
             target[1:4, 1:4] = 255
@@ -249,7 +249,7 @@ class LiveLearnedScannedBasketPipelineTest(unittest.TestCase):
             self.assertEqual(mask_iou(target_path, separate_path), 0.0)
 
     def test_grounded_qwen_cache_ignores_episode_identifiers(self):
-        with tempfile.TemporaryDirectory(dir=ROOT / "outputs") as temporary:
+        with tempfile.TemporaryDirectory(dir=ROOT / "tests/fixtures") as temporary:
             root = Path(temporary)
             assets = {}
             for name in ("rgb", "crop", "mask", "context", "ref", "overlay"):

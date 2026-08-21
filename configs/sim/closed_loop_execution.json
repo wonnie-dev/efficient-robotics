@@ -1,0 +1,7 @@
+{
+  "schema_version": "closed-loop-execution-config-v1",
+  "viewpoint_execution": {
+    "mode": "interpolated_joint_physics",
+    "debug_ee_positions_world_m": {}
+  }
+}

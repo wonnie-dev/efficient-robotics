@@ -74,7 +74,7 @@ from scanned_basket_scene import (  # noqa: E402
     MANIPULABLE_COVER_MASS_KG,
     _composite_cover_mass_properties,
 )
-from run_remove_cover_live_smoke import (  # noqa: E402
+from execute_cover_removal import (  # noqa: E402
     calibration_authorizes_remove_cover,
     contact_grasp_success,
     removal_contact_success,
@@ -85,12 +85,12 @@ class LidPhysicsStabilityTests(unittest.TestCase):
     def test_forced_calibration_rejects_reserved_seed(self) -> None:
         with self.assertRaises(ValueError):
             calibration_authorizes_remove_cover(
-                200, forced_observation_calibration=True
+                1100, forced_observation_calibration=True
             )
 
     def test_forced_calibration_records_intervention(self) -> None:
         result = calibration_authorizes_remove_cover(
-            212, forced_observation_calibration=True
+            1099, forced_observation_calibration=True
         )
         self.assertEqual(
             result["authorization_mode"],
@@ -233,7 +233,7 @@ class LidPhysicsStabilityTests(unittest.TestCase):
         source = (ROOT / "scripts" / "persistent_composite_grasp.py").read_text(
             encoding="utf-8"
         )
-        launcher = (ROOT / "scripts" / "open_minimal_scene.py").read_text(
+        launcher = (ROOT / "scripts" / "isaac_sim_server.py").read_text(
             encoding="utf-8"
         )
         self.assertIn('rg6_coupling_mode: str = "passive_mimic"', source)
@@ -493,7 +493,7 @@ class LidPhysicsStabilityTests(unittest.TestCase):
         executor = (
             ROOT / "scripts" / "persistent_composite_grasp.py"
         ).read_text(encoding="utf-8")
-        launcher = (ROOT / "scripts" / "open_minimal_scene.py").read_text(
+        launcher = (ROOT / "scripts" / "isaac_sim_server.py").read_text(
             encoding="utf-8"
         )
         self.assertIn("persistent_supported_placement_verification", executor)

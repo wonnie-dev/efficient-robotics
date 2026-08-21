@@ -16,7 +16,7 @@ from PIL import Image, ImageDraw
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = ROOT / "configs/perception/grounding_pilot_seed0_2.json"
+DEFAULT_CONFIG = ROOT / "configs/perception/grounded_segmentation.json"
 
 
 def resolve_path(value: str | Path) -> Path:
@@ -124,8 +124,8 @@ def main() -> None:
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     args = parser.parse_args()
     config = json.loads(args.config.read_text(encoding="utf-8"))
-    pilot_root = resolve_path(config["output_root"])
-    export_root = pilot_root / "grounded_sam2_qwen_inputs"
+    perception_root = resolve_path(config["output_root"])
+    export_root = perception_root / "grounded_sam2_qwen_inputs"
     manifest = {
         "schema_version": "grounded-sam2-qwen-input-manifest-v1",
         "samples": [],
@@ -141,7 +141,7 @@ def main() -> None:
     for sample in config["samples"]:
         sample_id = sample["sample_id"]
         observation_dir = resolve_path(sample["observation_dir"])
-        source_root = pilot_root / "grounded_sam2" / sample_id
+        source_root = perception_root / "grounded_sam2" / sample_id
         segmentations = json.loads(
             (source_root / "segmentations.json").read_text(encoding="utf-8")
         )

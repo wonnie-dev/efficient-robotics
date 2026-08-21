@@ -43,7 +43,7 @@ Grounding environment:
 python3 -m venv /path/to/efficient-robotics-perception
 source /path/to/efficient-robotics-perception/bin/activate
 pip install --upgrade pip
-pip install -r requirements/perception-grounding-pilot.txt
+pip install -r requirements/perception.txt
 ```
 
 Install the official Grounded-SAM-2 source at the pinned commit into the grounding environment. Record local checkpoint hashes in each paper run because weights are stored outside Git.

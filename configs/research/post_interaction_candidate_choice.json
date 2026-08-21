@@ -1,0 +1,18 @@
+{
+  "schema_version": "post-interaction-candidate-choice-config-v1",
+  "experiment_id": "post_interaction_candidate_choice",
+  "source_perception_root": "outputs/development/condition_balanced/perception",
+  "grounding_audit_root": "outputs/development/condition_balanced/grounding_candidate_audit",
+  "output_root": "outputs/development/post_interaction_candidate_choice",
+  "model_path": "models/Qwen3-VL-8B-Instruct",
+  "gpu_ids": [0, 2, 4, 5],
+  "view_id": "post_remove",
+  "max_pixels_per_image": 401408,
+  "batch_size_per_gpu": 1,
+  "include_none_choice": true,
+  "reserved_test_seed_range_untouched": [1100, 1159],
+  "training_performed": false,
+  "calibration_performed": false,
+  "testing_performed": false,
+  "valid_for_final_evaluation": false
+}

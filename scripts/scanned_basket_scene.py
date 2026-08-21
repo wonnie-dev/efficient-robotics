@@ -2,7 +2,7 @@
 
 The source asset remains in the existing LIBERO checkout.  This module does
 not download, copy, or modify it; it records the source and license in the
-experiment metadata so pilot outputs remain attributable and reproducible.
+experiment metadata so outputs remain attributable and reproducible.
 
 Names ending in ``_WORLD_M`` use the stage world frame. Basket collision boxes
 are basket-local, and target mug positions use the mug's bottom contact as the
@@ -116,7 +116,7 @@ COVERED_ACTION_BASE_VARIANT = {
 NEGATIVE_EVIDENCE_SCENE_VARIANTS = (
     "empty_cover_then_right",
 )
-V15_TASK_STATE_SCENE_VARIANTS = (
+TASK_STATE_SCENE_VARIANTS = (
     "target_absent_covered",
     "covered_target_outside_visible_no_gain",
 )
@@ -126,7 +126,7 @@ ALL_CALIBRATION_SCENE_VARIANTS = (
     + ACTION_DIFFERENTIATING_SCENE_VARIANTS
     + COVERED_ACTION_DIFFERENTIATING_SCENE_VARIANTS
     + NEGATIVE_EVIDENCE_SCENE_VARIANTS
-    + V15_TASK_STATE_SCENE_VARIANTS
+    + TASK_STATE_SCENE_VARIANTS
 )
 CALIBRATION_COVER_LOCAL_CENTER_M = (0.0, 0.0, 0.166)
 CALIBRATION_COVER_FULL_EXTENTS_M = (0.362, 0.338, 0.014)
@@ -1912,7 +1912,7 @@ def _add_static_basket_collision(
     The textured scan remains visual-only.  Convex decomposition of the raw
     triangle mesh would close the basket opening, so a documented bottom plus
     four-wall approximation preserves the usable interior for the physics
-    pilot.
+    validation scene.
     """
     from pxr import Gf, UsdGeom, UsdPhysics
 
@@ -1951,7 +1951,7 @@ def _add_static_basket_collision(
     return {
         "type": "five_box_static_approximation",
         "exact_mesh_collision": False,
-        "purpose": "single_seed_physics_safety_smoke",
+        "purpose": "single_seed_physics_safety_validation",
         "xy_scale_factor_from_perception_scene": xy_scale_factor,
         "boxes": authored,
     }
@@ -1960,8 +1960,8 @@ def _add_static_basket_collision(
 def replace_procedural_basket_with_scan(
     stage,
     *,
-    active_occlusion_pilot: bool = False,
-    collision_physics_pilot: bool = False,
+    active_occlusion_scene: bool = False,
+    collision_physics_enabled: bool = False,
     calibration_scene_variant: str | None = None,
     calibration_seed: int = 0,
     cover_physics_calibration: dict | None = None,
@@ -1988,14 +1988,14 @@ def replace_procedural_basket_with_scan(
         raise ValueError(
             f"Unknown calibration scene variant: {calibration_scene_variant}"
         )
-    if active_occlusion_pilot and calibration_scene_variant is not None:
+    if active_occlusion_scene and calibration_scene_variant is not None:
         raise ValueError(
-            "active_occlusion_pilot and calibration_scene_variant are mutually exclusive"
+            "active_occlusion_scene and calibration_scene_variant are mutually exclusive"
         )
 
     # The original "rear" distractor is almost completely hidden by this
     # thicker scanned rim in all three reachable wrist views.  Put it beside
-    # the basket so the deterministic pilot genuinely contains two visible
+    # the basket so the deterministic scene genuinely contains two visible
     # red candidates: the logo mug inside and a no-logo mug outside.
     outside_mug = stage.GetPrimAtPath("/World/RearRedCandidate")
     if not outside_mug.IsValid():
@@ -2004,14 +2004,14 @@ def replace_procedural_basket_with_scan(
     outside_xform.ClearXformOpOrder()
     outside_position = (
         PHYSICS_CLEARANCE_OUTSIDE_MUG_POSITION_WORLD_M
-        if collision_physics_pilot
+        if collision_physics_enabled
         else VISIBLE_OUTSIDE_MUG_POSITION_WORLD_M
     )
     outside_xform.AddTranslateOp().Set(Gf.Vec3d(*outside_position))
 
     occlusion_metadata = {
         "enabled": False,
-        "purpose": "normal_two_candidate_visibility_pilot",
+        "purpose": "normal_two_candidate_visibility",
     }
     basket_position = tuple(
         float(value)
@@ -2058,7 +2058,7 @@ def replace_procedural_basket_with_scan(
             "semantic_id": "cover_01",
             "purpose": "covered_container_target_absent_negative_evidence",
             "manual_annotation": False,
-            "generator_revision": "v15-target-absent-covered-v1",
+            "generator_revision": "target-absent-covered-v1",
             "render_validation_required": True,
         }
     elif calibration_scene_variant == "covered_target_outside_visible_no_gain":
@@ -2087,7 +2087,7 @@ def replace_procedural_basket_with_scan(
             "semantic_id": "cover_01",
             "purpose": "visible_outside_target_makes_cover_interaction_no_gain",
             "manual_annotation": False,
-            "generator_revision": "v16-covered-outside-seeded-no-gain-v1",
+            "generator_revision": "covered-outside-seeded-no-gain-v1",
             "render_validation_required": True,
         }
     elif calibration_scene_variant == "outside":
@@ -2447,7 +2447,7 @@ def replace_procedural_basket_with_scan(
             }
         elif calibration_scene_variant == "covered_unknown":
             cover_metadata = _author_calibration_cover(stage, root_path)
-    elif active_occlusion_pilot:
+    elif active_occlusion_scene:
         occluder_prim = stage.GetPrimAtPath("/World/OccluderOrange")
         if not occluder_prim.IsValid():
             raise RuntimeError("Orange occluder benchmark prim is missing")
@@ -2512,7 +2512,7 @@ def replace_procedural_basket_with_scan(
     st.Set([Gf.Vec2f(*uv) for uv in texcoords])
     st.SetIndices(texcoord_indices)
     _bind_texture(stage, mesh.GetPrim(), f"{root_path}/ScannedMaterial")
-    # The physics pilot uses the open five-box proxy instead of the raw scan;
+    # The physics validation uses the open five-box proxy instead of the raw scan;
     # a convex hull would seal the basket and create unsafe false contacts.
     collision_metadata = (
         _add_static_basket_collision(
@@ -2523,7 +2523,7 @@ def replace_procedural_basket_with_scan(
                 / PERCEPTION_BASKET_SCALE_XYZ[0]
             ),
         )
-        if collision_physics_pilot
+        if collision_physics_enabled
         else {
             "type": "not_added_perception_only",
             "exact_mesh_collision": False,
@@ -2551,7 +2551,7 @@ def replace_procedural_basket_with_scan(
             ),
             "rear_red_candidate_relation": "outside",
             "reason": (
-                "keep_both_red_candidates_visible_for_identity_and_relation_pilot"
+                "keep_both_red_candidates_visible_for_identity_and_relation_validation"
             ),
         },
         "active_occlusion": occlusion_metadata,

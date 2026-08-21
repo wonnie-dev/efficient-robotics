@@ -31,8 +31,7 @@ Execution returns a separate result record containing status, measured motion, o
 | `viewpoint_right` | view ID or wrist pose, reference object | reachable IK, joint limits, collision-free path | right-side RGB-D | motion time, collision risk | `ik_failed`, `path_blocked`, or `capture_failed` |
 | `viewpoint_close_high` | view ID or wrist pose, reference object | reachable wrist pose, safe camera clearance | higher view of the container interior | motion time, camera clearance | `ik_failed`, `path_blocked`, or `capture_failed` |
 | `remove_cover` | cover ID, handle pose, staging pose | cover and handle available, grasp feasible, placement clear | open container and new RGB-D | interaction time, slip, collision, force | `grasp_failed`, `slip`, `force_limit`, `placement_failed`, or `capture_failed` |
-| `grasp_inside` | candidate ID, grasp pose | container open, IK and descent safe | contact-based target lift | expected wrong commitment, execution failure, motion cost | `wrong_target`, `contact_failed`, `slip`, or `lift_failed` |
-| `grasp_outside` | candidate ID, grasp pose | IK and descent safe | contact-based target lift | expected wrong commitment, execution failure, motion cost | `wrong_target`, `contact_failed`, `slip`, or `lift_failed` |
+| `grasp` | candidate ID, membership hypothesis, grasp pose | container state, IK, and descent checks pass | contact-based target lift | expected wrong commitment, execution failure, motion cost | `wrong_target`, `contact_failed`, `slip`, or `lift_failed` |
 | `defer` | reason | always available as a terminal alternative | no physical motion | noncompletion cost | none |
 
 `viewpoint_center` is the initial observation state, not normally a useful repeated action. `viewpoint_left`, `inspect_container`, and `move_occluder` are extension points and are not part of the frozen evaluation action set.

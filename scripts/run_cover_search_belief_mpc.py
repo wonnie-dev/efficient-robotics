@@ -22,7 +22,7 @@ DEFAULT_CONFIG = (
     ROOT
     / "configs"
     / "research"
-    / "cover_search_belief_mpc_cpu_pilot.json"
+    / "cover_search_planner.json"
 )
 
 
@@ -76,7 +76,7 @@ def validate_config(config: dict[str, Any]) -> None:
     if config.get("training_performed") is not False:
         raise ValueError("Model-weight training must remain disabled")
     if config.get("testing_performed") is not False:
-        raise ValueError("This pilot is not testing")
+        raise ValueError("This diagnostic run is not testing")
 
 
 def split_state(state: str) -> tuple[str, str]:
@@ -622,7 +622,7 @@ def run_experiment(config_path: Path) -> dict[str, Any]:
         == "target_outside_negative_evidence"
     )
     result = {
-        "schema_version": "cover-search-belief-mpc-cpu-pilot-v1",
+        "schema_version": "cover-search-belief-planner-v1",
         "experiment_id": config["experiment_id"],
         "status": (
             "completed"

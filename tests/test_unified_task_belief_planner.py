@@ -1,4 +1,4 @@
-"""Tests for the V15 unified semantic-belief task planner."""
+"""Tests for the unified semantic-belief task planner."""
 
 import json
 import copy
@@ -19,7 +19,7 @@ from unified_task_belief_planner import (  # noqa: E402
 )
 
 
-CONFIG = ROOT / "configs/research/icra_v15_unified_task_belief_preflight.json"
+CONFIG = ROOT / "configs/research/task_belief_validation.json"
 
 
 class UnifiedTaskBeliefPlannerTests(unittest.TestCase):

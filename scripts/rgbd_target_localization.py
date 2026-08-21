@@ -2,7 +2,7 @@
 
 Depth values are Euclidean distances along camera rays, not optical-axis
 depth. Learned pipelines enter through ``localize_mask_files`` after selecting
-an anonymous RGB mask; controlled pilots can instead select a semantic instance
+an anonymous RGB mask; controlled validation runs can instead select a semantic instance
 with ``localize_observation``. Neither estimator reads saved world positions.
 """
 
@@ -158,7 +158,7 @@ def instance_id_for_class(
     labels: dict,
     semantic_class: str,
 ) -> int:
-    """Require one unambiguous simulator instance for a controlled pilot."""
+    """Require one unambiguous simulator instance for a controlled validation run."""
     matches = [
         int(instance_id)
         for instance_id, value in labels.items()

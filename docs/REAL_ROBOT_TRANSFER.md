@@ -24,7 +24,7 @@ Simulation currently uses UR10e and a rectangular scanned-basket setup. The robo
 Enter measured values in `configs/hardware/rg6_lid_transfer_calibration.json`. Validate the worksheet without commanding hardware:
 
 ```bash
-bash scripts/real_robot_smoke_test.sh
+bash scripts/validate_real_robot_configuration.sh
 ```
 
 ## Interface boundary
@@ -65,6 +65,6 @@ The hardware adapter must return measured execution status and a new observation
 7. Run one supervised closed-loop episode with emergency-stop access.
 8. Expand only after failure logs and safety gates pass.
 
-## Current status
+## Transfer constraints
 
 No real-robot motion has been executed from this repository. The supplied transfer calibration contains placeholders or public-spec proxies and is not transfer-ready.

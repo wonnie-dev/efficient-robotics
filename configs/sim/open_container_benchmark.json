@@ -27,6 +27,6 @@
     {"id": "boundary_purple", "prim": "/World/BoundaryPurple", "role": "relation_distractor", "shape": "cuboid", "relation": "near_boundary", "position_m": [0.80, 0.10, 0.805]},
     {"id": "rear_red_candidate", "prim": "/World/RearRedCandidate", "role": "target_distractor", "shape": "cylinder", "relation": "behind_container", "position_m": [0.66, 0.31, 0.80]}
   ],
-  "randomization_status": "relation_preserving_seeded_pilot_generator_implemented_not_final_evaluation",
+  "randomization_status": "relation_preserving_seeded_generator",
   "seed": 0
 }

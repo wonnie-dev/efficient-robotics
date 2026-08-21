@@ -1,0 +1,53 @@
+{
+  "schema_version": "five-scenario-validation-episodes-v1",
+  "status": "predeclared_nonreserved_development_before_collection",
+  "data_split": "calibration",
+  "purpose": "five-headline-scenario live preflight before method freeze",
+  "seed_start": 1334,
+  "episode_count": 20,
+  "episodes_per_headline_scenario": 4,
+  "gpu_ids": [0, 2, 4, 5],
+  "output_root": "outputs/live_pipeline/five_scenario_validation_episodes",
+  "physics_config": "configs/hardware/rg6_lid_simulation.json",
+  "views": ["center", "post_remove", "close_high", "right"],
+  "counterfactual_post_remove_views": ["close_high", "right"],
+  "disable_manipulation_video": true,
+  "physics_only_manipulation_steps": true,
+  "startup_timeout_seconds": 1200.0,
+  "family_schedule": [
+    8, 3, 0, 5, 1, 8, 7, 2, 6, 4,
+    2, 8, 6, 1, 4, 0, 8, 7, 5, 3
+  ],
+  "expected_family_counts": {
+    "visible_inside_clear": 2,
+    "visible_outside_clear": 2,
+    "partial_close_high_resolving": 2,
+    "partial_right_resolving": 2,
+    "covered_close_high_resolving": 2,
+    "covered_right_resolving": 2,
+    "ambiguous_inside_rim": 2,
+    "ambiguous_outside_behind": 2,
+    "target_absent_covered": 4
+  },
+  "family_cycle": [
+    {"headline_scenario": "visible_open", "family": "visible_inside_clear", "scene_variant": "inside_clear", "collector": "static_reachable_views", "resolving_view": "center", "blocked_view": null, "expected_membership": "inside"},
+    {"headline_scenario": "visible_open", "family": "visible_outside_clear", "scene_variant": "outside", "collector": "static_reachable_views", "resolving_view": "center", "blocked_view": null, "expected_membership": "outside"},
+    {"headline_scenario": "partially_occluded", "family": "partial_close_high_resolving", "scene_variant": "close_high_only", "collector": "static_reachable_views", "resolving_view": "close_high", "blocked_view": "right", "expected_membership": "inside"},
+    {"headline_scenario": "partially_occluded", "family": "partial_right_resolving", "scene_variant": "right_only", "collector": "static_reachable_views", "resolving_view": "right", "blocked_view": "close_high", "expected_membership": "inside"},
+    {"headline_scenario": "covered_container", "family": "covered_close_high_resolving", "scene_variant": "covered_center_ambiguous_then_close_high_logo_v2", "collector": "remove_cover_counterfactual", "resolving_view": "close_high", "blocked_view": "right", "expected_membership": "inside"},
+    {"headline_scenario": "covered_container", "family": "covered_right_resolving", "scene_variant": "covered_center_ambiguous_then_right_only", "collector": "remove_cover_counterfactual", "resolving_view": "right", "blocked_view": "close_high", "expected_membership": "inside"},
+    {"headline_scenario": "ambiguous_inside_outside", "family": "ambiguous_inside_rim", "scene_variant": "rim_occluded", "collector": "static_reachable_views", "resolving_view": "close_high_or_right", "blocked_view": "center", "expected_membership": "inside"},
+    {"headline_scenario": "ambiguous_inside_outside", "family": "ambiguous_outside_behind", "scene_variant": "behind_ambiguous", "collector": "static_reachable_views", "resolving_view": "close_high_or_right", "blocked_view": "center", "expected_membership": "outside"},
+    {"headline_scenario": "target_absent", "family": "target_absent_covered", "scene_variant": "target_absent_covered", "collector": "remove_cover_counterfactual", "resolving_view": "post_remove_empty", "blocked_view": null, "expected_membership": "not_applicable"}
+  ],
+  "required_policy_actions": ["viewpoint_right", "viewpoint_close_high", "remove_cover", "grasp", "defer"],
+  "reserved_test_seed_range_untouched": [1100, 1159],
+  "one_process_per_gpu": true,
+  "multi_gpu_inside_process": false,
+  "ddp_used": false,
+  "nccl_used": false,
+  "training_performed": false,
+  "calibration_performed": false,
+  "testing_performed": false,
+  "valid_for_final_evaluation": false
+}

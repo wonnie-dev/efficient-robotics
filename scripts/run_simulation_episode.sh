@@ -23,12 +23,13 @@ export CUDA_VISIBLE_DEVICES="${PHYSICAL_GPU}"
 export NVIDIA_VISIBLE_DEVICES="${PHYSICAL_GPU}"
 
 exec "${isaacsim_venv}/bin/python" \
-    "${project_root}/scripts/open_minimal_scene.py" \
+    "${project_root}/scripts/isaac_sim_server.py" \
     --scene-profile benchmark \
     --headless \
-    --renderer-gpu "${PHYSICAL_GPU}" \
+    --renderer-gpu 0 \
     --physics-gpu 0 \
     --seed "${seed}" \
-    --household-perception-pilot \
-    --scanned-basket-perception-pilot \
+    --seeded-scene-capture \
+    --tabletop-scene \
+    --scanned-basket-scene \
     --calibration-scene-variant auto

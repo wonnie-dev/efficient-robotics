@@ -175,9 +175,9 @@ def calibrated_commitment_gate(
     identity: dict,
     minimum_probability: float,
 ) -> dict:
-    """Reproduce the legacy V11 factor-product gate.
+    """Reproduce the legacy factor-product gate.
 
-    This function is retained only so that historical V11 runs remain
+    This function is retained only so that historical runs remain
     reproducible.  Multiplying two marginal confidence values is not, by
     itself, a calibrated joint probability.  New experiments must use
     ``expected_cost_commitment_decision`` with a direct joint belief.
@@ -212,7 +212,7 @@ def calibrated_commitment_gate(
         "calibrated_inputs_used": True,
         "joint_probability_calibrated": False,
         "calibrated_probability_used": False,
-        "protocol_status": "legacy_v11_reproduction_only",
+        "protocol_status": "deprecated_independent_marginal_product",
     }
 
 

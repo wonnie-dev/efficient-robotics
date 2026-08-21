@@ -1,4 +1,4 @@
-"""Deterministic, relation-preserving layouts for the benchmark pilot."""
+"""Deterministic, relation-preserving layouts for benchmark episodes."""
 
 from __future__ import annotations
 

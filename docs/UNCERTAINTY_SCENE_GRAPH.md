@@ -33,7 +33,7 @@ Every spatial edge has:
 
 - `relation_distribution`: probability distribution over relations such as `inside`, `outside`, `near`, and `behind`;
 - `relation_uncertainty`: a typed placeholder or computed uncertainty record;
-- `source`: VLM, grounding model, geometry, multi-view fusion, or a test stub.
+- `source`: VLM, grounding model, geometry, multi-view fusion, or a test fixture.
 
 The distribution must remain available instead of immediately collapsing to one hard relation label.
 
@@ -44,7 +44,7 @@ The distribution must remain available instead of immediately collapsing to one 
 For belief-space control with coupled task factors, the optional
 `joint_task_state_distribution` stores the exact discrete planner belief
 instead of reconstructing it from independent marginals. For example, the
-removable-cover pilot uses states such as `inside|covered` and
+removable-cover scenario uses states such as `inside|covered` and
 `outside_near|open`. This is an interface field; its state vocabulary,
 transition model, calibration, and final paper equations remain scenario
 specific.

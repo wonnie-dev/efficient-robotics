@@ -76,7 +76,10 @@ class CoreMethodRuntimeTests(unittest.TestCase):
         self.assertTrue(gate["authorized"])
         self.assertGreater(gate["joint_commitment_probability"], 0.9)
         self.assertFalse(gate["joint_probability_calibrated"])
-        self.assertEqual(gate["protocol_status"], "legacy_v11_reproduction_only")
+        self.assertEqual(
+            gate["protocol_status"],
+            "deprecated_independent_marginal_product",
+        )
 
     def test_direct_joint_belief_rejects_unnormalized_scores(self) -> None:
         with self.assertRaises(ValueError):

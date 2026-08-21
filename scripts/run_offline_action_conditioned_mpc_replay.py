@@ -1412,7 +1412,7 @@ def run_experiment(config_path: Path) -> dict[str, Any]:
         "experiment_id": config["experiment_id"],
         "status": "completed",
         "purpose": (
-            "cpu_only_action_conditioned_future_belief_integration_pilot"
+            "cpu_only_action_conditioned_future_belief_integration"
         ),
         "evaluation_protocol": config["evaluation_protocol"],
         "episode_count": len(episodes),

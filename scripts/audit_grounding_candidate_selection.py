@@ -16,14 +16,14 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_PERCEPTION_ROOT = (
-    ROOT / "outputs/calibration/icra_v16_calibration_perception"
+    ROOT / "outputs/calibration/perception"
 )
 DEFAULT_POLICY_RESULT = (
     ROOT
-    / "outputs/calibration/icra_v18_persistent_negative_evidence_candidate/result.json"
+    / "outputs/calibration/policy_comparison/result.json"
 )
 DEFAULT_OUTPUT_ROOT = (
-    ROOT / "outputs/analysis/professor_feedback_grounding_candidate_audit_20260819"
+    ROOT / "outputs/analysis/grounding_candidate_audit"
 )
 REFERENCE_CONCEPTS = {"open container", "lid or cover"}
 
@@ -365,7 +365,7 @@ def main() -> None:
 
     visible = [row for row in samples if row["target_visible_pixel_count"] > 0]
     report = {
-        "schema_version": "professor-feedback-grounding-candidate-audit-v1",
+        "schema_version": "grounding-candidate-audit-v1",
         "status": "completed_posthoc_development_audit",
         "perception_root": str(args.perception_root.resolve()),
         "sample_count": len(samples),

@@ -9,7 +9,16 @@
 - headless RTX rendering
 - one physical NVIDIA GPU per job
 
-The imported UR10e and RG6 assets are under `assets/robots/`. Scene geometry and observation poses are configured under `configs/sim/`.
+URDF sources are under `assets/robots/`. Generated Isaac Sim USD imports are ignored by Git and must be created once on each machine:
+
+```bash
+CUDA_VISIBLE_DEVICES=<gpu> /path/to/isaacsim_venv/bin/python \
+  scripts/import_rg6_asset.py
+CUDA_VISIBLE_DEVICES=<gpu> /path/to/isaacsim_venv/bin/python \
+  scripts/import_ur10e_rg6_asset.py
+```
+
+Both importers expose one GPU and refer to it internally as device `0`. Scene geometry and observation poses are configured under `configs/sim/`.
 
 ## Environment
 

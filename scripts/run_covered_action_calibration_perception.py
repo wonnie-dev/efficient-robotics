@@ -19,9 +19,9 @@ ROOT = Path(__file__).resolve().parents[1]
 PROFILES = {
     "seed221_222": {
         "capture_root": ROOT
-        / "outputs/live_pipeline/covered_action_calibration_smoke",
+        / "outputs/live_pipeline/covered_action_calibration",
         "output_root": ROOT
-        / "outputs/calibration_pilot/covered_action_differentiating_seed221_222_gpu0",
+        / "outputs/calibration/covered_action_differentiating_seed221_222_gpu0",
         "experiment_id": "covered_action_differentiating_seed221_222",
         "episodes": (
             (221, "covered_then_close_high_only"),
@@ -32,7 +32,7 @@ PROFILES = {
         "capture_root": ROOT
         / "outputs/live_pipeline/covered_action_center_ambiguous_calibration",
         "output_root": ROOT
-        / "outputs/calibration_pilot/covered_action_center_ambiguous_seed224_225_gpu0",
+        / "outputs/calibration/covered_action_center_ambiguous_seed224_225_gpu0",
         "experiment_id": "covered_action_center_ambiguous_seed224_225",
         "episodes": (
             (224, "covered_center_ambiguous_then_close_high_only"),
@@ -43,7 +43,7 @@ PROFILES = {
         "capture_root": ROOT
         / "outputs/live_pipeline/covered_action_center_ambiguous_calibration",
         "output_root": ROOT
-        / "outputs/calibration_pilot/covered_action_center_ambiguous_seed226_229_gpu0",
+        / "outputs/calibration/covered_action_center_ambiguous_seed226_229_gpu0",
         "experiment_id": "covered_action_center_ambiguous_seed226_229",
         "episodes": (
             (226, "covered_center_ambiguous_then_close_high_only"),
@@ -56,7 +56,7 @@ PROFILES = {
         "capture_root": ROOT
         / "outputs/live_pipeline/covered_action_center_ambiguous_calibration",
         "output_root": ROOT
-        / "outputs/calibration_pilot/covered_action_center_ambiguous_semantic_seed230_gpu0",
+        / "outputs/calibration/covered_action_center_ambiguous_semantic_seed230_gpu0",
         "experiment_id": "covered_action_center_ambiguous_semantic_seed230",
         "episodes": (
             (230, "covered_center_ambiguous_then_close_high_only"),
@@ -66,7 +66,7 @@ PROFILES = {
         "capture_root": ROOT
         / "outputs/live_pipeline/covered_action_center_ambiguous_calibration",
         "output_root": ROOT
-        / "outputs/calibration_pilot/covered_action_center_ambiguous_semantic_seed230_234_gpu0",
+        / "outputs/calibration/covered_action_center_ambiguous_semantic_seed230_234_gpu0",
         "experiment_id": "covered_action_center_ambiguous_semantic_seed230_234",
         "episodes": (
             (230, "covered_center_ambiguous_then_close_high_only"),
@@ -78,7 +78,7 @@ PROFILES = {
         "capture_root": ROOT
         / "outputs/live_pipeline/covered_action_center_ambiguous_calibration",
         "output_root": ROOT
-        / "outputs/calibration_pilot/covered_action_center_ambiguous_right_seed231_233_gpu0",
+        / "outputs/calibration/covered_action_center_ambiguous_right_seed231_233_gpu0",
         "experiment_id": "covered_action_center_ambiguous_right_seed231_233",
         "episodes": (
             (231, "covered_center_ambiguous_then_right_only"),
@@ -89,7 +89,7 @@ PROFILES = {
         "capture_root": ROOT
         / "outputs/live_pipeline/covered_action_center_ambiguous_calibration",
         "output_root": ROOT
-        / "outputs/calibration_pilot/covered_action_center_ambiguous_right_seed231_235_gpu0",
+        / "outputs/calibration/covered_action_center_ambiguous_right_seed231_235_gpu0",
         "experiment_id": "covered_action_center_ambiguous_right_seed231_235",
         "episodes": (
             (231, "covered_center_ambiguous_then_right_only"),
@@ -101,7 +101,7 @@ PROFILES = {
         "capture_root": ROOT
         / "outputs/live_pipeline/covered_action_center_ambiguous_calibration",
         "output_root": ROOT
-        / "outputs/calibration_pilot/covered_action_center_ambiguous_balanced_seed236_237_gpu0",
+        / "outputs/calibration/covered_action_center_ambiguous_balanced_seed236_237_gpu0",
         "experiment_id": "covered_action_center_ambiguous_balanced_seed236_237",
         "episodes": (
             (236, "covered_center_ambiguous_then_close_high_only"),
@@ -112,7 +112,7 @@ PROFILES = {
         "capture_root": ROOT
         / "outputs/live_pipeline/covered_action_center_ambiguous_calibration",
         "output_root": ROOT
-        / "outputs/calibration_pilot/covered_action_center_ambiguous_balanced_seed238_239_gpu0",
+        / "outputs/calibration/covered_action_center_ambiguous_balanced_seed238_239_gpu0",
         "experiment_id": "covered_action_center_ambiguous_balanced_seed238_239",
         "episodes": (
             (238, "covered_center_ambiguous_then_close_high_only"),
@@ -122,7 +122,7 @@ PROFILES = {
 }
 SOURCE_CONFIG = (
     ROOT
-    / "outputs/perception_grounding_pilot"
+    / "outputs/perception/grounded_segmentation"
     / "action_differentiating_neutral_seed185_196/perception_config.json"
 )
 VIEWS = ("center", "post_remove", "close_high", "right")
@@ -357,7 +357,7 @@ def main() -> None:
             "gdino_detect",
             [
                 python,
-                str(ROOT / "scripts/run_perception_grounding_pilot.py"),
+                str(ROOT / "scripts/run_grounded_segmentation.py"),
                 "gdino_detect",
                 "--config",
                 str(config_path),
@@ -368,7 +368,7 @@ def main() -> None:
             "sam2_segment",
             [
                 python,
-                str(ROOT / "scripts/run_perception_grounding_pilot.py"),
+                str(ROOT / "scripts/run_grounded_segmentation.py"),
                 "sam2_segment",
                 "--config",
                 str(config_path),

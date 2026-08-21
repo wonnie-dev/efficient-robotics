@@ -14,7 +14,7 @@ from pathlib import Path
 
 import numpy as np
 
-from run_hybrid_rgbd_relation_pilot import (
+from estimate_rgbd_relations import (
     load_json,
     load_mask,
     masked_world_points,
@@ -22,11 +22,11 @@ from run_hybrid_rgbd_relation_pilot import (
     reference_geometry,
     resolve_path,
 )
-from run_live_single_gpu_pipeline import write_json_atomic
+from run_closed_loop_pipeline import write_json_atomic
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = ROOT / "configs/perception/hybrid_rgbd_relation_pilot.json"
+DEFAULT_CONFIG = ROOT / "configs/perception/rgbd_relation_calibration.json"
 
 
 def audit_relation(

@@ -39,7 +39,7 @@ echo "MAX_GPU_COUNT=1"
 echo "RENDER_QUALITY=${render_quality}"
 
 exec "${isaac_python}" \
-    "${project_root}/scripts/open_minimal_scene.py" \
+    "${project_root}/scripts/isaac_sim_server.py" \
     --scene-profile minimal \
     --headless \
     --renderer-gpu "${PHYSICAL_GPU}" \

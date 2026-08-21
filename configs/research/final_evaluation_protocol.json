@@ -1,0 +1,116 @@
+{
+  "schema_version": "five-scenario-final-evaluation-protocol-v1",
+  "status": "candidate_before_calibration_freeze",
+  "method_claim": "observation_condition_calibrated_joint_semantic_belief_and_task_risk_aware_receding_horizon_action_selection",
+  "instruction_protocol": {
+    "template": "Find and pick up the red mug with the white rectangular logo.",
+    "scenario_label_hidden_from_policy": true,
+    "ground_truth_hidden_from_policy": true,
+    "required_action_hidden_from_policy": true
+  },
+  "method_definitions": "configs/research/method_definitions.json",
+  "planner_template": "configs/research/unified_task_belief.json",
+  "development_selection_record": "configs/research/method_selection_record.json",
+  "reserved_test_capture_config": "configs/research/reserved_test_episodes.json",
+  "data_split": {
+    "development_seed_range": [1270, 1333],
+    "reserved_test_seed_range": [1100, 1159],
+    "reserved_test_episode_count": 60,
+    "episodes_per_headline_scenario": 12
+  },
+  "headline_scenarios": [
+    "visible_open",
+    "partially_occluded",
+    "covered_container",
+    "ambiguous_inside_outside",
+    "target_absent"
+  ],
+  "scenario_design": {
+    "visible_open": [
+      "visible_inside_clear",
+      "visible_outside_clear"
+    ],
+    "partially_occluded": [
+      "partial_close_high_resolving",
+      "partial_right_resolving"
+    ],
+    "covered_container": [
+      "covered_close_high_resolving",
+      "covered_right_resolving"
+    ],
+    "ambiguous_inside_outside": [
+      "ambiguous_inside_rim",
+      "ambiguous_outside_behind"
+    ],
+    "target_absent": [
+      "target_absent_covered"
+    ]
+  },
+  "scene_assignment": {
+    "strategy": "predeclared counterbalanced schedule",
+    "headline_scenario_support_balanced": true,
+    "assignment_hidden_from_policy": true
+  },
+  "action_set": [
+    "viewpoint_right",
+    "viewpoint_close_high",
+    "remove_cover",
+    "grasp",
+    "defer"
+  ],
+  "methods": [
+    "immediate_grasp",
+    "fixed_right_view",
+    "fixed_close_high_view",
+    "confidence_greedy",
+    "myopic_information_gain",
+    "open_loop_belief_planner",
+    "direct_vlm_action_selection",
+    "random_feasible_action",
+    "oracle_simulator_ground_truth",
+    "proposed_task_risk_aware_joint_belief_mpc"
+  ],
+  "ablations": [
+    "no_joint_belief",
+    "no_calibration",
+    "no_negative_evidence",
+    "no_action_conditioned_future_belief",
+    "no_task_risk_cost",
+    "no_persistent_tracking",
+    "no_scene_conditioned_view_model"
+  ],
+  "primary_metrics": [
+    "semantic_task_success_rate",
+    "wrong_commitment_rate",
+    "target_absent_safe_deferral_rate",
+    "mean_realized_task_cost"
+  ],
+  "diagnostic_metrics": [
+    "identity_ece_nll_brier",
+    "membership_ece_nll_brier",
+    "absence_ece_nll_brier",
+    "grounding_proposal_recall",
+    "selected_candidate_accuracy",
+    "condition_wise_failure_causes"
+  ],
+  "statistics": {
+    "success_rate_interval": "wilson_95",
+    "paired_binary_test": "exact_mcnemar",
+    "continuous_pairing": "paired_bootstrap_10000_seed0"
+  },
+  "required_reporting": [
+    "all_grounding_candidates_and_confidences",
+    "candidate_selection_trace",
+    "condition_wise_success_and_failure",
+    "failure_causes",
+    "runtime_without_video_encoding"
+  ],
+  "final_output_root": "outputs/final_evaluation/reserved_test",
+  "reserved_test_launch_authorized": false,
+  "test_seed_reuse_for_tuning_forbidden": true,
+  "training_performed": false,
+  "calibration_performed": false,
+  "testing_performed": false,
+  "reserved_test_seeds_used": false,
+  "valid_for_final_evaluation": false
+}

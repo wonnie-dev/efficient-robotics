@@ -40,7 +40,7 @@
           "calibrated": false,
           "units": null
         },
-        "source": "rule_based_stub"
+        "source": "rule_based_fixture"
       },
       "last_observed_view": "center"
     },
@@ -65,7 +65,7 @@
           "calibrated": false,
           "units": null
         },
-        "source": "ground_truth_stub"
+        "source": "ground_truth_fixture"
       },
       "last_observed_view": "center"
     }
@@ -90,7 +90,7 @@
           "calibrated": false,
           "units": null
         },
-        "source": "rule_based_stub"
+        "source": "rule_based_fixture"
       },
       "last_updated_view": "center"
     }
@@ -122,7 +122,7 @@
   },
   "provenance": {
     "schema_file": "configs/scene_graph/uncertainty_aware_scene_graph.schema.json",
-    "perception_source": "example rule-based stub values",
+    "perception_source": "example rule-based fixture values",
     "ground_truth_used_for_control": false,
     "notes": "Probabilities are illustrative only and are not experimental results."
   }

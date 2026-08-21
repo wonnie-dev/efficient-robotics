@@ -28,7 +28,7 @@ from qwen3_vl_logits import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = ROOT / "configs/perception/grounding_pilot_seed0_2.json"
+DEFAULT_CONFIG = ROOT / "configs/perception/grounded_segmentation.json"
 RANKING_PROMPT_VERSION = (
     "grounded-qwen-factorized-identity-relation-v2-conservative-unknown"
 )
@@ -81,8 +81,8 @@ def main() -> None:
         raise RuntimeError("Exactly one GPU must be visible.")
     torch.cuda.set_device("cuda:0")
     config = json.loads(args.config.read_text(encoding="utf-8"))
-    pilot_root = resolve_path(config["output_root"])
-    input_root = pilot_root / "grounded_sam2_qwen_inputs"
+    perception_root = resolve_path(config["output_root"])
+    input_root = perception_root / "grounded_sam2_qwen_inputs"
     manifest = json.loads(
         (input_root / "manifest.json").read_text(encoding="utf-8")
     )
@@ -109,7 +109,7 @@ def main() -> None:
     results = []
     for item in manifest["samples"]:
         input_path = resolve_path(item["input_path"])
-        destination = pilot_root / "grounded_sam2_qwen_rankings" / item["sample_id"]
+        destination = perception_root / "grounded_sam2_qwen_rankings" / item["sample_id"]
         result_path = destination / "result.json"
         if not args.force and cached_result_matches_input(result_path, input_path):
             # Cache hits retain the runtime and memory metrics from their original run.
@@ -269,7 +269,7 @@ def main() -> None:
         "training_performed": False,
         "valid_for_final_evaluation": False,
     }
-    summary_path = pilot_root / "grounded_sam2_qwen_ranking_summary.json"
+    summary_path = perception_root / "grounded_sam2_qwen_ranking_summary.json"
     summary_path.write_text(
         json.dumps(summary, indent=2) + "\n", encoding="utf-8"
     )

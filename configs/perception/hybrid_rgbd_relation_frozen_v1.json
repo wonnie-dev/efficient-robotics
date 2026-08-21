@@ -1,7 +1,7 @@
 {
   "schema_version": "hybrid-rgbd-relation-runtime-config-v1",
   "experiment_id": "icra_relation_model_frozen_v1",
-  "calibration_source": "outputs/calibration_pilot/objective_relations_seed165_189_gpu0/hybrid_rgbd_relation_measured_extent/cross_validation/result.json",
+  "calibration_source": "outputs/calibration/objective_relations_seed165_189_gpu0/hybrid_rgbd_relation_measured_extent/cross_validation/result.json",
   "calibration_source_sha256": "51f6ace874c52e5e9da9f0f8202df619f13cf188d81395ba6b18aa70cf9ae9b1",
   "reference_geometry": {
     "frame_assumption": "world_axis_aligned_simulation_basket_with_measured_real_world_dimensions_required",

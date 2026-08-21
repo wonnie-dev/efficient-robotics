@@ -12,7 +12,7 @@ from run_grounded_proposal_qwen_ranking import (  # noqa: E402
     cached_result_matches_input,
     sha256 as input_sha256,
 )
-from run_perception_grounding_pilot import (  # noqa: E402
+from run_grounded_segmentation import (  # noqa: E402
     cached_result_matches_image,
     sha256,
 )

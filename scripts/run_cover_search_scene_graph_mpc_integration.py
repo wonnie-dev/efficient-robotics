@@ -145,7 +145,7 @@ def build_scene_graph(
                         entropy({"target": 0.85, "other": 0.15}),
                         "categorical_entropy_nats_debug",
                     ),
-                    "source": "rule_based_stub",
+                    "source": "rule_based_fixture",
                 },
                 "last_observed_view": observation_symbol,
             },
@@ -162,7 +162,7 @@ def build_scene_graph(
                         0.0,
                         "categorical_entropy_nats_debug",
                     ),
-                    "source": "rule_based_stub",
+                    "source": "rule_based_fixture",
                 },
                 "last_observed_view": observation_symbol,
             },
@@ -180,7 +180,7 @@ def build_scene_graph(
                         entropy(cover),
                         "categorical_entropy_nats_debug",
                     ),
-                    "source": "rule_based_stub",
+                    "source": "rule_based_fixture",
                 },
                 "last_observed_view": observation_symbol,
             },
@@ -200,7 +200,7 @@ def build_scene_graph(
                         location_entropy,
                         "categorical_entropy_nats_debug",
                     ),
-                    "source": "rule_based_stub",
+                    "source": "rule_based_fixture",
                 },
                 "last_updated_view": observation_symbol,
             }
@@ -303,7 +303,7 @@ def action_request(
     return request
 
 
-def execute_contract_stub(
+def execute_contract_fixture(
     request: dict[str, Any],
     *,
     expected_action: str | None,
@@ -318,7 +318,7 @@ def execute_contract_stub(
         request["type"] == "defer"
     )
     if terminal and observation is not None:
-        raise ValueError("Terminal stub result cannot contain observation")
+        raise ValueError("Terminal fixture result cannot contain observation")
     if not terminal and observation is None:
         # An information action without a result cannot revise the belief.
         raise ValueError("Information action requires post-action observation")
@@ -328,7 +328,7 @@ def execute_contract_stub(
         "episode_id": request["episode_id"],
         "step_index": request["step_index"],
         "type": request["type"],
-        "status": "accepted_cpu_contract_stub",
+        "status": "accepted_cpu_contract_fixture",
         "observation_symbol": observation,
         "physical_execution": False,
         "collision_checked": False,
@@ -385,7 +385,7 @@ def run_episode(
         selected = request["type"]
         terminal = selected.startswith("grasp_") or selected == "defer"
         if terminal:
-            result = execute_contract_stub(
+            result = execute_contract_fixture(
                 request,
                 expected_action=episode["expected_terminal_action"],
                 observation=None,
@@ -398,7 +398,7 @@ def run_episode(
                     "post-action evidence"
                 )
             scripted = episode["observations"][observation_index]
-            result = execute_contract_stub(
+            result = execute_contract_fixture(
                 request,
                 expected_action=scripted["expected_action"],
                 observation=scripted["outcome"],
@@ -521,7 +521,7 @@ def run_experiment(config_path: Path) -> dict[str, Any]:
         "testing_performed": False,
         "valid_for_final_evaluation": False,
         "limitations": [
-            "The executor and observations are CPU contract stubs.",
+            "The executor and observations are CPU contract fixtures.",
             "Scene Graph RGB-D paths explicitly state that images are unavailable.",
             "Planner probabilities and costs remain hand specified and uncalibrated.",
             "No UR10e, RG6, collision, cover physics, or learned perception was executed.",

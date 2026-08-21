@@ -52,7 +52,7 @@
       "resolution": [1920, 1080],
       "focal_length_mm": 38.0
     },
-    "meeting_quality": {
+    "high_quality": {
       "resolution": [1920, 1080],
       "focal_length_mm": 42.0
     }
