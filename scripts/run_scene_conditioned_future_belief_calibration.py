@@ -70,15 +70,18 @@ FEATURE_NAMES = (
 
 
 def load_json(path: Path) -> dict[str, Any]:
+    """Load one calibration input artifact."""
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def bbox_aspect(annotation: dict[str, Any]) -> float:
+    """Return the width-to-height ratio of a detected box."""
     x0, y0, x1, y1 = annotation["bbox_xyxy_pixels"]
     return float(x1 - x0) / max(1e-9, float(y1 - y0))
 
 
 def bbox_area_fraction(annotation: dict[str, Any], image_area: float) -> float:
+    """Return the fraction of image area covered by a detected box."""
     x0, y0, x1, y1 = annotation["bbox_xyxy_pixels"]
     return float(x1 - x0) * float(y1 - y0) / image_area
 
@@ -152,6 +155,7 @@ def extract_center_features(
 def standardized_distance(
     left: list[float], right: list[float], mean: list[float], std: list[float]
 ) -> float:
+    """Measure feature distance after per-dimension standardization."""
     return math.sqrt(
         sum(
             ((left[index] - right[index]) / std[index]) ** 2
@@ -161,6 +165,7 @@ def standardized_distance(
 
 
 def fit_statistics(rows: list[dict[str, Any]]) -> tuple[list[float], list[float]]:
+    """Estimate feature means and standard deviations from calibration rows."""
     dimension = len(FEATURE_NAMES)
     mean = [
         sum(row["features"]["values"][index] for row in rows) / len(rows)
@@ -252,6 +257,7 @@ def select_action(variant_probabilities: dict[str, float]) -> dict[str, Any]:
 
 
 def expected_action(variant: str) -> str:
+    """Return the view action associated with a scene variant."""
     if variant == "either_view":
         return min(
             RESOLVING_ACTIONS[variant], key=lambda action: ACTION_COST[action]
@@ -260,6 +266,7 @@ def expected_action(variant: str) -> str:
 
 
 def main() -> None:
+    """Fit and evaluate the scene-conditioned future-observation model."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)

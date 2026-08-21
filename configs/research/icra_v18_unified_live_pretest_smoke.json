@@ -1,0 +1,53 @@
+{
+  "schema_version": "icra-v18-unified-live-pretest-smoke-config-v1",
+  "status": "development_smoke_ready",
+  "experiment_id": "v18_unified_planner_nonreserved_live_smoke",
+  "seed": 1063,
+  "scene_variant": "covered_center_ambiguous_then_close_high_logo_v2",
+  "live_smoke_branch_scope": "unified_root_action_dispatch",
+  "frozen_cover_planner": "artifacts/calibration/frozen_cover_planner.json",
+  "joint_development_config": "configs/research/icra_v13_joint_development_stress_18seed.json",
+  "joint_observation_model": "artifacts/calibration/development_joint_observation_model.json",
+  "unified_joint_model": "outputs/calibration/icra_v18_persistent_negative_evidence_candidate/calibration_candidate_model.json",
+  "unified_view_model": "outputs/calibration/icra_v18_persistent_negative_evidence_candidate/scene_conditioned_view_model_candidate.json",
+  "unified_resolution_likelihoods": "outputs/calibration/icra_v18_persistent_negative_evidence_candidate/resolution_likelihoods_candidate.json",
+  "target_temperature": 5.825,
+  "maximum_track_center_distance_m": 0.12,
+  "maximum_target_localization_extent_m": 0.18,
+  "rgbd_relation_config": "configs/perception/hybrid_rgbd_relation_frozen_v1.json",
+  "rg6_lid_calibration_config": "configs/hardware/rg6_lid_development_proxy.json",
+  "rg6_coupling_mode": "coordinated_drives",
+  "coordinated_rg6_total_drive_effort_limit_nm": 18,
+  "record_debug_video": false,
+  "collect_development_failures": true,
+  "perception_task_overrides": {
+    "instruction": "Find and pick up the red mug with the white rectangular logo.",
+    "target_description": "red mug with a white rectangular logo",
+    "qwen_direct_prompt": "Find the red mug with the white rectangular logo. Report its tight visible bounding box using relative image coordinates from 0 to 1000. Output exactly one JSON list containing the bbox and label target, or [] when it cannot be located reliably.",
+    "qwen_candidate_concept": "red object",
+    "qwen_reference_concept": "open container",
+    "factorized_relations": true,
+    "membership_label_space": ["inside", "outside", "unknown"],
+    "independent_relation_label_spaces": {
+      "near": ["yes", "no", "unknown"],
+      "behind": ["yes", "no", "unknown"],
+      "occluded_by": ["yes", "no", "unknown"]
+    },
+    "open_vocabulary_concepts": [
+      "red object",
+      "orange object",
+      "yellow object",
+      "blue object",
+      "green object",
+      "purple object",
+      "open container",
+      "lid or cover"
+    ],
+    "grounding_dino_prompt": "red object. orange object. yellow object. blue object. green object. purple object. open container. lid or cover."
+  },
+  "training_performed": false,
+  "calibration_performed": true,
+  "testing_performed": false,
+  "reserved_test_seed_used": false,
+  "valid_for_final_evaluation": false
+}

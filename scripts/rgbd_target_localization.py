@@ -209,6 +209,7 @@ def localize_observation(
 
 
 def main() -> None:
+    """Run the command-line RGB-D localization entry point."""
     parser = argparse.ArgumentParser()
     parser.add_argument("observation_dir", type=Path)
     parser.add_argument("--output", type=Path, required=True)

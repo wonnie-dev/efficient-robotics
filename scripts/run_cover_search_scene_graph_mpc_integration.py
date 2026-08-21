@@ -36,15 +36,18 @@ DEFAULT_CONFIG = (
 
 
 def load_json(path: Path) -> dict[str, Any]:
+    """Load a JSON configuration or cached observation."""
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def resolve_path(value: str | Path) -> Path:
+    """Resolve a repository-relative path."""
     path = Path(value)
     return path if path.is_absolute() else ROOT / path
 
 
 def canonical_hash(payload: dict[str, Any]) -> str:
+    """Hash a JSON payload using stable key ordering."""
     encoded = json.dumps(
         payload,
         sort_keys=True,
@@ -54,6 +57,7 @@ def canonical_hash(payload: dict[str, Any]) -> str:
 
 
 def uncertainty_record(value: float, method: str) -> dict[str, Any]:
+    """Store an uncertainty value together with its estimation method."""
     return {
         "status": "available",
         "method": method,
@@ -64,6 +68,7 @@ def uncertainty_record(value: float, method: str) -> dict[str, Any]:
 
 
 def empty_observation(visible: bool) -> dict[str, Any]:
+    """Build the null target observation used by negative-evidence updates."""
     return {
         "visible": visible,
         "visible_fraction": 0.0,
@@ -335,6 +340,7 @@ def execute_contract_stub(
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
+    """Write a formatted experiment artifact."""
     path.write_text(
         json.dumps(payload, indent=2) + "\n",
         encoding="utf-8",
@@ -464,6 +470,7 @@ def run_episode(
 
 
 def run_experiment(config_path: Path) -> dict[str, Any]:
+    """Replay one Scene Graph and belief-planning integration experiment."""
     integration_config = load_json(config_path)
     planner_config = load_json(
         resolve_path(integration_config["planner_config"])
@@ -546,6 +553,7 @@ def run_experiment(config_path: Path) -> dict[str, Any]:
 
 
 def main() -> None:
+    """Run the integration experiment selected on the command line."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     args = parser.parse_args()

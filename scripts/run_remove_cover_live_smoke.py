@@ -19,11 +19,22 @@ from run_live_single_gpu_pipeline import (
 )
 from run_single_gpu_pilot import configured_physical_gpu
 from run_single_gpu_pilot import require_single_gpu_policy
+from final_evaluation_authorization import (
+    DEFAULT_PROTOCOL,
+    validate_output_authorization,
+)
 from run_cover_search_belief_mpc import (
     execute_observation_action,
     normalize,
     plan,
     validate_config,
+)
+from run_post_cover_view_calibration import select_post_cover_action
+from run_scene_conditioned_future_belief_calibration import (
+    FEATURE_NAMES,
+    bbox_area_fraction,
+    bbox_aspect,
+    predict_variant_distribution,
 )
 
 
@@ -35,10 +46,110 @@ CALIBRATION_RESULT = (
     / "scene_conditioned_future_belief_seed185_196"
     / "result.json"
 )
+FROZEN_COVER_PLANNER = (
+    ROOT / "outputs" / "final_evaluation" / "icra_protocol_v1"
+    / "frozen_cover_planner.json"
+)
+FINAL_PERCEPTION_TASK_OVERRIDES = {
+    "instruction": "Find and pick up the red mug with the white logo.",
+    "target_description": "the red mug with the white logo",
+    "qwen_direct_prompt": (
+        "Find the single red mug with the white logo. If it cannot be "
+        "located reliably, return []. Return JSON only."
+    ),
+    "qwen_candidate_concept": "red object",
+    "qwen_reference_concept": "open container",
+    "minimum_candidate_proposals": 1,
+    "factorized_relations": True,
+    "membership_label_space": ["inside", "outside", "unknown"],
+    "independent_relation_label_spaces": {
+        "near": ["yes", "no", "unknown"],
+        "behind": ["yes", "no", "unknown"],
+        "occluded_by": ["yes", "no", "unknown"],
+    },
+    "open_vocabulary_concepts": [
+        "red object",
+        "orange object",
+        "yellow object",
+        "blue object",
+        "green object",
+        "purple object",
+        "open container",
+        "lid or cover",
+    ],
+    "grounding_dino_prompt": (
+        "red object. orange object. yellow object. blue object. green object. "
+        "purple object. open container. lid or cover."
+    ),
+}
+FINAL_PERCEPTION_MODEL_OVERRIDES = {
+    "grounding_dino": {
+        "box_threshold": 0.25,
+        "text_threshold": 0.2,
+    }
+}
+POST_COVER_VIEW_CALIBRATION = (
+    ROOT / "outputs/offline_mpc/post_cover_view_calibration_seed224_239/result.json"
+)
+COVERED_SCENE_VARIANTS = (
+    "cover_removal_required",
+    "empty_cover_then_right",
+    "covered_then_close_high_only",
+    "covered_then_right_only",
+    "covered_then_either_view",
+    "covered_center_ambiguous_then_close_high_only",
+    "covered_center_ambiguous_then_close_high_logo_v2",
+    "covered_center_ambiguous_then_right_only",
+    "target_absent_covered",
+    "covered_target_outside_visible_no_gain",
+)
 
 
-def next_output_dir(seed: int) -> Path:
-    seed_root = OUTPUT_ROOT / f"seed{seed:03d}"
+def expected_visibility_outcome_passed(
+    scene_variant: str,
+    initial_pixels: int,
+    post_pixels: int,
+) -> tuple[str, bool]:
+    """Check the intervention outcome specified by each calibration family."""
+    if scene_variant == "target_absent_covered":
+        return "target_absent_before_and_after", bool(
+            initial_pixels == 0 and post_pixels == 0
+        )
+    if scene_variant == "covered_target_outside_visible_no_gain":
+        return "outside_target_visible_before_and_after", bool(
+            initial_pixels >= 100 and post_pixels >= 100
+        )
+    return "target_visibility_increases_after_removal", bool(
+        post_pixels > initial_pixels
+    )
+
+
+def counterfactual_cache_step(
+    views: list[str], view_offset: int
+) -> tuple[int, str, dict]:
+    """Return the expected event and follow-up request for one cached view."""
+    if not views:
+        raise ValueError("At least one counterfactual view is required")
+    if view_offset < 0 or view_offset >= len(views):
+        raise IndexError("Counterfactual view offset is out of range")
+    if len(views) != len(set(views)):
+        raise ValueError("Counterfactual views must be unique")
+    expected_view = views[view_offset]
+    next_view = views[view_offset + 1] if view_offset + 1 < len(views) else None
+    event_index = 2 + view_offset
+    request = {
+        "schema_version": "counterfactual-cache-request-v1",
+        "index": event_index,
+        "type": f"viewpoint_{next_view}" if next_view is not None else "stop",
+        "counterfactual_cache_only": True,
+        "physical_execution_requested": False,
+    }
+    return event_index, expected_view, request
+
+
+def next_output_dir(seed: int, output_root: Path = OUTPUT_ROOT) -> Path:
+    """Allocate a new per-seed output directory."""
+    seed_root = output_root / f"seed{seed:03d}"
     seed_root.mkdir(parents=True, exist_ok=True)
     indices = []
     for path in seed_root.glob("run*"):
@@ -50,6 +161,7 @@ def next_output_dir(seed: int) -> Path:
 
 
 def target_pixel_count(observation_dir: Path) -> int:
+    """Count visible target pixels in a saved benchmark instance mask."""
     labels = json.loads(
         (observation_dir / "instance_labels.json").read_text(encoding="utf-8")
     )
@@ -84,6 +196,11 @@ def learned_post_remove_localization(
             view=view,
             step_index=observation_index,
             task_overrides=task_overrides,
+            model_overrides=(
+                FINAL_PERCEPTION_MODEL_OVERRIDES
+                if task_overrides is FINAL_PERCEPTION_TASK_OVERRIDES
+                else None
+            ),
         )
     )
     selected_candidate = ranking.get("selected_candidate_id")
@@ -147,6 +264,111 @@ def learned_post_remove_localization(
     }
 
 
+def learned_scene_features(perception: dict) -> dict:
+    """Extract the frozen post-cover selector inputs from one live result."""
+    from PIL import Image
+
+    ranking = perception["ranking"]
+    config = json.loads(
+        Path(perception["perception_config_path"]).read_text(encoding="utf-8")
+    )
+    output_root = Path(config["output_root"])
+    detections_path = (
+        output_root
+        / "grounded_sam2"
+        / ranking["sample_id"]
+        / "detections.json"
+    )
+    detections = json.loads(detections_path.read_text(encoding="utf-8"))
+    selected_index = ranking["candidate_ids"].index(
+        ranking["selected_candidate_id"]
+    )
+    with Image.open(detections["image_path"]) as image:
+        image_area = float(image.width * image.height)
+    orange = [
+        item for item in detections["annotations"]
+        if item["label"] == "orange object"
+    ]
+    covers = [
+        item for item in detections["annotations"]
+        if item["label"] == "lid or cover"
+    ]
+    values = [
+        float(ranking["raw_match_logits"][selected_index]),
+        float(len(ranking["candidate_ids"])),
+        max((bbox_aspect(item) for item in orange), default=0.0),
+        max((float(item["score"]) for item in covers), default=0.0),
+        max(
+            (bbox_area_fraction(item, image_area) for item in covers),
+            default=0.0,
+        ),
+    ]
+    return {
+        "sample_id": ranking["sample_id"],
+        "values": values,
+        "named_values": dict(zip(FEATURE_NAMES, values)),
+        "inference_inputs": [
+            str(detections_path.resolve()),
+            str(Path(perception["ranking_path"]).resolve()),
+        ],
+    }
+
+
+def select_live_post_cover_view(perception: dict) -> dict:
+    """Apply the calibration-frozen future-observation selector live."""
+    calibration = json.loads(
+        POST_COVER_VIEW_CALIBRATION.read_text(encoding="utf-8")
+    )
+    query = learned_scene_features(perception)
+    prediction = predict_variant_distribution(
+        query,
+        calibration["frozen_full_calibration_model"]["episodes"],
+        k=int(calibration["frozen_full_calibration_model"]["neighbor_count"]),
+    )
+    decision = select_post_cover_action(prediction["variant_probabilities"])
+    selected = decision["selected_action"]
+    if selected not in {"viewpoint_close_high", "viewpoint_right"}:
+        raise RuntimeError(f"Frozen selector did not choose a view: {selected}")
+    return {
+        "schema_version": "live-post-cover-view-decision-v1",
+        "features": query,
+        "prediction": prediction,
+        "decision": decision,
+        "calibration_source": str(POST_COVER_VIEW_CALIBRATION.resolve()),
+        "future_observation_used_for_selection": False,
+    }
+
+
+def qwen_grasp_gate(perception: dict) -> dict:
+    """Require positive identity evidence and an inside membership judgment."""
+    ranking = perception["ranking"]
+    selected = ranking["selected_candidate_id"]
+    selected_index = ranking["candidate_ids"].index(selected)
+    target_logit = float(ranking["raw_match_logits"][selected_index])
+    membership = next(
+        (
+            relation
+            for relation in ranking.get("relations", [])
+            if relation.get("source_id") == selected
+            and relation.get("relation_type") == "membership"
+        ),
+        None,
+    )
+    membership_label = membership.get("top_label") if membership else None
+    authorized = target_logit > 0.0 and membership_label == "inside"
+    return {
+        "authorized": authorized,
+        "selected_candidate_id": selected,
+        "selected_target_logit": target_logit,
+        "membership_label": membership_label,
+        "thresholds": {
+            "target_logit_strictly_greater_than": 0.0,
+            "required_membership": "inside",
+        },
+        "calibrated_probability_used": False,
+    }
+
+
 def removal_contact_success(removal: dict) -> bool:
     """Apply the contact contract appropriate to a held or released cover.
 
@@ -183,12 +405,31 @@ def contact_grasp_success(server_result: dict) -> bool:
     )
 
 
+def transport_or_saved_result_succeeded(
+    returncode: int | None, server_result: dict
+) -> bool:
+    """Do not discard a complete result because Kit timed out while closing."""
+    return bool(
+        returncode == 0 or server_result.get("status") == "completed"
+    )
+
+
 def calibration_authorizes_remove_cover(
-    seed: int, *, forced_observation_calibration: bool = False
+    seed: int,
+    *,
+    scene_variant: str = "cover_removal_required",
+    forced_observation_calibration: bool = False,
+    final_evaluation_authorized: bool = False,
+    protocol_path: Path = DEFAULT_PROTOCOL,
 ) -> dict:
     """Accept removal only from its held-out calibration fold or an explicit pilot."""
     if forced_observation_calibration:
-        if 200 <= seed <= 209:
+        protocol = json.loads(protocol_path.resolve().read_text(encoding="utf-8"))
+        reserved = {
+            int(value)
+            for value in protocol["data_split"]["reserved_test_seeds"]
+        }
+        if seed in reserved:
             raise ValueError(
                 f"Seed {seed} is reserved for final testing and cannot be "
                 "used for forced calibration"
@@ -196,10 +437,32 @@ def calibration_authorizes_remove_cover(
         return {
             "authorization_mode": "forced_observation_calibration_intervention",
             "seed": seed,
-            "scene_variant": "cover_removal_required",
+            "scene_variant": scene_variant,
             "future_observation_used_for_selection": False,
             "testing_performed": False,
             "valid_for_final_evaluation": False,
+        }
+    if final_evaluation_authorized:
+        protocol = json.loads(protocol_path.resolve().read_text(encoding="utf-8"))
+        frozen_path = ROOT / protocol["calibration_freeze_requirements"][
+            "frozen_parameters_path"
+        ]
+        frozen = json.loads(frozen_path.read_text(encoding="utf-8"))
+        if frozen.get("status") not in {
+            "frozen_before_reserved_test",
+            "frozen_ready_for_reserved_test",
+        }:
+            raise RuntimeError("Final parameters are not frozen")
+        if not frozen.get("reserved_test_launch_authorized"):
+            raise RuntimeError("Reserved test launch is not authorized")
+        return {
+            "authorization_mode": "frozen_reserved_test_policy",
+            "seed": seed,
+            "selected_action": "remove_cover",
+            "source": str(frozen_path.resolve()),
+            "future_observation_used_for_selection": False,
+            "testing_performed": True,
+            "valid_for_final_evaluation": True,
         }
     result = json.loads(CALIBRATION_RESULT.read_text(encoding="utf-8"))
     matches = [
@@ -216,8 +479,14 @@ def calibration_authorizes_remove_cover(
 
 
 def main() -> None:
+    """Run one persistent cover-removal, re-observation, and grasp episode."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=188)
+    parser.add_argument(
+        "--scene-variant",
+        choices=COVERED_SCENE_VARIANTS,
+        default="cover_removal_required",
+    )
     parser.add_argument("--timeout-seconds", type=float, default=1800.0)
     parser.add_argument(
         "--rg6-lid-calibration-config",
@@ -236,6 +505,21 @@ def main() -> None:
             "Development only: use an explicit public-spec/simulation proxy "
             "without claiming transfer readiness."
         ),
+    )
+    parser.add_argument(
+        "--final-evaluation-authorized",
+        action="store_true",
+        help="Write a reserved test episode under the frozen final protocol.",
+    )
+    parser.add_argument(
+        "--protocol",
+        type=Path,
+        default=DEFAULT_PROTOCOL,
+    )
+    parser.add_argument(
+        "--output-root",
+        type=Path,
+        default=OUTPUT_ROOT,
     )
     parser.add_argument(
         "--rg6-coupling-mode",
@@ -265,6 +549,31 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--execute-post-remove-active-view-grasp",
+        action="store_true",
+        help=(
+            "Run frozen post-cover view selection, physically move to that "
+            "view, infer again, and execute a contact-gated target grasp."
+        ),
+    )
+    parser.add_argument(
+        "--counterfactual-post-remove-viewpoint-right-cache",
+        action="store_true",
+        help=(
+            "Cache the reachable right observation after physical cover "
+            "removal, send stop, and do not count the run as a policy result."
+        ),
+    )
+    parser.add_argument(
+        "--counterfactual-post-remove-views",
+        nargs="+",
+        choices=("left", "close_high", "right"),
+        help=(
+            "Cache one or both reachable views after physical cover removal, "
+            "then stop without counting the run as a policy result."
+        ),
+    )
+    parser.add_argument(
         "--force-remove-cover-for-observation-calibration",
         action="store_true",
         help=(
@@ -272,13 +581,80 @@ def main() -> None:
             "claiming that MPC selected it. Reserved test seeds are rejected."
         ),
     )
+    parser.add_argument(
+        "--disable-manipulation-video",
+        action="store_true",
+        help=(
+            "Skip per-step manipulation frames and MP4 encoding while "
+            "retaining RGB-D observations and all physics safety checks."
+        ),
+    )
+    parser.add_argument(
+        "--physics-only-manipulation-steps",
+        action="store_true",
+        help=(
+            "Use renderer-free PhysX stepping during manipulation while "
+            "retaining rendered RGB-D observations at decision points."
+        ),
+    )
     args = parser.parse_args()
+    if (
+        args.counterfactual_post_remove_viewpoint_right_cache
+        and args.counterfactual_post_remove_views
+    ):
+        parser.error("Use only one counterfactual post-remove view option")
+    counterfactual_views = list(
+        args.counterfactual_post_remove_views
+        or (
+            ["right"]
+            if args.counterfactual_post_remove_viewpoint_right_cache
+            else []
+        )
+    )
+    if len(counterfactual_views) != len(set(counterfactual_views)):
+        parser.error("Counterfactual post-remove views must be unique")
+    counterfactual_cache_only = bool(counterfactual_views)
     if args.timeout_seconds <= 0.0:
         parser.error("--timeout-seconds must be positive")
-    if args.execute_post_remove_grasp and not args.replan_after_remove_cover:
+    execute_final_grasp = bool(
+        args.execute_post_remove_grasp
+        or args.execute_post_remove_active_view_grasp
+    )
+    if execute_final_grasp and not args.replan_after_remove_cover:
         parser.error(
-            "--execute-post-remove-grasp requires "
+            "Post-remove grasp execution requires "
             "--replan-after-remove-cover"
+        )
+    if (
+        args.execute_post_remove_grasp
+        and args.execute_post_remove_active_view_grasp
+    ):
+        parser.error("Choose direct grasp or active-view grasp, not both")
+    if (
+        counterfactual_cache_only
+        and not args.replan_after_remove_cover
+    ):
+        parser.error(
+            "--counterfactual-post-remove-viewpoint-right-cache requires "
+            "--replan-after-remove-cover"
+        )
+    if (
+        counterfactual_cache_only
+        and execute_final_grasp
+    ):
+        parser.error(
+            "Counterfactual cache capture cannot execute a terminal grasp"
+        )
+    if (
+        counterfactual_cache_only
+        and not (
+            args.final_evaluation_authorized
+            or args.force_remove_cover_for_observation_calibration
+        )
+    ):
+        parser.error(
+            "Counterfactual cache capture requires final-evaluation "
+            "authorization or an explicit calibration intervention"
         )
     if args.require_transfer_ready_physics and not args.rg6_lid_calibration_config:
         parser.error(
@@ -340,11 +716,21 @@ def main() -> None:
     physical_gpu = configured_physical_gpu()
     fold = calibration_authorizes_remove_cover(
         args.seed,
+        scene_variant=args.scene_variant,
         forced_observation_calibration=(
             args.force_remove_cover_for_observation_calibration
         ),
+        final_evaluation_authorized=args.final_evaluation_authorized,
+        protocol_path=args.protocol,
     )
-    output_dir = next_output_dir(args.seed)
+    output_root = args.output_root.resolve()
+    output_dir = next_output_dir(args.seed, output_root)
+    validate_output_authorization(
+        seed=args.seed,
+        output_dir=output_dir.resolve(),
+        final_evaluation_authorized=args.final_evaluation_authorized,
+        protocol_path=args.protocol.resolve(),
+    )
     output_dir.mkdir(parents=True, exist_ok=False)
 
     base_config = json.loads(
@@ -378,7 +764,7 @@ def main() -> None:
         "--household-perception-pilot",
         "--scanned-basket-perception-pilot",
         "--calibration-scene-variant",
-        "cover_removal_required",
+        args.scene_variant,
         "--basket-collision-physics-pilot",
         "--execute-persistent-remove-cover",
     ]
@@ -399,8 +785,20 @@ def main() -> None:
                 str(args.coordinated_rg6_total_drive_effort_limit_nm),
             ]
         )
+    if args.disable_manipulation_video:
+        command.append("--disable-manipulation-video")
+    if args.physics_only_manipulation_steps:
+        command.append("--physics-only-manipulation-steps")
     if args.replan_after_remove_cover:
         command.append("--continue-after-remove-cover")
+    if args.final_evaluation_authorized:
+        command.extend(
+            [
+                "--final-evaluation-authorized",
+                "--final-evaluation-protocol",
+                str(args.protocol.resolve()),
+            ]
+        )
     environment = dict(os.environ)
     # The renderer keeps the host's physical index, while the one exposed CUDA
     # device is numbered 0 inside the process for PhysX.
@@ -432,13 +830,13 @@ def main() -> None:
     )
     try:
         initial_event_path = output_dir / "observation_ready_000.json"
-        # Isaac's first RTX/Replicator capture can exceed four minutes on the
-        # shared server even when the selected GPU is otherwise idle.  Keep
-        # this bounded but separate from the manipulation timeout.
+        # Concurrent RTX startup on the shared server can exceed ten minutes.
+        # Keep startup bounded, but do not confuse shader/extension contention
+        # with an episode failure.
         wait_for_path(
             initial_event_path,
             server,
-            timeout=min(args.timeout_seconds, 600.0),
+            timeout=min(args.timeout_seconds, 1200.0),
         )
         initial_event = json.loads(initial_event_path.read_text(encoding="utf-8"))
         write_json_atomic(
@@ -462,6 +860,9 @@ def main() -> None:
         )
         replanning = None
         learned_perception = None
+        active_view_decision = None
+        final_view_perception = None
+        final_grasp_gate = None
         if args.replan_after_remove_cover:
             post_event_path = output_dir / "observation_ready_001.json"
             wait_for_path(
@@ -474,11 +875,19 @@ def main() -> None:
             )
             post_observation_dir = Path(post_event_live["observation_dir"])
             post_pixels_live = target_pixel_count(post_observation_dir)
-            if args.execute_post_remove_grasp:
+            if execute_final_grasp:
                 learned_perception = learned_post_remove_localization(
                     output_dir,
                     post_observation_dir,
                     observation_index=1,
+                    task_overrides=(
+                        FINAL_PERCEPTION_TASK_OVERRIDES
+                        if (
+                            args.final_evaluation_authorized
+                            or args.execute_post_remove_active_view_grasp
+                        )
+                        else None
+                    ),
                 )
                 outcome = "target_detected"
             else:
@@ -487,25 +896,40 @@ def main() -> None:
                     if post_pixels_live >= 100
                     else "empty_container"
                 )
-            planner_config = json.loads(
-                (
-                    ROOT
-                    / "configs"
-                    / "research"
-                    / "cover_search_belief_mpc_cpu_pilot.json"
-                ).read_text(encoding="utf-8")
-            )
-            validate_config(planner_config)
-            belief_before = normalize(planner_config["initial_belief"])
-            belief_update = execute_observation_action(
-                belief_before,
-                "remove_cover",
-                outcome,
-                planner_config,
-            )
-            replanned_policy = plan(
-                belief_update["posterior"], planner_config
-            )
+            if args.execute_post_remove_active_view_grasp:
+                active_view_decision = select_live_post_cover_view(
+                    learned_perception
+                )
+                replanned_policy = active_view_decision["decision"]
+                belief_before = None
+                belief_update = {"posterior": None}
+            elif args.final_evaluation_authorized:
+                protocol = json.loads(
+                    args.protocol.resolve().read_text(encoding="utf-8")
+                )
+                planner_path = ROOT / protocol.get(
+                    "frozen_cover_planner_path",
+                    str(FROZEN_COVER_PLANNER.relative_to(ROOT)),
+                )
+            else:
+                planner_path = (
+                    ROOT / "configs/research/cover_search_belief_mpc_cpu_pilot.json"
+                )
+            if not args.execute_post_remove_active_view_grasp:
+                planner_config = json.loads(
+                    planner_path.read_text(encoding="utf-8")
+                )
+                validate_config(planner_config)
+                belief_before = normalize(planner_config["initial_belief"])
+                belief_update = execute_observation_action(
+                    belief_before,
+                    "remove_cover",
+                    outcome,
+                    planner_config,
+                )
+                replanned_policy = plan(
+                    belief_update["posterior"], planner_config
+                )
             replanning = {
                 "schema_version": "live-post-remove-replan-v1",
                 "observation_index": 1,
@@ -515,13 +939,27 @@ def main() -> None:
                 "belief_after": belief_update["posterior"],
                 "planner": replanned_policy,
                 "selected_action": replanned_policy["selected_action"],
+                "active_view_decision": active_view_decision,
                 "simulator_instance_mask_used_for_pilot_control": (
-                    not args.execute_post_remove_grasp
+                    not execute_final_grasp
                 ),
                 "learned_perception_executed": bool(learned_perception),
                 "learned_perception": learned_perception,
-                "valid_for_final_evaluation": False,
+                "valid_for_final_evaluation": bool(
+                    args.final_evaluation_authorized
+                    and not counterfactual_cache_only
+                ),
             }
+            dispatched_action = (
+                f"viewpoint_{counterfactual_views[0]}"
+                if counterfactual_cache_only
+                else replanned_policy["selected_action"]
+            )
+            replanning["dispatched_action"] = dispatched_action
+            replanning["counterfactual_cache_only"] = bool(
+                counterfactual_cache_only
+            )
+            replanning["counterfactual_views"] = counterfactual_views
             write_json_atomic(
                 output_dir / "post_remove_replan.json", replanning
             )
@@ -530,7 +968,7 @@ def main() -> None:
                 {
                     "schema_version": "live-post-remove-action-request-v1",
                     "index": 1,
-                    "type": replanned_policy["selected_action"],
+                    "type": dispatched_action,
                     "source_replan": str(
                         output_dir / "post_remove_replan.json"
                     ),
@@ -541,9 +979,88 @@ def main() -> None:
                     ),
                     "physical_execution_requested": bool(
                         args.execute_post_remove_grasp
+                        or args.execute_post_remove_active_view_grasp
                     ),
                 },
             )
+            if args.execute_post_remove_active_view_grasp:
+                view_event_path = output_dir / "observation_ready_002.json"
+                wait_for_path(
+                    view_event_path,
+                    server,
+                    timeout=args.timeout_seconds,
+                )
+                view_event = json.loads(
+                    view_event_path.read_text(encoding="utf-8")
+                )
+                selected_view = dispatched_action.removeprefix("viewpoint_")
+                if view_event.get("view") != selected_view:
+                    raise RuntimeError(
+                        f"Unexpected selected view: {view_event.get('view')} "
+                        f"!= {selected_view}"
+                    )
+                final_view_perception = learned_post_remove_localization(
+                    output_dir,
+                    Path(view_event["observation_dir"]),
+                    observation_index=2,
+                    view=selected_view,
+                    task_overrides=FINAL_PERCEPTION_TASK_OVERRIDES,
+                )
+                final_grasp_gate = qwen_grasp_gate(final_view_perception)
+                terminal_type = (
+                    "grasp_inside"
+                    if final_grasp_gate["authorized"]
+                    else "stop"
+                )
+                write_json_atomic(
+                    output_dir / "action_request_002.json",
+                    {
+                        "schema_version": "live-post-view-action-request-v1",
+                        "index": 2,
+                        "type": terminal_type,
+                        "source_view_decision": str(
+                            output_dir / "post_remove_replan.json"
+                        ),
+                        "qwen_grasp_gate": final_grasp_gate,
+                        "rgbd_localization_path": (
+                            final_view_perception["localization_path"]
+                            if final_grasp_gate["authorized"]
+                            else None
+                        ),
+                        "physical_execution_requested": bool(
+                            final_grasp_gate["authorized"]
+                        ),
+                    },
+                )
+            if counterfactual_cache_only:
+                for view_offset in range(len(counterfactual_views)):
+                    event_index, expected_view, request = (
+                        counterfactual_cache_step(
+                            counterfactual_views, view_offset
+                        )
+                    )
+                    view_event_path = (
+                        output_dir
+                        / f"observation_ready_{event_index:03d}.json"
+                    )
+                    wait_for_path(
+                        view_event_path,
+                        server,
+                        timeout=args.timeout_seconds,
+                    )
+                    view_event = json.loads(
+                        view_event_path.read_text(encoding="utf-8")
+                    )
+                    if view_event.get("view") != expected_view:
+                        raise RuntimeError(
+                            "Unexpected counterfactual view: "
+                            f"{view_event.get('view')} != {expected_view}"
+                        )
+                    write_json_atomic(
+                        output_dir
+                        / f"action_request_{event_index:03d}.json",
+                        request,
+                    )
         wait_for_path(
             output_dir / "server_result.json",
             server,
@@ -570,6 +1087,13 @@ def main() -> None:
     post_dir = Path(post_event["observation_dir"]) if post_event else None
     initial_pixels = target_pixel_count(initial_dir)
     post_pixels = target_pixel_count(post_dir) if post_dir else 0
+    expected_visibility_outcome, visibility_outcome_passed = (
+        expected_visibility_outcome_passed(
+            args.scene_variant,
+            initial_pixels,
+            post_pixels,
+        )
+    )
     removal = server_result.get("cover_removal_execution") or {}
     final_grasp = server_result.get("grasp_execution") or {}
     final_grasp_success = contact_grasp_success(server_result)
@@ -577,7 +1101,7 @@ def main() -> None:
     # change agree. Contact alone cannot prove the cover revealed the target,
     # and a visibility increase cannot prove the motion was physically safe.
     success = bool(
-        server.returncode == 0
+        transport_or_saved_result_succeeded(server.returncode, server_result)
         and server_result.get("status") == "completed"
         and server_result.get("cover_removal_executed")
         and server_result.get("post_removal_observation_generated")
@@ -587,9 +1111,9 @@ def main() -> None:
         and not removal.get("unexpected_environment_pairs")
         and removal.get("contact_force_within_limit")
         and removal.get("contact_penetration_within_limit")
-        and post_pixels > initial_pixels
+        and visibility_outcome_passed
         and (
-            not args.execute_post_remove_grasp
+            not execute_final_grasp
             or final_grasp_success
         )
     )
@@ -598,16 +1122,31 @@ def main() -> None:
         "status": "completed" if success else "failed",
         "seed": args.seed,
         "runtime_seconds": time.perf_counter() - started,
+        "transport_returncode": server.returncode,
+        "transport_exit_warning": bool(
+            server.returncode not in (0, None)
+            and server_result.get("status") == "completed"
+        ),
         "root_action": "remove_cover",
         "root_action_source": (
             "forced_observation_calibration_intervention"
             if args.force_remove_cover_for_observation_calibration
-            else "scene_conditioned_calibration_model"
+            else (
+                "frozen_counterfactual_cache_policy"
+                if counterfactual_cache_only
+                else (
+                    "frozen_reserved_test_policy"
+                    if args.final_evaluation_authorized
+                    else "scene_conditioned_calibration_model"
+                )
+            )
         ),
         "future_observation_used_for_root_selection": False,
         "initial_target_visible_pixel_count": initial_pixels,
         "post_removal_target_visible_pixel_count": post_pixels,
         "target_visibility_gain_pixels": post_pixels - initial_pixels,
+        "expected_visibility_outcome": expected_visibility_outcome,
+        "visibility_outcome_passed": visibility_outcome_passed,
         "cover_removal_execution": removal,
         "post_removal_observation": str(post_dir) if post_dir else None,
         "gpu_policy": {
@@ -639,8 +1178,12 @@ def main() -> None:
             ),
         },
         "training_performed": False,
-        "calibration_performed": True,
-        "testing_performed": False,
+        "calibration_performed": not args.final_evaluation_authorized,
+        "testing_performed": bool(
+            args.final_evaluation_authorized
+            and not counterfactual_cache_only
+        ),
+        "reserved_test_seeds_used": args.final_evaluation_authorized,
         "negative_evidence_update_performed": False,
         "replanning_performed": replanning is not None,
         "post_remove_replan": replanning,
@@ -650,12 +1193,23 @@ def main() -> None:
             else None
         ),
         "post_remove_learned_perception": learned_perception,
+        "post_remove_active_view_decision": active_view_decision,
+        "final_view_learned_perception": final_view_perception,
+        "final_grasp_gate": final_grasp_gate,
         "post_remove_replanned_action_physical_execution": bool(
-            args.execute_post_remove_grasp and final_grasp_success
+            execute_final_grasp and final_grasp_success
         ),
         "final_grasp_executed": final_grasp_success,
         "final_grasp_execution": final_grasp,
-        "valid_for_final_evaluation": False,
+        "counterfactual_cache_only": bool(
+            counterfactual_cache_only
+        ),
+        "counterfactual_views": counterfactual_views,
+        "valid_for_final_evaluation": bool(
+            args.final_evaluation_authorized
+            and success
+            and not counterfactual_cache_only
+        ),
     }
     write_json_atomic(output_dir / "remove_cover_smoke_result.json", result)
     print(f"REMOVE_COVER_SMOKE_RESULT={output_dir / 'remove_cover_smoke_result.json'}")

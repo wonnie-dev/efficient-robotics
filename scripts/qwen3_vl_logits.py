@@ -30,6 +30,7 @@ CHOICE_LETTERS = tuple("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse one VLM contract request and its output locations."""
     parser = argparse.ArgumentParser()
     parser.add_argument("input", type=Path, help="vlm-input-v1 JSON file")
     parser.add_argument("--output", type=Path)
@@ -93,6 +94,7 @@ def resolve_asset_path(path_text: str, input_path: Path) -> Path:
 
 
 def load_rgb(path: Path) -> Image.Image:
+    """Load an RGB image without retaining an open file handle."""
     with Image.open(path) as image:
         return image.convert("RGB").copy()
 
@@ -249,6 +251,7 @@ def target_question(
     model_input: dict,
     mapping: list[tuple[str, str]] | None = None,
 ) -> tuple[str, list[tuple[str, str]]]:
+    """Build a forced-choice question over all anonymous candidates."""
     candidate_ids = [
         candidate["candidate_id"] for candidate in model_input["candidates"]
     ]
@@ -270,6 +273,7 @@ def joint_candidate_question(
     candidate_id: str,
     mapping: list[tuple[str, str]] | None = None,
 ) -> tuple[str, list[tuple[str, str]]]:
+    """Score one candidate against the full identity-and-relation instruction."""
     values = ["matches_instruction", "does_not_match"]
     mapping = mapping or letter_mapping(values)
     choices = "\n".join(f"{letter}: {value}" for letter, value in mapping)
@@ -295,6 +299,7 @@ def candidate_identity_question(
     candidate_id: str,
     mapping: list[tuple[str, str]] | None = None,
 ) -> tuple[str, list[tuple[str, str]]]:
+    """Score visual identity without using the candidate's spatial relation."""
     values = ["matches_target_description", "does_not_match_target_description"]
     mapping = mapping or letter_mapping(values)
     choices = "\n".join(f"{letter}: {value}" for letter, value in mapping)
@@ -400,6 +405,7 @@ def prepare_inputs(
     question: str,
     device: str,
 ) -> Any:
+    """Tokenize one multimodal forced-choice request on the selected device."""
     messages = [
         {
             "role": "user",
@@ -497,6 +503,7 @@ def permutation_debiased_scores(
 
 
 def local_hf_revision(model_path: Path) -> str:
+    """Read the pinned Hugging Face revision from the local model cache."""
     metadata_root = model_path / ".cache" / "huggingface" / "download"
     revisions = set()
     for metadata_path in metadata_root.glob("*.metadata"):
@@ -509,6 +516,7 @@ def local_hf_revision(model_path: Path) -> str:
 
 
 def run_inference(args: argparse.Namespace) -> tuple[dict, dict]:
+    """Run one single-GPU request and return prediction and runtime records."""
     require_single_gpu_only()
 
     import torch
@@ -640,6 +648,7 @@ def run_inference(args: argparse.Namespace) -> tuple[dict, dict]:
 
 
 def main() -> None:
+    """Run the command-line forced-choice scoring interface."""
     args = parse_args()
     args.input = args.input.resolve()
     args.model_path = args.model_path.resolve()

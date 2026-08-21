@@ -27,15 +27,18 @@ DEFAULT_CONFIG = (
 
 
 def resolve_path(value: str | Path) -> Path:
+    """Resolve a repository-relative calibration path."""
     path = Path(value)
     return path if path.is_absolute() else ROOT / path
 
 
 def load_json(path: Path) -> dict[str, Any]:
+    """Load one calibration artifact."""
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def write_json_atomic(path: Path, value: Any) -> None:
+    """Atomically replace a JSON artifact."""
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(
@@ -46,6 +49,7 @@ def write_json_atomic(path: Path, value: Any) -> None:
 
 
 def sha256(path: Path) -> str:
+    """Return a content digest for provenance checks."""
     digest = hashlib.sha256()
     with path.open("rb") as stream:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
@@ -241,6 +245,7 @@ def cover_examples(
 
 
 def run(config_path: Path) -> dict[str, Any]:
+    """Fit action-conditioned observation tables from calibration episodes."""
     started = time.monotonic()
     config = load_json(config_path)
     for field in ("training_performed", "testing_performed", "apply_to_mpc"):
@@ -360,6 +365,7 @@ def run(config_path: Path) -> dict[str, Any]:
 
 
 def main() -> None:
+    """Run the configured observation-model calibration."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     arguments = parser.parse_args()

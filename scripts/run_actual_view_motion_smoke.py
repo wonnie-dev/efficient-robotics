@@ -20,9 +20,23 @@ from run_live_single_gpu_pipeline import (
 )
 from run_single_gpu_pilot import require_single_gpu_policy
 from run_single_gpu_pilot import configured_physical_gpu
+from final_evaluation_authorization import (
+    DEFAULT_PROTOCOL,
+    validate_output_authorization,
+)
+from scanned_basket_scene import ALL_CALIBRATION_SCENE_VARIANTS
 
 
 OUTPUT_ROOT = ROOT / "outputs" / "live_pipeline" / "actual_view_motion_smoke"
+
+
+def transport_or_saved_result_succeeded(
+    returncode: int | None, server_result: dict
+) -> bool:
+    """Accept a complete server result when Kit stalls only during shutdown."""
+    return bool(
+        returncode == 0 or server_result.get("status") == "completed"
+    )
 
 
 def next_output_dir(seed: int) -> Path:
@@ -113,20 +127,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--calibration-scene-variant",
-        choices=(
-            "auto",
-            "inside_clear",
-            "outside",
-            "rim_occluded",
-            "covered_unknown",
-            "behind_ambiguous",
-            "behind_boundary_unknown",
-            "close_high_only",
-            "right_only",
-            "either_view",
-            "cover_removal_required",
-            "empty_cover_then_right",
-        ),
+        choices=("auto", *ALL_CALIBRATION_SCENE_VARIANTS),
         help="Use one deterministic factorized calibration scene variant.",
     )
     parser.add_argument(
@@ -150,9 +151,22 @@ def main() -> None:
         type=Path,
         help="Optional explicit session directory under outputs/live_pipeline.",
     )
+    parser.add_argument(
+        "--startup-timeout-seconds",
+        type=float,
+        default=1200.0,
+        help=(
+            "Maximum wait for the first observation. Concurrent Isaac Sim "
+            "startup on the shared host can take several minutes."
+        ),
+    )
+    parser.add_argument("--final-evaluation-authorized", action="store_true")
+    parser.add_argument("--protocol", type=Path, default=DEFAULT_PROTOCOL)
     args = parser.parse_args()
     if args.seed < 0:
         raise ValueError("seed must be non-negative")
+    if args.startup_timeout_seconds <= 0:
+        raise ValueError("--startup-timeout-seconds must be positive")
     if (
         args.active_occlusion_pilot
         and not args.scanned_basket_perception_pilot
@@ -202,11 +216,12 @@ def main() -> None:
         if args.output_dir is not None
         else next_output_dir(args.seed)
     )
-    allowed_root = (ROOT / "outputs" / "live_pipeline").resolve()
-    if not output_dir.is_relative_to(allowed_root):
-        raise ValueError(
-            f"Output directory must be under {allowed_root}: {output_dir}"
-        )
+    validate_output_authorization(
+        seed=args.seed,
+        output_dir=output_dir,
+        final_evaluation_authorized=args.final_evaluation_authorized,
+        protocol_path=args.protocol,
+    )
     output_dir.mkdir(parents=True, exist_ok=False)
     base_config = json.loads(
         (
@@ -261,6 +276,14 @@ def main() -> None:
         )
     if args.basket_collision_physics_pilot:
         command.append("--basket-collision-physics-pilot")
+    if args.final_evaluation_authorized:
+        command.extend(
+            [
+                "--final-evaluation-authorized",
+                "--final-evaluation-protocol",
+                str(args.protocol.resolve()),
+            ]
+        )
     if args.execute_grasp:
         command.append("--execute-persistent-composite-grasp")
     started = time.perf_counter()
@@ -289,7 +312,11 @@ def main() -> None:
                 wait_for_path(
                     output_dir / f"observation_ready_{index:03d}.json",
                     server,
-                    timeout=180.0,
+                    timeout=(
+                        args.startup_timeout_seconds
+                        if index == 0
+                        else 180.0
+                    ),
                 )
                 write_json_atomic(
                     output_dir / f"action_request_{index:03d}.json",
@@ -319,7 +346,7 @@ def main() -> None:
         event["trajectory"] for event in server_result["events"][1:]
     ]
     success = (
-        server.returncode == 0
+        transport_or_saved_result_succeeded(server.returncode, server_result)
         and len(trajectories) == len(requested_views)
         and all(item["status"] == "completed" for item in trajectories)
         and all(item["actual_robot_motion_executed"] for item in trajectories)
@@ -338,6 +365,11 @@ def main() -> None:
         "schema_version": "actual-view-motion-smoke-v1",
         "status": "completed" if success else "failed",
         "runtime_seconds": time.perf_counter() - started,
+        "transport_returncode": server.returncode,
+        "transport_exit_warning": bool(
+            server.returncode not in (0, None)
+            and server_result.get("status") == "completed"
+        ),
         "sequence": ["center", *requested_views],
         "seed": args.seed,
         "trajectories": trajectories,
@@ -351,7 +383,9 @@ def main() -> None:
         "grasp_requested": args.execute_grasp,
         "grasp_execution": server_result.get("grasp_execution"),
         "training_performed": False,
-        "valid_for_final_evaluation": False,
+        "testing_performed": bool(args.final_evaluation_authorized),
+        "reserved_test_seeds_used": bool(args.final_evaluation_authorized),
+        "valid_for_final_evaluation": bool(args.final_evaluation_authorized),
     }
     if args.calibration_scene_variant is not None:
         from scanned_basket_scene import validate_calibration_visibility

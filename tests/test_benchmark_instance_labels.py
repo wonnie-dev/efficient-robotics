@@ -158,6 +158,26 @@ class BenchmarkInstanceLabelTests(unittest.TestCase):
             "inside_target_hidden_by_reference_facing_surface",
         )
 
+    def test_objective_behind_abstains_when_target_is_absent(self) -> None:
+        empty = np.zeros((6, 6), dtype=bool)
+        result = objective_camera_relative_behind_measurement(
+            target_center_world_m=[0.5, 0.5, 0.1],
+            reference_bounds_world_m={
+                "lower": [0.0, 0.0, 0.0],
+                "upper": [1.0, 1.0, 0.5],
+            },
+            camera_to_world_row_vector_matrix=np.eye(4).tolist(),
+            target_amodal_mask=empty,
+            reference_visible_mask=empty,
+            membership="not_applicable",
+            reference_occlusion_fraction=None,
+        )
+        self.assertTrue(result["valid"])
+        self.assertEqual(result["label"], "unknown")
+        self.assertEqual(
+            result["reason"], "target_absent_relation_not_applicable"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

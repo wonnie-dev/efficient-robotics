@@ -27,15 +27,18 @@ DEFAULT_CONFIG = (
 
 
 def load_json(path: Path) -> dict[str, Any]:
+    """Load a planner configuration or observation artifact."""
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def resolve_path(value: str | Path) -> Path:
+    """Resolve a repository-relative path."""
     path = Path(value)
     return path if path.is_absolute() else ROOT / path
 
 
 def normalize(distribution: dict[str, float]) -> dict[str, float]:
+    """Normalize a nonzero discrete probability distribution."""
     total = float(sum(distribution.values()))
     if total <= 0.0:
         raise ValueError("Cannot normalize a zero-mass distribution")
@@ -46,6 +49,7 @@ def normalize(distribution: dict[str, float]) -> dict[str, float]:
 
 
 def validate_config(config: dict[str, Any]) -> None:
+    """Validate state, transition, observation, and evaluation invariants."""
     states = tuple(str(state) for state in config["state_space"])
     if set(config["initial_belief"]) != set(states):
         raise ValueError("Initial belief does not cover state_space")
@@ -76,6 +80,7 @@ def validate_config(config: dict[str, Any]) -> None:
 
 
 def split_state(state: str) -> tuple[str, str]:
+    """Split a joint target-location and cover-state label."""
     location, cover = state.split("|", maxsplit=1)
     if location not in {"inside", "outside_near"}:
         raise ValueError(f"Unknown target location: {location}")
@@ -85,12 +90,14 @@ def split_state(state: str) -> tuple[str, str]:
 
 
 def state_name(location: str, cover: str) -> str:
+    """Create and validate a joint state label."""
     value = f"{location}|{cover}"
     split_state(value)
     return value
 
 
 def entropy(distribution: dict[str, float]) -> float:
+    """Return Shannon entropy in nats."""
     return -sum(
         probability * math.log(probability)
         for probability in distribution.values()
@@ -101,6 +108,7 @@ def entropy(distribution: dict[str, float]) -> float:
 def marginal_location(
     belief: dict[str, float],
 ) -> dict[str, float]:
+    """Marginalize a joint belief over the target-location variable."""
     result = {"inside": 0.0, "outside_near": 0.0}
     for state, probability in belief.items():
         location, _ = split_state(state)
@@ -109,6 +117,7 @@ def marginal_location(
 
 
 def marginal_cover(belief: dict[str, float]) -> dict[str, float]:
+    """Marginalize a joint belief over the cover-state variable."""
     result = {"covered": 0.0, "open": 0.0}
     for state, probability in belief.items():
         _, cover = split_state(state)
@@ -121,6 +130,7 @@ def transition_state_distribution(
     action_name: str,
     config: dict[str, Any],
 ) -> dict[str, float]:
+    """Predict the latent-state distribution after one action."""
     transition = config["transition_model"][action_name]
     transition_type = str(transition["type"])
     if transition_type == "identity":
@@ -257,6 +267,7 @@ def grasp_success_probability(
     action: dict[str, Any],
     belief: dict[str, float],
 ) -> float:
+    """Sum belief mass over the states in which a grasp succeeds."""
     return sum(
         belief[state] for state in action["success_states"]
     )
@@ -322,6 +333,7 @@ def information_action_feasibility(
     config: dict[str, Any],
     used_observation_actions: frozenset[str],
 ) -> dict[str, Any]:
+    """Check whether an information-gathering action is currently feasible."""
     action = config["actions"][action_name]
     if action["kind"] == "observation":
         feasible = action_name not in used_observation_actions
@@ -449,6 +461,7 @@ def plan(
     *,
     negative_evidence_enabled: bool = True,
 ) -> dict[str, Any]:
+    """Choose the minimum expected-cost first action from a belief tree."""
     normalized = normalize(belief)
     values = belief_tree_action_values(
         normalized,
@@ -583,6 +596,7 @@ def run_scripted_episode(
 
 
 def run_experiment(config_path: Path) -> dict[str, Any]:
+    """Run a configured CPU belief-tree replay and save its trace."""
     config = load_json(config_path)
     validate_config(config)
     started = time.perf_counter()
@@ -726,6 +740,7 @@ def run_experiment(config_path: Path) -> dict[str, Any]:
 
 
 def main() -> None:
+    """Run the configured belief-space planning experiment."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     args = parser.parse_args()

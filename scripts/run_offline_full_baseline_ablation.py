@@ -40,10 +40,12 @@ DEFAULT_CONFIG = (
 
 
 def load_json(path: Path) -> dict[str, Any]:
+    """Load one cached episode, model, or evaluation configuration."""
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def write_json_atomic(path: Path, value: Any) -> None:
+    """Atomically replace a JSON result artifact."""
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(
@@ -77,6 +79,7 @@ def configure_relation_observations(
 def remove_hybrid_relation_observations(
     episodes: dict[int, dict[str, dict]],
 ) -> dict[int, dict[str, dict]]:
+    """Remove membership and occlusion evidence for the relation ablation."""
     return configure_relation_observations(
         episodes,
         membership_enabled=False,
@@ -135,6 +138,7 @@ def configure_relation_likelihood(
 def make_relation_likelihood_uninformative(
     model: dict[str, Any],
 ) -> dict[str, Any]:
+    """Replace relation likelihoods with uninformative observations."""
     return configure_relation_likelihood(
         model,
         membership_enabled=False,
@@ -168,6 +172,7 @@ def model_for_method(
     training: dict[int, dict[str, dict]],
     config: dict[str, Any],
 ) -> dict[str, Any]:
+    """Fit the observation model required by one comparison method."""
     action_agnostic = method == "action_agnostic_belief_mpc"
     model = fit_action_model(
         training,
@@ -186,6 +191,7 @@ def replay_model_method(
     model: dict[str, Any],
     config: dict[str, Any],
 ) -> dict[str, Any]:
+    """Replay one method on one cached episode."""
     if method == "confidence_only_fixed_reobservation":
         row = replay_confidence_baseline(seed, episode, model, config)
         row["method"] = method
@@ -255,6 +261,7 @@ def tune_cost(
 def variant_failure_summary(
     rows: list[dict[str, Any]],
 ) -> dict[str, Any]:
+    """Aggregate failure categories for each scene variant and method."""
     grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
         grouped[str(row["variant"])].append(row)
@@ -313,6 +320,7 @@ def paired_loss_counts(
 
 
 def run(config_path: Path) -> dict[str, Any]:
+    """Run cached baseline and ablation comparisons without GPU inference."""
     started = time.perf_counter()
     experiment_config = load_json(config_path)
     if experiment_config["training_performed"] is not False:
@@ -526,6 +534,7 @@ def run(config_path: Path) -> dict[str, Any]:
 
 
 def main() -> None:
+    """Run the configured offline method comparison."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     args = parser.parse_args()

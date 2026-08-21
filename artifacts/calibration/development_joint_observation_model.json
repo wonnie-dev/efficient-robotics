@@ -1,0 +1,164 @@
+{
+  "hypotheses": [
+    "track_center_selected|inside",
+    "track_center_selected|outside",
+    "track_other_target|inside",
+    "track_other_target|outside"
+  ],
+  "prior": {
+    "track_center_selected|inside": 0.425,
+    "track_center_selected|outside": 0.325,
+    "track_other_target|inside": 0.225,
+    "track_other_target|outside": 0.025
+  },
+  "observation_vocabulary": {
+    "initial_observation": [
+      "other|unknown",
+      "selected_high|inside",
+      "selected_high|outside",
+      "selected_not_high|inside",
+      "selected_not_high|outside"
+    ],
+    "viewpoint_close_high": [
+      "different|outside",
+      "other|unknown",
+      "same_high|inside",
+      "same_high|outside",
+      "same_not_high|outside",
+      "same_not_high|unknown"
+    ],
+    "viewpoint_right": [
+      "different|outside",
+      "other|unknown",
+      "same_high|inside",
+      "same_high|outside",
+      "same_not_high|outside"
+    ]
+  },
+  "joint_observation_likelihood": {
+    "initial_observation": {
+      "track_center_selected|inside": {
+        "other|unknown": 0.047619047619047616,
+        "selected_high|inside": 0.42857142857142855,
+        "selected_high|outside": 0.047619047619047616,
+        "selected_not_high|inside": 0.42857142857142855,
+        "selected_not_high|outside": 0.047619047619047616
+      },
+      "track_center_selected|outside": {
+        "other|unknown": 0.058823529411764705,
+        "selected_high|inside": 0.058823529411764705,
+        "selected_high|outside": 0.7647058823529411,
+        "selected_not_high|inside": 0.058823529411764705,
+        "selected_not_high|outside": 0.058823529411764705
+      },
+      "track_other_target|inside": {
+        "other|unknown": 0.07692307692307693,
+        "selected_high|inside": 0.07692307692307693,
+        "selected_high|outside": 0.07692307692307693,
+        "selected_not_high|inside": 0.07692307692307693,
+        "selected_not_high|outside": 0.6923076923076923
+      },
+      "track_other_target|outside": {
+        "other|unknown": 0.2,
+        "selected_high|inside": 0.2,
+        "selected_high|outside": 0.2,
+        "selected_not_high|inside": 0.2,
+        "selected_not_high|outside": 0.2
+      }
+    },
+    "viewpoint_close_high": {
+      "track_center_selected|inside": {
+        "different|outside": 0.045454545454545456,
+        "other|unknown": 0.045454545454545456,
+        "same_high|inside": 0.7727272727272727,
+        "same_high|outside": 0.045454545454545456,
+        "same_not_high|outside": 0.045454545454545456,
+        "same_not_high|unknown": 0.045454545454545456
+      },
+      "track_center_selected|outside": {
+        "different|outside": 0.3888888888888889,
+        "other|unknown": 0.05555555555555555,
+        "same_high|inside": 0.05555555555555555,
+        "same_high|outside": 0.3888888888888889,
+        "same_not_high|outside": 0.05555555555555555,
+        "same_not_high|unknown": 0.05555555555555555
+      },
+      "track_other_target|inside": {
+        "different|outside": 0.07142857142857142,
+        "other|unknown": 0.07142857142857142,
+        "same_high|inside": 0.07142857142857142,
+        "same_high|outside": 0.07142857142857142,
+        "same_not_high|outside": 0.35714285714285715,
+        "same_not_high|unknown": 0.35714285714285715
+      },
+      "track_other_target|outside": {
+        "different|outside": 0.16666666666666666,
+        "other|unknown": 0.16666666666666666,
+        "same_high|inside": 0.16666666666666666,
+        "same_high|outside": 0.16666666666666666,
+        "same_not_high|outside": 0.16666666666666666,
+        "same_not_high|unknown": 0.16666666666666666
+      }
+    },
+    "viewpoint_right": {
+      "track_center_selected|inside": {
+        "different|outside": 0.047619047619047616,
+        "other|unknown": 0.047619047619047616,
+        "same_high|inside": 0.8095238095238095,
+        "same_high|outside": 0.047619047619047616,
+        "same_not_high|outside": 0.047619047619047616
+      },
+      "track_center_selected|outside": {
+        "different|outside": 0.17647058823529413,
+        "other|unknown": 0.058823529411764705,
+        "same_high|inside": 0.058823529411764705,
+        "same_high|outside": 0.6470588235294118,
+        "same_not_high|outside": 0.058823529411764705
+      },
+      "track_other_target|inside": {
+        "different|outside": 0.07692307692307693,
+        "other|unknown": 0.07692307692307693,
+        "same_high|inside": 0.07692307692307693,
+        "same_high|outside": 0.07692307692307693,
+        "same_not_high|outside": 0.6923076923076923
+      },
+      "track_other_target|outside": {
+        "different|outside": 0.2,
+        "other|unknown": 0.2,
+        "same_high|inside": 0.2,
+        "same_high|outside": 0.2,
+        "same_not_high|outside": 0.2
+      }
+    }
+  },
+  "fit_episode_count": 18,
+  "fit_seeds": [
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182
+  ],
+  "fit_uses_automatic_simulator_labels": true,
+  "marginal_confidence_product_used": false,
+  "schema_version": "icra-v13-direct-joint-observation-model-development-v1",
+  "status": "development_integration_only_not_frozen_calibration",
+  "candidate_identity": "persistent_rgbd_track",
+  "training_performed": false,
+  "calibration_performed": false,
+  "testing_performed": false,
+  "valid_for_final_evaluation": false
+}

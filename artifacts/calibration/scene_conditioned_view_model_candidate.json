@@ -1,0 +1,1863 @@
+{
+  "schema_version": "icra-v16-scene-conditioned-view-model-candidate-v1",
+  "status": "calibration_candidate_not_frozen",
+  "episodes": [
+    {
+      "seed": 1270,
+      "family": "outside_other_target_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1270_post_remove",
+        "values": [
+          -8.625,
+          3.0,
+          -15.0,
+          9.416666666666664,
+          0.7942708333333334,
+          0.3236111111111111,
+          0.023446180555555557,
+          0.4203125,
+          0.5611111111111111,
+          0.4930295138888889
+        ],
+        "named_values": {
+          "selected_match_logit": -8.625,
+          "candidate_count": 3.0,
+          "membership_inside_minus_outside": -15.0,
+          "membership_best_minus_unknown": 9.416666666666664,
+          "selected_bbox_center_x_fraction": 0.7942708333333334,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.023446180555555557,
+          "container_bbox_center_x_fraction": 0.4203125,
+          "container_bbox_center_y_fraction": 0.5611111111111111,
+          "container_bbox_area_fraction": 0.4930295138888889
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1270_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1270_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1271,
+      "family": "target_absent_negative_evidence",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1271_post_remove",
+        "values": [
+          -2.75,
+          1.0,
+          -17.916666666666664,
+          11.416666666666664,
+          0.8083333333333333,
+          0.32430555555555557,
+          0.017864583333333333,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": -2.75,
+          "candidate_count": 1.0,
+          "membership_inside_minus_outside": -17.916666666666664,
+          "membership_best_minus_unknown": 11.416666666666664,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.32430555555555557,
+          "selected_bbox_area_fraction": 0.017864583333333333,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1271_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1271_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1272,
+      "family": "remove_cover_failure_or_no_gain",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1272_post_remove",
+        "values": [
+          19.375,
+          2.0,
+          -18.16666666666667,
+          10.25,
+          0.9041666666666667,
+          0.5097222222222222,
+          0.0479224537037037,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": 19.375,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": -18.16666666666667,
+          "membership_best_minus_unknown": 10.25,
+          "selected_bbox_center_x_fraction": 0.9041666666666667,
+          "selected_bbox_center_y_fraction": 0.5097222222222222,
+          "selected_bbox_area_fraction": 0.0479224537037037,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1272_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1272_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1273,
+      "family": "inside_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1273_post_remove",
+        "values": [
+          -10.875,
+          2.0,
+          -13.916666666666664,
+          8.833333333333336,
+          0.8083333333333333,
+          0.3236111111111111,
+          0.017743055555555557,
+          0.40625,
+          0.5041666666666667,
+          0.6252314814814814
+        ],
+        "named_values": {
+          "selected_match_logit": -10.875,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": -13.916666666666664,
+          "membership_best_minus_unknown": 8.833333333333336,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017743055555555557,
+          "container_bbox_center_x_fraction": 0.40625,
+          "container_bbox_center_y_fraction": 0.5041666666666667,
+          "container_bbox_area_fraction": 0.6252314814814814
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1273_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1273_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1277,
+      "family": "inside_close_high_resolving",
+      "view_mode": "close_high",
+      "features": {
+        "sample_id": "seed1277_post_remove",
+        "values": [
+          -6.125,
+          2.0,
+          20.916666666666664,
+          21.75,
+          0.390625,
+          0.45,
+          0.03450810185185185,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": -6.125,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": 20.916666666666664,
+          "membership_best_minus_unknown": 21.75,
+          "selected_bbox_center_x_fraction": 0.390625,
+          "selected_bbox_center_y_fraction": 0.45,
+          "selected_bbox_area_fraction": 0.03450810185185185,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu4/grounded_sam2_qwen_rankings/seed1277_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu4/grounded_sam2_qwen_inputs/seed1277_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1279,
+      "family": "target_absent_negative_evidence",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1279_post_remove",
+        "values": [
+          -3.25,
+          1.0,
+          -19.416666666666664,
+          13.083333333333336,
+          0.8083333333333333,
+          0.3236111111111111,
+          0.017743055555555557,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": -3.25,
+          "candidate_count": 1.0,
+          "membership_inside_minus_outside": -19.416666666666664,
+          "membership_best_minus_unknown": 13.083333333333336,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017743055555555557,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1279_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1279_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1280,
+      "family": "outside_other_target_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1280_post_remove",
+        "values": [
+          -9.875,
+          3.0,
+          -15.0,
+          8.5,
+          0.7942708333333334,
+          0.3236111111111111,
+          0.023446180555555557,
+          0.4203125,
+          0.5618055555555556,
+          0.4920703125
+        ],
+        "named_values": {
+          "selected_match_logit": -9.875,
+          "candidate_count": 3.0,
+          "membership_inside_minus_outside": -15.0,
+          "membership_best_minus_unknown": 8.5,
+          "selected_bbox_center_x_fraction": 0.7942708333333334,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.023446180555555557,
+          "container_bbox_center_x_fraction": 0.4203125,
+          "container_bbox_center_y_fraction": 0.5618055555555556,
+          "container_bbox_area_fraction": 0.4920703125
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1280_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1280_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1281,
+      "family": "inside_close_high_resolving",
+      "view_mode": "close_high",
+      "features": {
+        "sample_id": "seed1281_post_remove",
+        "values": [
+          -3.5,
+          2.0,
+          18.333333333333336,
+          18.66666666666667,
+          0.43697916666666664,
+          0.40625,
+          0.030924479166666668,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": -3.5,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": 18.333333333333336,
+          "membership_best_minus_unknown": 18.66666666666667,
+          "selected_bbox_center_x_fraction": 0.43697916666666664,
+          "selected_bbox_center_y_fraction": 0.40625,
+          "selected_bbox_area_fraction": 0.030924479166666668,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1281_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1281_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1284,
+      "family": "remove_cover_failure_or_no_gain",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1284_post_remove",
+        "values": [
+          18.625,
+          2.0,
+          -16.0,
+          8.416666666666664,
+          0.865625,
+          0.48194444444444445,
+          0.043287037037037034,
+          0.40625,
+          0.5145833333333333,
+          0.6110590277777778
+        ],
+        "named_values": {
+          "selected_match_logit": 18.625,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": -16.0,
+          "membership_best_minus_unknown": 8.416666666666664,
+          "selected_bbox_center_x_fraction": 0.865625,
+          "selected_bbox_center_y_fraction": 0.48194444444444445,
+          "selected_bbox_area_fraction": 0.043287037037037034,
+          "container_bbox_center_x_fraction": 0.40625,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6110590277777778
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_rankings/seed1284_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_inputs/seed1284_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1285,
+      "family": "inside_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1285_post_remove",
+        "values": [
+          -4.125,
+          2.0,
+          -14.166666666666664,
+          8.75,
+          0.8083333333333333,
+          0.3236111111111111,
+          0.017743055555555557,
+          0.40625,
+          0.5041666666666667,
+          0.6231192129629629
+        ],
+        "named_values": {
+          "selected_match_logit": -4.125,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": -14.166666666666664,
+          "membership_best_minus_unknown": 8.75,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017743055555555557,
+          "container_bbox_center_x_fraction": 0.40625,
+          "container_bbox_center_y_fraction": 0.5041666666666667,
+          "container_bbox_area_fraction": 0.6231192129629629
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_rankings/seed1285_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_inputs/seed1285_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1286,
+      "family": "remove_cover_failure_or_no_gain",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1286_post_remove",
+        "values": [
+          19.0,
+          2.0,
+          -20.666666666666664,
+          11.75,
+          0.9213541666666667,
+          0.4791666666666667,
+          0.037939814814814815,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": 19.0,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": -20.666666666666664,
+          "membership_best_minus_unknown": 11.75,
+          "selected_bbox_center_x_fraction": 0.9213541666666667,
+          "selected_bbox_center_y_fraction": 0.4791666666666667,
+          "selected_bbox_area_fraction": 0.037939814814814815,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_rankings/seed1286_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_inputs/seed1286_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1289,
+      "family": "inside_close_high_resolving",
+      "view_mode": "close_high",
+      "features": {
+        "sample_id": "seed1289_post_remove",
+        "values": [
+          -4.5,
+          2.0,
+          20.583333333333336,
+          21.333333333333336,
+          0.41302083333333334,
+          0.4263888888888889,
+          0.03247395833333333,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": -4.5,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": 20.583333333333336,
+          "membership_best_minus_unknown": 21.333333333333336,
+          "selected_bbox_center_x_fraction": 0.41302083333333334,
+          "selected_bbox_center_y_fraction": 0.4263888888888889,
+          "selected_bbox_area_fraction": 0.03247395833333333,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1289_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1289_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1291,
+      "family": "outside_other_target_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1291_post_remove",
+        "values": [
+          -9.625,
+          3.0,
+          -14.333333333333329,
+          8.5,
+          0.7942708333333334,
+          0.3236111111111111,
+          0.023446180555555557,
+          0.42135416666666664,
+          0.5618055555555556,
+          0.4905859375
+        ],
+        "named_values": {
+          "selected_match_logit": -9.625,
+          "candidate_count": 3.0,
+          "membership_inside_minus_outside": -14.333333333333329,
+          "membership_best_minus_unknown": 8.5,
+          "selected_bbox_center_x_fraction": 0.7942708333333334,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.023446180555555557,
+          "container_bbox_center_x_fraction": 0.42135416666666664,
+          "container_bbox_center_y_fraction": 0.5618055555555556,
+          "container_bbox_area_fraction": 0.4905859375
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu0/grounded_sam2_qwen_rankings/seed1291_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu0/grounded_sam2_qwen_inputs/seed1291_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1292,
+      "family": "inside_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1292_post_remove",
+        "values": [
+          -10.75,
+          2.0,
+          -10.5,
+          7.083333333333336,
+          0.8083333333333333,
+          0.3236111111111111,
+          0.017743055555555557,
+          0.40520833333333334,
+          0.50625,
+          0.6237673611111111
+        ],
+        "named_values": {
+          "selected_match_logit": -10.75,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": -10.5,
+          "membership_best_minus_unknown": 7.083333333333336,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017743055555555557,
+          "container_bbox_center_x_fraction": 0.40520833333333334,
+          "container_bbox_center_y_fraction": 0.50625,
+          "container_bbox_area_fraction": 0.6237673611111111
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu0/grounded_sam2_qwen_rankings/seed1292_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu0/grounded_sam2_qwen_inputs/seed1292_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1293,
+      "family": "target_absent_negative_evidence",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1293_post_remove",
+        "values": [
+          -3.375,
+          1.0,
+          -19.583333333333336,
+          12.5,
+          0.8083333333333333,
+          0.3236111111111111,
+          0.017743055555555557,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6140147569444444
+        ],
+        "named_values": {
+          "selected_match_logit": -3.375,
+          "candidate_count": 1.0,
+          "membership_inside_minus_outside": -19.583333333333336,
+          "membership_best_minus_unknown": 12.5,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017743055555555557,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6140147569444444
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu0/grounded_sam2_qwen_rankings/seed1293_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu0/grounded_sam2_qwen_inputs/seed1293_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1295,
+      "family": "inside_close_high_resolving",
+      "view_mode": "close_high",
+      "features": {
+        "sample_id": "seed1295_post_remove",
+        "values": [
+          -13.125,
+          2.0,
+          19.75,
+          20.5,
+          0.4635416666666667,
+          0.39791666666666664,
+          0.02982928240740741,
+          0.40625,
+          0.5145833333333333,
+          0.6110590277777778
+        ],
+        "named_values": {
+          "selected_match_logit": -13.125,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": 19.75,
+          "membership_best_minus_unknown": 20.5,
+          "selected_bbox_center_x_fraction": 0.4635416666666667,
+          "selected_bbox_center_y_fraction": 0.39791666666666664,
+          "selected_bbox_area_fraction": 0.02982928240740741,
+          "container_bbox_center_x_fraction": 0.40625,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6110590277777778
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_rankings/seed1295_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_inputs/seed1295_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1296,
+      "family": "target_absent_negative_evidence",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1296_post_remove",
+        "values": [
+          -3.0,
+          1.0,
+          -19.41666666666667,
+          12.583333333333336,
+          0.8083333333333333,
+          0.3236111111111111,
+          0.017743055555555557,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": -3.0,
+          "candidate_count": 1.0,
+          "membership_inside_minus_outside": -19.41666666666667,
+          "membership_best_minus_unknown": 12.583333333333336,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017743055555555557,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_rankings/seed1296_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_inputs/seed1296_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1299,
+      "family": "inside_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1299_post_remove",
+        "values": [
+          -5.875,
+          2.0,
+          5.083333333333336,
+          4.166666666666671,
+          0.4161458333333333,
+          0.4048611111111111,
+          0.01242042824074074,
+          0.40729166666666666,
+          0.5013888888888889,
+          0.6294560185185185
+        ],
+        "named_values": {
+          "selected_match_logit": -5.875,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": 5.083333333333336,
+          "membership_best_minus_unknown": 4.166666666666671,
+          "selected_bbox_center_x_fraction": 0.4161458333333333,
+          "selected_bbox_center_y_fraction": 0.4048611111111111,
+          "selected_bbox_area_fraction": 0.01242042824074074,
+          "container_bbox_center_x_fraction": 0.40729166666666666,
+          "container_bbox_center_y_fraction": 0.5013888888888889,
+          "container_bbox_area_fraction": 0.6294560185185185
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1299_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1299_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1300,
+      "family": "remove_cover_failure_or_no_gain",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1300_post_remove",
+        "values": [
+          20.375,
+          2.0,
+          -20.583333333333336,
+          10.583333333333336,
+          0.9208333333333333,
+          0.4444444444444444,
+          0.036458333333333336,
+          0.40677083333333336,
+          0.5138888888888888,
+          0.6129542824074075
+        ],
+        "named_values": {
+          "selected_match_logit": 20.375,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": -20.583333333333336,
+          "membership_best_minus_unknown": 10.583333333333336,
+          "selected_bbox_center_x_fraction": 0.9208333333333333,
+          "selected_bbox_center_y_fraction": 0.4444444444444444,
+          "selected_bbox_area_fraction": 0.036458333333333336,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5138888888888888,
+          "container_bbox_area_fraction": 0.6129542824074075
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1300_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1300_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1301,
+      "family": "outside_other_target_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1301_post_remove",
+        "values": [
+          -6.875,
+          3.0,
+          -15.25,
+          10.25,
+          0.7942708333333334,
+          0.3236111111111111,
+          0.023446180555555557,
+          0.42083333333333334,
+          0.5618055555555556,
+          0.491328125
+        ],
+        "named_values": {
+          "selected_match_logit": -6.875,
+          "candidate_count": 3.0,
+          "membership_inside_minus_outside": -15.25,
+          "membership_best_minus_unknown": 10.25,
+          "selected_bbox_center_x_fraction": 0.7942708333333334,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.023446180555555557,
+          "container_bbox_center_x_fraction": 0.42083333333333334,
+          "container_bbox_center_y_fraction": 0.5618055555555556,
+          "container_bbox_area_fraction": 0.491328125
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1301_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1301_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1302,
+      "family": "inside_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1302_post_remove",
+        "values": [
+          -10.5,
+          2.0,
+          6.5,
+          5.916666666666664,
+          0.4239583333333333,
+          0.37916666666666665,
+          0.010416666666666666,
+          0.40677083333333336,
+          0.5013888888888889,
+          0.6303182870370371
+        ],
+        "named_values": {
+          "selected_match_logit": -10.5,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": 6.5,
+          "membership_best_minus_unknown": 5.916666666666664,
+          "selected_bbox_center_x_fraction": 0.4239583333333333,
+          "selected_bbox_center_y_fraction": 0.37916666666666665,
+          "selected_bbox_area_fraction": 0.010416666666666666,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5013888888888889,
+          "container_bbox_area_fraction": 0.6303182870370371
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1302_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1302_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1305,
+      "family": "target_absent_negative_evidence",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1305_post_remove",
+        "values": [
+          -3.25,
+          1.0,
+          -18.16666666666667,
+          12.0,
+          0.8083333333333333,
+          0.32430555555555557,
+          0.017864583333333333,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": -3.25,
+          "candidate_count": 1.0,
+          "membership_inside_minus_outside": -18.16666666666667,
+          "membership_best_minus_unknown": 12.0,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.32430555555555557,
+          "selected_bbox_area_fraction": 0.017864583333333333,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_rankings/seed1305_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_inputs/seed1305_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1306,
+      "family": "inside_close_high_resolving",
+      "view_mode": "close_high",
+      "features": {
+        "sample_id": "seed1306_post_remove",
+        "values": [
+          -8.375,
+          2.0,
+          20.25,
+          21.08333333333333,
+          0.42083333333333334,
+          0.4722222222222222,
+          0.0362037037037037,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": -8.375,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": 20.25,
+          "membership_best_minus_unknown": 21.08333333333333,
+          "selected_bbox_center_x_fraction": 0.42083333333333334,
+          "selected_bbox_center_y_fraction": 0.4722222222222222,
+          "selected_bbox_area_fraction": 0.0362037037037037,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_rankings/seed1306_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_inputs/seed1306_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1307,
+      "family": "outside_other_target_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1307_post_remove",
+        "values": [
+          -7.25,
+          3.0,
+          -9.75,
+          4.333333333333336,
+          0.41302083333333334,
+          0.0625,
+          0.0038773148148148148,
+          0.4203125,
+          0.5611111111111111,
+          0.4930295138888889
+        ],
+        "named_values": {
+          "selected_match_logit": -7.25,
+          "candidate_count": 3.0,
+          "membership_inside_minus_outside": -9.75,
+          "membership_best_minus_unknown": 4.333333333333336,
+          "selected_bbox_center_x_fraction": 0.41302083333333334,
+          "selected_bbox_center_y_fraction": 0.0625,
+          "selected_bbox_area_fraction": 0.0038773148148148148,
+          "container_bbox_center_x_fraction": 0.4203125,
+          "container_bbox_center_y_fraction": 0.5611111111111111,
+          "container_bbox_area_fraction": 0.4930295138888889
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_rankings/seed1307_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_inputs/seed1307_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1308,
+      "family": "remove_cover_failure_or_no_gain",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1308_post_remove",
+        "values": [
+          19.0,
+          2.0,
+          -20.58333333333333,
+          12.333333333333329,
+          0.878125,
+          0.4708333333333333,
+          0.04279513888888889,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": 19.0,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": -20.58333333333333,
+          "membership_best_minus_unknown": 12.333333333333329,
+          "selected_bbox_center_x_fraction": 0.878125,
+          "selected_bbox_center_y_fraction": 0.4708333333333333,
+          "selected_bbox_area_fraction": 0.04279513888888889,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_rankings/seed1308_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_inputs/seed1308_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1311,
+      "family": "inside_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1311_post_remove",
+        "values": [
+          -9.25,
+          3.0,
+          -10.416666666666671,
+          6.833333333333336,
+          0.8083333333333333,
+          0.3236111111111111,
+          0.017743055555555557,
+          0.40625,
+          0.50625,
+          0.6220630787037037
+        ],
+        "named_values": {
+          "selected_match_logit": -9.25,
+          "candidate_count": 3.0,
+          "membership_inside_minus_outside": -10.416666666666671,
+          "membership_best_minus_unknown": 6.833333333333336,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017743055555555557,
+          "container_bbox_center_x_fraction": 0.40625,
+          "container_bbox_center_y_fraction": 0.50625,
+          "container_bbox_area_fraction": 0.6220630787037037
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1311_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1311_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1313,
+      "family": "outside_other_target_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1313_post_remove",
+        "values": [
+          -10.375,
+          4.0,
+          -12.583333333333329,
+          7.333333333333329,
+          0.7942708333333334,
+          0.3236111111111111,
+          0.023446180555555557,
+          0.42135416666666664,
+          0.5611111111111111,
+          0.4915422453703704
+        ],
+        "named_values": {
+          "selected_match_logit": -10.375,
+          "candidate_count": 4.0,
+          "membership_inside_minus_outside": -12.583333333333329,
+          "membership_best_minus_unknown": 7.333333333333329,
+          "selected_bbox_center_x_fraction": 0.7942708333333334,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.023446180555555557,
+          "container_bbox_center_x_fraction": 0.42135416666666664,
+          "container_bbox_center_y_fraction": 0.5611111111111111,
+          "container_bbox_area_fraction": 0.4915422453703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu0/grounded_sam2_qwen_rankings/seed1313_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu0/grounded_sam2_qwen_inputs/seed1313_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1314,
+      "family": "remove_cover_failure_or_no_gain",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1314_post_remove",
+        "values": [
+          20.125,
+          2.0,
+          -19.333333333333336,
+          11.666666666666671,
+          0.8984375,
+          0.4354166666666667,
+          0.040348668981481484,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": 20.125,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": -19.333333333333336,
+          "membership_best_minus_unknown": 11.666666666666671,
+          "selected_bbox_center_x_fraction": 0.8984375,
+          "selected_bbox_center_y_fraction": 0.4354166666666667,
+          "selected_bbox_area_fraction": 0.040348668981481484,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu0/grounded_sam2_qwen_rankings/seed1314_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu0/grounded_sam2_qwen_inputs/seed1314_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1315,
+      "family": "inside_close_high_resolving",
+      "view_mode": "close_high",
+      "features": {
+        "sample_id": "seed1315_post_remove",
+        "values": [
+          -12.75,
+          2.0,
+          19.25,
+          20.166666666666664,
+          0.4203125,
+          0.4041666666666667,
+          0.03074363425925926,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": -12.75,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": 19.25,
+          "membership_best_minus_unknown": 20.166666666666664,
+          "selected_bbox_center_x_fraction": 0.4203125,
+          "selected_bbox_center_y_fraction": 0.4041666666666667,
+          "selected_bbox_area_fraction": 0.03074363425925926,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu0/grounded_sam2_qwen_rankings/seed1315_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu0/grounded_sam2_qwen_inputs/seed1315_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1317,
+      "family": "target_absent_negative_evidence",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1317_post_remove",
+        "values": [
+          -3.625,
+          1.0,
+          -15.916666666666671,
+          8.833333333333336,
+          0.8083333333333333,
+          0.3236111111111111,
+          0.017743055555555557,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": -3.625,
+          "candidate_count": 1.0,
+          "membership_inside_minus_outside": -15.916666666666671,
+          "membership_best_minus_unknown": 8.833333333333336,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017743055555555557,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_rankings/seed1317_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu5/grounded_sam2_qwen_inputs/seed1317_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1320,
+      "family": "outside_other_target_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1320_post_remove",
+        "values": [
+          -10.25,
+          4.0,
+          -10.916666666666664,
+          5.083333333333329,
+          0.41302083333333334,
+          0.0625,
+          0.0038773148148148148,
+          0.42135416666666664,
+          0.5618055555555556,
+          0.4920703125
+        ],
+        "named_values": {
+          "selected_match_logit": -10.25,
+          "candidate_count": 4.0,
+          "membership_inside_minus_outside": -10.916666666666664,
+          "membership_best_minus_unknown": 5.083333333333329,
+          "selected_bbox_center_x_fraction": 0.41302083333333334,
+          "selected_bbox_center_y_fraction": 0.0625,
+          "selected_bbox_area_fraction": 0.0038773148148148148,
+          "container_bbox_center_x_fraction": 0.42135416666666664,
+          "container_bbox_center_y_fraction": 0.5618055555555556,
+          "container_bbox_area_fraction": 0.4920703125
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1320_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1320_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1321,
+      "family": "inside_close_high_resolving",
+      "view_mode": "close_high",
+      "features": {
+        "sample_id": "seed1321_post_remove",
+        "values": [
+          -8.375,
+          2.0,
+          -15.0,
+          8.5,
+          0.8083333333333333,
+          0.3236111111111111,
+          0.017743055555555557,
+          0.40625,
+          0.5145833333333333,
+          0.6110590277777778
+        ],
+        "named_values": {
+          "selected_match_logit": -8.375,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": -15.0,
+          "membership_best_minus_unknown": 8.5,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017743055555555557,
+          "container_bbox_center_x_fraction": 0.40625,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6110590277777778
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1321_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1321_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1322,
+      "family": "remove_cover_failure_or_no_gain",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1322_post_remove",
+        "values": [
+          19.0,
+          2.0,
+          -19.0,
+          11.0,
+          0.8552083333333333,
+          0.425,
+          0.03746527777777778,
+          0.40625,
+          0.5145833333333333,
+          0.6110590277777778
+        ],
+        "named_values": {
+          "selected_match_logit": 19.0,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": -19.0,
+          "membership_best_minus_unknown": 11.0,
+          "selected_bbox_center_x_fraction": 0.8552083333333333,
+          "selected_bbox_center_y_fraction": 0.425,
+          "selected_bbox_area_fraction": 0.03746527777777778,
+          "container_bbox_center_x_fraction": 0.40625,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6110590277777778
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1322_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1322_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1323,
+      "family": "inside_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1323_post_remove",
+        "values": [
+          -3.875,
+          3.0,
+          -8.583333333333336,
+          5.0,
+          0.8083333333333333,
+          0.32430555555555557,
+          0.017864583333333333,
+          0.40625,
+          0.5027777777777778,
+          0.62734375
+        ],
+        "named_values": {
+          "selected_match_logit": -3.875,
+          "candidate_count": 3.0,
+          "membership_inside_minus_outside": -8.583333333333336,
+          "membership_best_minus_unknown": 5.0,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.32430555555555557,
+          "selected_bbox_area_fraction": 0.017864583333333333,
+          "container_bbox_center_x_fraction": 0.40625,
+          "container_bbox_center_y_fraction": 0.5027777777777778,
+          "container_bbox_area_fraction": 0.62734375
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1323_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1323_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1324,
+      "family": "target_absent_negative_evidence",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1324_post_remove",
+        "values": [
+          -4.75,
+          1.0,
+          -20.16666666666667,
+          13.25,
+          0.8083333333333333,
+          0.32430555555555557,
+          0.017864583333333333,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": -4.75,
+          "candidate_count": 1.0,
+          "membership_inside_minus_outside": -20.16666666666667,
+          "membership_best_minus_unknown": 13.25,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.32430555555555557,
+          "selected_bbox_area_fraction": 0.017864583333333333,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1324_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1324_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1326,
+      "family": "inside_close_high_resolving",
+      "view_mode": "close_high",
+      "features": {
+        "sample_id": "seed1326_post_remove",
+        "values": [
+          -6.625,
+          2.0,
+          19.75,
+          20.41666666666667,
+          0.37552083333333336,
+          0.45555555555555555,
+          0.0352806712962963,
+          0.40625,
+          0.5145833333333333,
+          0.6110590277777778
+        ],
+        "named_values": {
+          "selected_match_logit": -6.625,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": 19.75,
+          "membership_best_minus_unknown": 20.41666666666667,
+          "selected_bbox_center_x_fraction": 0.37552083333333336,
+          "selected_bbox_center_y_fraction": 0.45555555555555555,
+          "selected_bbox_area_fraction": 0.0352806712962963,
+          "container_bbox_center_x_fraction": 0.40625,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6110590277777778
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu0/grounded_sam2_qwen_rankings/seed1326_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu0/grounded_sam2_qwen_inputs/seed1326_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1329,
+      "family": "outside_other_target_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1329_post_remove",
+        "values": [
+          -11.0,
+          4.0,
+          -11.75,
+          6.0,
+          0.7942708333333334,
+          0.3236111111111111,
+          0.023446180555555557,
+          0.42083333333333334,
+          0.5611111111111111,
+          0.4922858796296296
+        ],
+        "named_values": {
+          "selected_match_logit": -11.0,
+          "candidate_count": 4.0,
+          "membership_inside_minus_outside": -11.75,
+          "membership_best_minus_unknown": 6.0,
+          "selected_bbox_center_x_fraction": 0.7942708333333334,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.023446180555555557,
+          "container_bbox_center_x_fraction": 0.42083333333333334,
+          "container_bbox_center_y_fraction": 0.5611111111111111,
+          "container_bbox_area_fraction": 0.4922858796296296
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu4/grounded_sam2_qwen_rankings/seed1329_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu4/grounded_sam2_qwen_inputs/seed1329_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1330,
+      "family": "remove_cover_failure_or_no_gain",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1330_post_remove",
+        "values": [
+          18.5,
+          2.0,
+          -18.833333333333336,
+          10.75,
+          0.8880208333333334,
+          0.4840277777777778,
+          0.04481336805555555,
+          0.40677083333333336,
+          0.5138888888888888,
+          0.6129542824074075
+        ],
+        "named_values": {
+          "selected_match_logit": 18.5,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": -18.833333333333336,
+          "membership_best_minus_unknown": 10.75,
+          "selected_bbox_center_x_fraction": 0.8880208333333334,
+          "selected_bbox_center_y_fraction": 0.4840277777777778,
+          "selected_bbox_area_fraction": 0.04481336805555555,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5138888888888888,
+          "container_bbox_area_fraction": 0.6129542824074075
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu4/grounded_sam2_qwen_rankings/seed1330_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu4/grounded_sam2_qwen_inputs/seed1330_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1332,
+      "family": "target_absent_negative_evidence",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1332_post_remove",
+        "values": [
+          -5.5,
+          1.0,
+          -18.833333333333336,
+          12.0,
+          0.8083333333333333,
+          0.3236111111111111,
+          0.017743055555555557,
+          0.40625,
+          0.5138888888888888,
+          0.6137905092592593
+        ],
+        "named_values": {
+          "selected_match_logit": -5.5,
+          "candidate_count": 1.0,
+          "membership_inside_minus_outside": -18.833333333333336,
+          "membership_best_minus_unknown": 12.0,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017743055555555557,
+          "container_bbox_center_x_fraction": 0.40625,
+          "container_bbox_center_y_fraction": 0.5138888888888888,
+          "container_bbox_area_fraction": 0.6137905092592593
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1332_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1332_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1333,
+      "family": "inside_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1333_post_remove",
+        "values": [
+          -10.25,
+          1.0,
+          -16.666666666666664,
+          10.916666666666664,
+          0.8083333333333333,
+          0.3236111111111111,
+          0.017743055555555557,
+          0.40625,
+          0.5055555555555555,
+          0.6210069444444445
+        ],
+        "named_values": {
+          "selected_match_logit": -10.25,
+          "candidate_count": 1.0,
+          "membership_inside_minus_outside": -16.666666666666664,
+          "membership_best_minus_unknown": 10.916666666666664,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017743055555555557,
+          "container_bbox_center_x_fraction": 0.40625,
+          "container_bbox_center_y_fraction": 0.5055555555555555,
+          "container_bbox_area_fraction": 0.6210069444444445
+        },
+        "inputs": [
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1333_post_remove/result.json",
+          "outputs/development/icra_v19_condition_balanced_development_64episode/perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1333_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1334,
+      "family": "target_absent_covered",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1334_post_remove",
+        "values": [
+          -4.875,
+          1.0,
+          -18.333333333333336,
+          11.833333333333336,
+          0.8083333333333333,
+          0.3236111111111111,
+          0.017743055555555557,
+          0.40677083333333336,
+          0.5138888888888888,
+          0.6129542824074075
+        ],
+        "named_values": {
+          "selected_match_logit": -4.875,
+          "candidate_count": 1.0,
+          "membership_inside_minus_outside": -18.333333333333336,
+          "membership_best_minus_unknown": 11.833333333333336,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017743055555555557,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5138888888888888,
+          "container_bbox_area_fraction": 0.6129542824074075
+        },
+        "inputs": [
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu2/grounded_sam2_qwen_rankings/seed1334_post_remove/result.json",
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu2/grounded_sam2_qwen_inputs/seed1334_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1337,
+      "family": "covered_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1337_post_remove",
+        "values": [
+          -8.875,
+          3.0,
+          -9.916666666666671,
+          5.333333333333336,
+          0.8078125,
+          0.3236111111111111,
+          0.017531828703703702,
+          0.40729166666666666,
+          0.5020833333333333,
+          0.6283998842592593
+        ],
+        "named_values": {
+          "selected_match_logit": -8.875,
+          "candidate_count": 3.0,
+          "membership_inside_minus_outside": -9.916666666666671,
+          "membership_best_minus_unknown": 5.333333333333336,
+          "selected_bbox_center_x_fraction": 0.8078125,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017531828703703702,
+          "container_bbox_center_x_fraction": 0.40729166666666666,
+          "container_bbox_center_y_fraction": 0.5020833333333333,
+          "container_bbox_area_fraction": 0.6283998842592593
+        },
+        "inputs": [
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu5/grounded_sam2_qwen_rankings/seed1337_post_remove/result.json",
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu5/grounded_sam2_qwen_inputs/seed1337_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1339,
+      "family": "target_absent_covered",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1339_post_remove",
+        "values": [
+          -3.125,
+          1.0,
+          -18.083333333333336,
+          11.083333333333336,
+          0.8083333333333333,
+          0.3236111111111111,
+          0.017743055555555557,
+          0.40677083333333336,
+          0.5138888888888888,
+          0.6129542824074075
+        ],
+        "named_values": {
+          "selected_match_logit": -3.125,
+          "candidate_count": 1.0,
+          "membership_inside_minus_outside": -18.083333333333336,
+          "membership_best_minus_unknown": 11.083333333333336,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017743055555555557,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5138888888888888,
+          "container_bbox_area_fraction": 0.6129542824074075
+        },
+        "inputs": [
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu4/grounded_sam2_qwen_rankings/seed1339_post_remove/result.json",
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu4/grounded_sam2_qwen_inputs/seed1339_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1343,
+      "family": "covered_close_high_resolving",
+      "view_mode": "close_high",
+      "features": {
+        "sample_id": "seed1343_post_remove",
+        "values": [
+          -6.75,
+          2.0,
+          20.5,
+          21.16666666666667,
+          0.3963541666666667,
+          0.42777777777777776,
+          0.032977430555555555,
+          0.40625,
+          0.5145833333333333,
+          0.6110590277777778
+        ],
+        "named_values": {
+          "selected_match_logit": -6.75,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": 20.5,
+          "membership_best_minus_unknown": 21.16666666666667,
+          "selected_bbox_center_x_fraction": 0.3963541666666667,
+          "selected_bbox_center_y_fraction": 0.42777777777777776,
+          "selected_bbox_area_fraction": 0.032977430555555555,
+          "container_bbox_center_x_fraction": 0.40625,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6110590277777778
+        },
+        "inputs": [
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu5/grounded_sam2_qwen_rankings/seed1343_post_remove/result.json",
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu5/grounded_sam2_qwen_inputs/seed1343_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1345,
+      "family": "target_absent_covered",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1345_post_remove",
+        "values": [
+          -3.0,
+          1.0,
+          -18.25,
+          11.25,
+          0.8078125,
+          0.3236111111111111,
+          0.017531828703703702,
+          0.40677083333333336,
+          0.5138888888888888,
+          0.6129542824074075
+        ],
+        "named_values": {
+          "selected_match_logit": -3.0,
+          "candidate_count": 1.0,
+          "membership_inside_minus_outside": -18.25,
+          "membership_best_minus_unknown": 11.25,
+          "selected_bbox_center_x_fraction": 0.8078125,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017531828703703702,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5138888888888888,
+          "container_bbox_area_fraction": 0.6129542824074075
+        },
+        "inputs": [
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu4/grounded_sam2_qwen_rankings/seed1345_post_remove/result.json",
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu4/grounded_sam2_qwen_inputs/seed1345_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1348,
+      "family": "covered_close_high_resolving",
+      "view_mode": "close_high",
+      "features": {
+        "sample_id": "seed1348_post_remove",
+        "values": [
+          -8.25,
+          2.0,
+          19.91666666666667,
+          20.833333333333336,
+          0.3984375,
+          0.4083333333333333,
+          0.031235532407407406,
+          0.40625,
+          0.5145833333333333,
+          0.6110590277777778
+        ],
+        "named_values": {
+          "selected_match_logit": -8.25,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": 19.91666666666667,
+          "membership_best_minus_unknown": 20.833333333333336,
+          "selected_bbox_center_x_fraction": 0.3984375,
+          "selected_bbox_center_y_fraction": 0.4083333333333333,
+          "selected_bbox_area_fraction": 0.031235532407407406,
+          "container_bbox_center_x_fraction": 0.40625,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6110590277777778
+        },
+        "inputs": [
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu0/grounded_sam2_qwen_rankings/seed1348_post_remove/result.json",
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu0/grounded_sam2_qwen_inputs/seed1348_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1350,
+      "family": "target_absent_covered",
+      "view_mode": "none",
+      "features": {
+        "sample_id": "seed1350_post_remove",
+        "values": [
+          -7.25,
+          1.0,
+          -18.16666666666667,
+          11.416666666666671,
+          0.8083333333333333,
+          0.32430555555555557,
+          0.017864583333333333,
+          0.40677083333333336,
+          0.5145833333333333,
+          0.6118938078703704
+        ],
+        "named_values": {
+          "selected_match_logit": -7.25,
+          "candidate_count": 1.0,
+          "membership_inside_minus_outside": -18.16666666666667,
+          "membership_best_minus_unknown": 11.416666666666671,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.32430555555555557,
+          "selected_bbox_area_fraction": 0.017864583333333333,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5145833333333333,
+          "container_bbox_area_fraction": 0.6118938078703704
+        },
+        "inputs": [
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu5/grounded_sam2_qwen_rankings/seed1350_post_remove/result.json",
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu5/grounded_sam2_qwen_inputs/seed1350_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    },
+    {
+      "seed": 1352,
+      "family": "covered_right_resolving",
+      "view_mode": "right",
+      "features": {
+        "sample_id": "seed1352_post_remove",
+        "values": [
+          -5.75,
+          2.0,
+          -13.583333333333336,
+          9.75,
+          0.8083333333333333,
+          0.3236111111111111,
+          0.017743055555555557,
+          0.40677083333333336,
+          0.5055555555555555,
+          0.62015625
+        ],
+        "named_values": {
+          "selected_match_logit": -5.75,
+          "candidate_count": 2.0,
+          "membership_inside_minus_outside": -13.583333333333336,
+          "membership_best_minus_unknown": 9.75,
+          "selected_bbox_center_x_fraction": 0.8083333333333333,
+          "selected_bbox_center_y_fraction": 0.3236111111111111,
+          "selected_bbox_area_fraction": 0.017743055555555557,
+          "container_bbox_center_x_fraction": 0.40677083333333336,
+          "container_bbox_center_y_fraction": 0.5055555555555555,
+          "container_bbox_area_fraction": 0.62015625
+        },
+        "inputs": [
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu4/grounded_sam2_qwen_rankings/seed1352_post_remove/result.json",
+          "outputs/calibration/icra_v20_five_scenario_development_perception/shards/gpu4/grounded_sam2_qwen_inputs/seed1352_post_remove/input.json"
+        ],
+        "simulator_ground_truth_used": false
+      },
+      "automatic_simulator_label_used_for_calibration_only": true
+    }
+  ],
+  "neighbor_count": 1,
+  "probability_pseudocount": 0.1,
+  "k_selection": {
+    "selected_k": 1,
+    "candidates": [
+      {
+        "k": 1,
+        "leave_one_out_nll": 0.19798522451187409
+      },
+      {
+        "k": 3,
+        "leave_one_out_nll": 0.21226084977181137
+      },
+      {
+        "k": 5,
+        "leave_one_out_nll": 0.22263784989279742
+      },
+      {
+        "k": 7,
+        "leave_one_out_nll": 0.23165991244941084
+      },
+      {
+        "k": 9,
+        "leave_one_out_nll": 0.26583493963571125
+      }
+    ]
+  },
+  "role": "condition action observation likelihoods inside unified MPC",
+  "policy_override_used": false,
+  "training_performed": false,
+  "calibration_performed": true,
+  "testing_performed": false,
+  "valid_for_final_evaluation": false
+}

@@ -7,6 +7,7 @@ ground truth are intentionally reserved for the separate evaluation script.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -23,6 +24,7 @@ DEFAULT_CONFIG = ROOT / "configs/perception/grounding_pilot_seed0_2.json"
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse the requested perception stage and cache options."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "stage",
@@ -63,6 +65,7 @@ def require_single_gpu_only() -> None:
 
 
 def resolve_project_path(value: str | Path) -> Path:
+    """Resolve repository-relative paths while preserving absolute paths."""
     path = Path(value)
     return path if path.is_absolute() else ROOT / path
 
@@ -76,20 +79,47 @@ def load_config(path: Path) -> dict[str, Any]:
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
+    """Write a formatted JSON artifact, creating its parent directory."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
+def sha256(path: Path) -> str:
+    """Return the SHA-256 digest used to validate cached image results."""
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def cached_result_matches_image(result_path: Path, image_path: Path) -> bool:
+    """Accept a cached result only when it was computed from the same RGB bytes."""
+    if not result_path.is_file():
+        return False
+    try:
+        cached = json.loads(result_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    return (
+        cached.get("image_path") == str(image_path)
+        and cached.get("image_sha256") == sha256(image_path)
+    )
+
+
 def sample_items(config: dict[str, Any], limit: int | None) -> list[dict[str, Any]]:
+    """Return configured samples, optionally truncated for a smoke test."""
     samples = list(config["samples"])
     return samples if limit is None else samples[:limit]
 
 
 def output_root(config: dict[str, Any]) -> Path:
+    """Resolve the configured artifact directory."""
     return resolve_project_path(config["output_root"])
 
 
 def rgb_path(sample: dict[str, Any]) -> Path:
+    """Return the required RGB path for one observation sample."""
     path = resolve_project_path(sample["observation_dir"]) / "rgb.png"
     if not path.is_file():
         raise FileNotFoundError(path)
@@ -107,6 +137,7 @@ def cuda_sample_start() -> float:
 
 
 def cuda_sample_metrics(started: float) -> dict[str, Any]:
+    """Finish a synchronized timing window and report peak CUDA memory."""
     import torch
 
     torch.cuda.synchronize("cuda:0")
@@ -237,11 +268,12 @@ def run_qwen_direct(
     for sample in samples:
         destination = output_root(config) / "qwen_direct" / sample["sample_id"]
         result_path = destination / "result.json"
-        if result_path.is_file() and not force:
+        source_image = rgb_path(sample)
+        if not force and cached_result_matches_image(result_path, source_image):
             results.append(json.loads(result_path.read_text(encoding="utf-8")))
             continue
 
-        image = Image.open(rgb_path(sample)).convert("RGB")
+        image = Image.open(source_image).convert("RGB")
         messages = [
             {
                 "role": "user",
@@ -293,7 +325,8 @@ def run_qwen_direct(
         result = {
             "schema_version": "qwen-direct-grounding-output-v1",
             "sample_id": sample["sample_id"],
-            "image_path": str(rgb_path(sample)),
+            "image_path": str(source_image),
+            "image_sha256": sha256(source_image),
             "instruction": config["task"]["instruction"],
             "model": model_config["repository"],
             "parsed_output": parsed,
@@ -338,11 +371,12 @@ def run_gdino_detect(
     for sample in samples:
         destination = output_root(config) / "grounded_sam2" / sample["sample_id"]
         result_path = destination / "detections.json"
-        if result_path.is_file() and not force:
+        source_image = rgb_path(sample)
+        if not force and cached_result_matches_image(result_path, source_image):
             results_out.append(json.loads(result_path.read_text(encoding="utf-8")))
             continue
 
-        image = Image.open(rgb_path(sample)).convert("RGB")
+        image = Image.open(source_image).convert("RGB")
         concepts = list(config["task"]["open_vocabulary_concepts"])
         started = cuda_sample_start()
         annotations = []
@@ -382,7 +416,8 @@ def run_gdino_detect(
         result = {
             "schema_version": "grounding-dino-detections-v1",
             "sample_id": sample["sample_id"],
-            "image_path": str(rgb_path(sample)),
+            "image_path": str(source_image),
+            "image_sha256": sha256(source_image),
             "text_prompts": [f"{concept}." for concept in concepts],
             "model": {
                 "repository": model_config["repository"],
@@ -436,13 +471,18 @@ def run_sam2_segment(
                 f"Run gdino_detect before sam2_segment: {detection_path}"
             )
         result_path = destination / "segmentations.json"
-        if result_path.is_file() and not force:
+        source_image = rgb_path(sample)
+        if not force and cached_result_matches_image(result_path, source_image):
             results_out.append(json.loads(result_path.read_text(encoding="utf-8")))
             continue
 
         detection_result = json.loads(detection_path.read_text(encoding="utf-8"))
+        if not cached_result_matches_image(detection_path, source_image):
+            raise RuntimeError(
+                f"Detector cache does not match current RGB: {detection_path}"
+            )
         detections = detection_result["annotations"]
-        image = Image.open(rgb_path(sample)).convert("RGB")
+        image = Image.open(source_image).convert("RGB")
         image_array = np.array(image, copy=True)
         boxes = np.asarray(
             [annotation["bbox_xyxy_pixels"] for annotation in detections],
@@ -489,7 +529,8 @@ def run_sam2_segment(
         result = {
             "schema_version": "grounded-sam2-segmentations-v1",
             "sample_id": sample["sample_id"],
-            "image_path": str(rgb_path(sample)),
+            "image_path": str(source_image),
+            "image_sha256": sha256(source_image),
             "models": {
                 "detector": config["models"]["grounding_dino"]["repository"],
                 "segmenter": model_config["repository"],
@@ -610,6 +651,7 @@ def run_sam3_segment(
 
 
 def main() -> None:
+    """Run one selected perception stage and save its reproducibility record."""
     args = parse_args()
     require_single_gpu_only()
     config = load_config(args.config.resolve())

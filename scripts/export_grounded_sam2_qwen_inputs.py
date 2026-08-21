@@ -7,6 +7,7 @@ instance IDs, semantic labels, depth, or ground truth.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -19,15 +20,27 @@ DEFAULT_CONFIG = ROOT / "configs/perception/grounding_pilot_seed0_2.json"
 
 
 def resolve_path(value: str | Path) -> Path:
+    """Resolve an artifact path against the repository root."""
     path = Path(value)
     return path if path.is_absolute() else ROOT / path
 
 
 def relative(path: Path) -> str:
+    """Serialize a repository path with platform-independent separators."""
     return str(path.resolve().relative_to(ROOT)).replace("\\", "/")
 
 
+def sha256(path: Path) -> str:
+    """Return a content digest for cache provenance checks."""
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def clipped_box(box: list[float], width: int, height: int) -> list[int]:
+    """Round and clip a proposal box to valid image coordinates."""
     x0, y0, x1, y1 = [int(round(value)) for value in box]
     x0 = max(0, min(width - 1, x0))
     x1 = max(0, min(width - 1, x1))
@@ -45,6 +58,7 @@ def save_candidate_assets(
     sample_dir: Path,
     candidate_id: str,
 ) -> tuple[Path, Path, Path]:
+    """Save the crop, binary mask, and context view for one candidate."""
     mask_path = sample_dir / f"{candidate_id}_mask.png"
     Image.fromarray(mask.astype(np.uint8) * 255, mode="L").save(mask_path)
     x0, y0, x1, y1 = bbox
@@ -89,6 +103,7 @@ def save_reference_assets(
     sample_dir: Path,
     reference_id: str,
 ) -> tuple[Path, Path]:
+    """Save the reference mask and its RGB overlay."""
     mask_path = sample_dir / f"{reference_id}_mask.png"
     Image.fromarray(mask.astype(np.uint8) * 255, mode="L").save(mask_path)
     overlay = rgb.copy()
@@ -104,6 +119,7 @@ def save_reference_assets(
 
 
 def main() -> None:
+    """Build anonymous candidate inputs from detector and segmenter outputs."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     args = parser.parse_args()
@@ -129,6 +145,15 @@ def main() -> None:
         segmentations = json.loads(
             (source_root / "segmentations.json").read_text(encoding="utf-8")
         )
+        source_rgb_path = observation_dir / "rgb.png"
+        source_rgb_sha256 = sha256(source_rgb_path)
+        if (
+            segmentations.get("image_path") != str(source_rgb_path)
+            or segmentations.get("image_sha256") != source_rgb_sha256
+        ):
+            raise RuntimeError(
+                f"Segmentation cache does not match current RGB: {sample_id}"
+            )
         candidate_proposals = [
             annotation
             for annotation in segmentations["annotations"]
@@ -156,7 +181,7 @@ def main() -> None:
         sample_dir = export_root / sample_id
         sample_dir.mkdir(parents=True, exist_ok=True)
         rgb = np.asarray(
-            Image.open(observation_dir / "rgb.png").convert("RGB")
+            Image.open(source_rgb_path).convert("RGB")
         ).copy()
         rgb_path = sample_dir / "rgb.png"
         Image.fromarray(rgb, mode="RGB").save(rgb_path)
@@ -300,6 +325,8 @@ def main() -> None:
             ],
             "relation_queries": relation_queries,
             "provenance": {
+                "source_rgb_path": str(source_rgb_path),
+                "source_rgb_sha256": source_rgb_sha256,
                 "simulator_masks_used": False,
                 "candidate_semantic_labels_exposed_to_qwen": False,
                 "reference_mask_source": (
@@ -316,6 +343,8 @@ def main() -> None:
             {
                 "sample_id": sample_id,
                 "input_path": relative(input_path),
+                "input_sha256": sha256(input_path),
+                "source_rgb_sha256": source_rgb_sha256,
                 "candidate_count": len(candidates),
             }
         )

@@ -92,14 +92,41 @@ ACTION_DIFFERENTIATING_SCENE_VARIANTS = (
     "either_view",
     "cover_removal_required",
 )
+COVERED_ACTION_DIFFERENTIATING_SCENE_VARIANTS = (
+    "covered_then_close_high_only",
+    "covered_then_right_only",
+    "covered_then_either_view",
+    "covered_center_ambiguous_then_close_high_only",
+    "covered_center_ambiguous_then_close_high_logo_v2",
+    "covered_center_ambiguous_then_right_only",
+)
+COVERED_CENTER_AMBIGUOUS_SCENE_VARIANTS = (
+    "covered_center_ambiguous_then_close_high_only",
+    "covered_center_ambiguous_then_close_high_logo_v2",
+    "covered_center_ambiguous_then_right_only",
+)
+COVERED_ACTION_BASE_VARIANT = {
+    "covered_then_close_high_only": "close_high_only",
+    "covered_then_right_only": "right_only",
+    "covered_then_either_view": "either_view",
+    "covered_center_ambiguous_then_close_high_only": "close_high_only",
+    "covered_center_ambiguous_then_close_high_logo_v2": "close_high_only",
+    "covered_center_ambiguous_then_right_only": "right_only",
+}
 NEGATIVE_EVIDENCE_SCENE_VARIANTS = (
     "empty_cover_then_right",
+)
+V15_TASK_STATE_SCENE_VARIANTS = (
+    "target_absent_covered",
+    "covered_target_outside_visible_no_gain",
 )
 ALL_CALIBRATION_SCENE_VARIANTS = (
     CALIBRATION_SCENE_VARIANTS
     + ADDITIONAL_CALIBRATION_SCENE_VARIANTS
     + ACTION_DIFFERENTIATING_SCENE_VARIANTS
+    + COVERED_ACTION_DIFFERENTIATING_SCENE_VARIANTS
     + NEGATIVE_EVIDENCE_SCENE_VARIANTS
+    + V15_TASK_STATE_SCENE_VARIANTS
 )
 CALIBRATION_COVER_LOCAL_CENTER_M = (0.0, 0.0, 0.166)
 CALIBRATION_COVER_FULL_EXTENTS_M = (0.362, 0.338, 0.014)
@@ -180,10 +207,11 @@ def _composite_cover_mass_properties(
 MANIPULABLE_COVER_CENTER_OF_MASS_LOCAL_M, MANIPULABLE_COVER_INERTIA_KG_M2 = (
     _composite_cover_mass_properties()
 )
-AMBIGUOUS_TRAY_SCALE_XYZ = (2.10, 2.10, 0.40)
+AMBIGUOUS_TRAY_SCALE_XYZ = (2.10, 2.10, 0.65)
 AMBIGUOUS_TARGET_BACK_CLEARANCE_M = 0.012
 AMBIGUOUS_CENTER_CAMERA_XY_M = (-0.03, -0.42)
 AMBIGUOUS_TARGET_RAY_OFFSET_M = 0.325
+AMBIGUOUS_TARGET_LATERAL_JITTER_M = 0.012
 # Actual composite-wrist center pose expressed in the unshifted benchmark
 # scene frame.  This is used only to author a calibration scene around the
 # predeclared 2 cm camera-relative far-edge abstention band.
@@ -196,18 +224,41 @@ BOUNDARY_UNKNOWN_RAY_JITTER_M = 0.003
 BOUNDARY_UNKNOWN_LATERAL_JITTER_M = 0.006
 NEGATIVE_EVIDENCE_TARGET_X_OFFSET_M = 0.470
 NEGATIVE_EVIDENCE_TARGET_Y_OFFSET_M = 0.300
+NEGATIVE_EVIDENCE_OCCLUDER_TARGET_DISTANCE_M = 0.280
+NEGATIVE_EVIDENCE_OCCLUDER_RADIUS_M = 0.035
+NEGATIVE_EVIDENCE_OCCLUDER_HEIGHT_M = 0.160
 ACTION_TARGET_X_JITTER_M = 0.035
 ACTION_TARGET_Y_OFFSET_M = 0.035
+ACTION_TARGET_Y_JITTER_M = 0.018
 ACTION_OCCLUDER_TARGET_DISTANCE_M = 0.100
 ACTION_VERTICAL_OCCLUDER_RADIUS_M = 0.050
-ACTION_VERTICAL_OCCLUDER_HEIGHT_M = 0.140
+ACTION_VERTICAL_OCCLUDER_HEIGHT_M = 0.100
 ACTION_PARTIAL_COVER_FULL_EXTENTS_M = (0.362, 0.110, 0.014)
 ACTION_PARTIAL_COVER_LOCAL_CENTER_Z_M = 0.166
+ACTION_CENTER_OCCLUDER_TARGET_DISTANCE_M = 0.115
+ACTION_CENTER_OCCLUDER_RADIUS_M = 0.052
+ACTION_CENTER_OCCLUDER_HEIGHT_M = 0.135
+ACTION_RIGHT_ONLY_CENTER_OCCLUDER_TARGET_DISTANCE_M = 0.135
+ACTION_RIGHT_ONLY_CENTER_OCCLUDER_RADIUS_M = 0.040
+ACTION_RIGHT_ONLY_CENTER_OCCLUDER_HEIGHT_M = 0.120
+ACTION_STATIC_RIGHT_LOGO_OCCLUDER_RADIUS_M = 0.020
+ACTION_COMBINED_CENTER_RIGHT_OCCLUDER_RADIUS_M = 0.048
+ACTION_COMBINED_CENTER_RIGHT_OCCLUDER_HEIGHT_M = 0.100
+CLOSE_HIGH_INTERIOR_LOGO_CENTER_Z_M = 0.008
+CLOSE_HIGH_INTERIOR_LOGO_CENTER_XY_M = (0.0044, 0.0067)
+CLOSE_HIGH_INTERIOR_LOGO_V2_CENTER_XY_M = (0.0075, 0.0075)
+CLOSE_HIGH_INTERIOR_LOGO_OUTER_RADIUS_M = 0.022
+CLOSE_HIGH_INTERIOR_LOGO_INNER_RADIUS_M = 0.0095
 # These environment-local camera centers are derived from the saved,
 # successful seed-169 wrist calibrations after undoing the benchmark
 # environment shift [0.20, -0.32, -0.76]. They are design references only;
 # every authored scene must still pass rendered objective-visibility gates.
 ACTION_REFERENCE_CAMERA_POSITION_SCENE_M = {
+    "center": (
+        0.17828645545861767,
+        -0.0492735348796571,
+        1.120606296820705,
+    ),
     "close_high": (
         0.370206029184295,
         0.00731642585917285,
@@ -222,7 +273,14 @@ ACTION_REFERENCE_CAMERA_POSITION_SCENE_M = {
 ACTION_VISIBILITY_RESOLVED_MINIMUM = 0.65
 ACTION_VISIBILITY_GAIN_MINIMUM = 0.15
 ACTION_VISIBILITY_DOMINANCE_MINIMUM = 0.15
+ACTION_POST_REMOVE_CENTER_AMBIGUOUS_MAXIMUM = 0.30
 ACTION_VISIBILITY_HIDDEN_MAXIMUM = 0.02
+PASSIVE_REOBSERVATION_CENTER_VISIBLE_MAXIMUM = 0.45
+PASSIVE_REOBSERVATION_RESOLVED_MINIMUM = 0.65
+PASSIVE_REOBSERVATION_GAIN_MINIMUM = 0.20
+STATIC_OUTSIDE_TARGET_JITTER_X_M = 0.040
+STATIC_OUTSIDE_TARGET_JITTER_Y_M = 0.030
+STATIC_OUTSIDE_TARGET_CLEARANCE_MINIMUM_M = 0.015
 # Analytic layouts are only proposals. A scene is accepted when the rendered
 # masks satisfy these view-specific visibility gates.
 
@@ -253,16 +311,22 @@ def factorized_calibration_ground_truth(variant: str) -> dict:
     if variant not in ALL_CALIBRATION_SCENE_VARIANTS:
         raise ValueError(f"Unknown calibration scene variant: {variant}")
 
+    target_exists = variant != "target_absent_covered"
     world_membership = (
-        "outside"
-        if variant
-        in (
-            "outside",
-            "behind_ambiguous",
-            "behind_boundary_unknown",
-            "empty_cover_then_right",
+        "not_applicable"
+        if not target_exists
+        else (
+            "outside"
+            if variant
+            in (
+                "outside",
+                "behind_ambiguous",
+                "behind_boundary_unknown",
+                "empty_cover_then_right",
+                "covered_target_outside_visible_no_gain",
+            )
+            else "inside"
         )
-        else "inside"
     )
     view_specs = {}
     for view_id in ("center", "close_high", "right"):
@@ -291,7 +355,20 @@ def factorized_calibration_ground_truth(variant: str) -> dict:
                 "rear_red_candidate": distractor_view,
             },
         }
-    if variant == "rim_occluded":
+    if variant == "target_absent_covered":
+        for view_id in view_specs:
+            target_view = {
+                "membership_observable": "unknown",
+                "behind": "unknown",
+                "occluded_by": {
+                    "label": "unknown",
+                    "occluder_id": "cover_01",
+                },
+                "target_visibility_intent": "absent",
+            }
+            view_specs[view_id].update(target_view)
+            view_specs[view_id]["entities"]["target_red"] = target_view
+    elif variant == "rim_occluded":
         target_view = {
             "membership_observable": "unknown",
             "behind": "yes",
@@ -352,6 +429,19 @@ def factorized_calibration_ground_truth(variant: str) -> dict:
                     "occluder_id": "basket_01",
                 },
                 "target_visibility_intent": "partial",
+            }
+            view_specs[view_id].update(target_view)
+            view_specs[view_id]["entities"]["target_red"] = target_view
+    elif variant in COVERED_ACTION_DIFFERENTIATING_SCENE_VARIANTS:
+        for view_id in view_specs:
+            target_view = {
+                "membership_observable": "unknown",
+                "behind": "unknown",
+                "occluded_by": {
+                    "label": "yes",
+                    "occluder_id": "cover_01",
+                },
+                "target_visibility_intent": "none",
             }
             view_specs[view_id].update(target_view)
             view_specs[view_id]["entities"]["target_red"] = target_view
@@ -466,11 +556,13 @@ def factorized_calibration_ground_truth(variant: str) -> dict:
         "variant": variant,
         "labels_source": "deterministic_scene_generator",
         "world_ground_truth": {
-            "target_id": "target_red",
+            "target_id": "target_red" if target_exists else None,
+            "target_exists": target_exists,
             "reference_id": "basket_01",
             "membership": world_membership,
             "entities": {
                 "target_red": {
+                    "exists": target_exists,
                     "membership": world_membership,
                 },
                 "rear_red_candidate": {
@@ -480,7 +572,7 @@ def factorized_calibration_ground_truth(variant: str) -> dict:
         },
         "view_observable_intent": view_specs,
         "label_factorization": {
-            "membership": ["inside", "outside"],
+            "membership": ["inside", "outside", "not_applicable"],
             "membership_observable": ["inside", "outside", "unknown"],
             "behind": ["yes", "no", "unknown"],
             "occluded_by": ["yes", "no", "unknown"],
@@ -510,6 +602,36 @@ def factorized_calibration_ground_truth(variant: str) -> dict:
             else (
                 {
                     "class": variant,
+                    "resolving_view_actions_after_remove_cover": {
+                        "covered_then_close_high_only": [
+                            "viewpoint_close_high"
+                        ],
+                        "covered_then_right_only": ["viewpoint_right"],
+                        "covered_then_either_view": [
+                            "viewpoint_close_high",
+                            "viewpoint_right",
+                        ],
+                        "covered_center_ambiguous_then_close_high_only": [
+                            "viewpoint_close_high"
+                        ],
+                        "covered_center_ambiguous_then_close_high_logo_v2": [
+                            "viewpoint_close_high"
+                        ],
+                        "covered_center_ambiguous_then_right_only": [
+                            "viewpoint_right"
+                        ],
+                    }[variant],
+                    "required_interaction_action": "remove_cover",
+                    "post_remove_layout_source": COVERED_ACTION_BASE_VARIANT[
+                        variant
+                    ],
+                    "minimum_belief_updates": 2,
+                    "render_validation_required_before_and_after_interaction": True,
+                }
+                if variant in COVERED_ACTION_DIFFERENTIATING_SCENE_VARIANTS
+                else (
+                {
+                    "class": variant,
                     "resolving_view_actions": ["viewpoint_right"],
                     "required_interaction_action": "remove_cover",
                     "post_interaction_observation": "empty_container",
@@ -522,10 +644,64 @@ def factorized_calibration_ground_truth(variant: str) -> dict:
                     "render_validation_required": True,
                 }
                 if variant == "empty_cover_then_right"
-                else None
+                else (
+                    {
+                        "class": variant,
+                        "required_interaction_action": "remove_cover",
+                        "post_interaction_observation": "empty_container",
+                        "terminal_action": "defer",
+                        "minimum_belief_updates": 2,
+                        "render_validation_required": True,
+                    }
+                    if variant == "target_absent_covered"
+                    else (
+                        {
+                            "class": variant,
+                            "required_interaction_action": None,
+                            "terminal_action": "grasp_outside",
+                            "cover_interaction_expected_information_gain": 0.0,
+                            "render_validation_required": True,
+                        }
+                        if variant
+                        == "covered_target_outside_visible_no_gain"
+                        else None
+                    )
+                )
+                )
             )
         ),
     }
+
+
+def validate_post_remove_action_visibility(
+    variant: str, measurements: dict
+) -> dict:
+    """Validate the two reachable views after a covered action scene opens."""
+    if variant not in COVERED_ACTION_DIFFERENTIATING_SCENE_VARIANTS:
+        raise ValueError(f"Not a covered action variant: {variant}")
+    result = validate_action_differentiating_visibility(
+        COVERED_ACTION_BASE_VARIANT[variant], measurements
+    )
+    if variant not in COVERED_CENTER_AMBIGUOUS_SCENE_VARIANTS:
+        return result
+    center = _objective_visibility_fraction(measurements.get("center", {}))
+    center_check = {
+        "name": "post_remove_center_remains_strongly_ambiguous",
+        "passed": bool(
+            center is not None
+            and center <= ACTION_POST_REMOVE_CENTER_AMBIGUOUS_MAXIMUM
+        ),
+        "value": center,
+        "maximum": ACTION_POST_REMOVE_CENTER_AMBIGUOUS_MAXIMUM,
+    }
+    result["checks"].append(center_check)
+    if not center_check["passed"]:
+        result["failure_reasons"].append(center_check["name"])
+    result["passed"] = not result["failure_reasons"]
+    result["thresholds"]["post_remove_center_ambiguous_maximum"] = (
+        ACTION_POST_REMOVE_CENTER_AMBIGUOUS_MAXIMUM
+    )
+    return result
 
 
 def _objective_visibility_fraction(measurement: dict) -> float | None:
@@ -703,6 +879,10 @@ def validate_calibration_visibility(
         view: int(measurements[view]["target_visible_pixel_count"])
         for view in required_views
     }
+    if variant in COVERED_ACTION_DIFFERENTIATING_SCENE_VARIANTS:
+        return validate_action_differentiating_visibility(
+            "cover_removal_required", measurements
+        )
     if variant in ACTION_DIFFERENTIATING_SCENE_VARIANTS:
         return validate_action_differentiating_visibility(
             variant, measurements
@@ -758,7 +938,11 @@ def validate_calibration_visibility(
             "objective_visible_fraction_of_amodal": fractions,
         }
     checks = []
-    if variant in ("inside_clear", "outside"):
+    if variant in (
+        "inside_clear",
+        "outside",
+        "covered_target_outside_visible_no_gain",
+    ):
         checks.append(
             {
                 "name": "target_visible_in_every_view",
@@ -766,7 +950,53 @@ def validate_calibration_visibility(
                 "values": pixels,
             }
         )
-    elif variant in ("rim_occluded", "behind_ambiguous"):
+    elif variant == "behind_ambiguous":
+        fractions = {
+            view: _objective_visibility_fraction(measurements[view])
+            for view in required_views
+        }
+        if any(value is None for value in fractions.values()):
+            return {
+                "passed": False,
+                "checks": [],
+                "failure_reasons": [
+                    "objective_visibility_fraction_required_for_passive_reobservation"
+                ],
+                "values": fractions,
+            }
+        center = float(fractions["center"])
+        resolving = max(
+            float(fractions["close_high"]),
+            float(fractions["right"]),
+        )
+        checks.extend(
+            [
+                {
+                    "name": "target_partially_visible_in_every_view",
+                    "passed": all(value > 0 for value in pixels.values()),
+                    "values": pixels,
+                },
+                {
+                    "name": "center_remains_geometrically_ambiguous",
+                    "passed": (
+                        center
+                        <= PASSIVE_REOBSERVATION_CENTER_VISIBLE_MAXIMUM
+                    ),
+                    "values": fractions,
+                },
+                {
+                    "name": "reachable_reobservation_resolves_target",
+                    "passed": (
+                        resolving
+                        >= PASSIVE_REOBSERVATION_RESOLVED_MINIMUM
+                        and resolving - center
+                        >= PASSIVE_REOBSERVATION_GAIN_MINIMUM
+                    ),
+                    "values": fractions,
+                },
+            ]
+        )
+    elif variant == "rim_occluded":
         checks.extend(
             [
                 {
@@ -889,7 +1119,10 @@ def compute_behind_ambiguous_target_layout(
         AMBIGUOUS_TARGET_RAY_OFFSET_M
         + 0.018 * math.sin(seed * 1.731)
     )
-    lateral_offset = 0.024 * math.sin(seed * 2.399 + 0.7)
+    lateral_offset = (
+        AMBIGUOUS_TARGET_LATERAL_JITTER_M
+        * math.sin(seed * 2.399 + 0.7)
+    )
     perpendicular_x = -unit_y
     perpendicular_y = unit_x
     target_position = (
@@ -923,6 +1156,42 @@ def compute_behind_ambiguous_target_layout(
         "lateral_offset_m": lateral_offset,
         "basket_planar_clearance_m": planar_clearance,
         "geometry_validation_passed": True,
+    }
+
+
+def compute_seeded_outside_target_layout(
+    basket_center_world_m: tuple[float, float, float],
+    seed: int = 0,
+) -> dict:
+    """Jitter a visible table target without allowing basket intersection."""
+    if seed < 0:
+        raise ValueError("seed must be non-negative")
+    basket_x, basket_y, _basket_z = basket_center_world_m
+    target_position = (
+        CALIBRATION_OUTSIDE_TARGET_POSITION_WORLD_M[0]
+        + STATIC_OUTSIDE_TARGET_JITTER_X_M * math.sin(seed * 1.417),
+        CALIBRATION_OUTSIDE_TARGET_POSITION_WORLD_M[1]
+        + STATIC_OUTSIDE_TARGET_JITTER_Y_M * math.sin(seed * 2.173 + 0.4),
+        CALIBRATION_OUTSIDE_TARGET_POSITION_WORLD_M[2],
+    )
+    half_x = 0.173412 * PERCEPTION_BASKET_SCALE_XYZ[0] * 0.5
+    half_y = 0.162194 * PERCEPTION_BASKET_SCALE_XYZ[1] * 0.5
+    closest_dx = max(0.0, abs(target_position[0] - basket_x) - half_x)
+    closest_dy = max(0.0, abs(target_position[1] - basket_y) - half_y)
+    planar_clearance = (
+        math.hypot(closest_dx, closest_dy) - TARGET_MUG_OUTER_RADIUS_M
+    )
+    if planar_clearance + 1e-9 < STATIC_OUTSIDE_TARGET_CLEARANCE_MINIMUM_M:
+        raise ValueError(
+            "Seeded outside target clearance is insufficient: "
+            f"{planar_clearance}"
+        )
+    return {
+        "target_position_world_m": list(target_position),
+        "seed": seed,
+        "basket_planar_clearance_m": planar_clearance,
+        "geometry_validation_passed": True,
+        "generator_revision": "seeded-visible-outside-layout-v1",
     }
 
 
@@ -993,6 +1262,8 @@ def compute_action_differentiating_layout(
     basket_center_world_m: tuple[float, float, float],
     variant: str,
     seed: int = 0,
+    *,
+    center_ambiguity_occluder: bool = False,
 ) -> dict:
     """Compute a stable target and optional view-specific occluder layout."""
     if variant not in ACTION_DIFFERENTIATING_SCENE_VARIANTS:
@@ -1003,7 +1274,9 @@ def compute_action_differentiating_layout(
     target_position = (
         basket_x
         + ACTION_TARGET_X_JITTER_M * math.sin(seed * 1.913 + 0.4),
-        basket_y + ACTION_TARGET_Y_OFFSET_M,
+        basket_y
+        + ACTION_TARGET_Y_OFFSET_M
+        + ACTION_TARGET_Y_JITTER_M * math.sin(seed * 2.317 + 0.9),
         basket_z + SCANNED_BASKET_INNER_SUPPORT_Z_OFFSET_M,
     )
     blocked_view = {
@@ -1055,6 +1328,72 @@ def compute_action_differentiating_layout(
             "support_surface": "scanned_basket_left_and_right_rims",
             "center_z_world_m": occluder_position[2],
         }
+    center_occluder_position = None
+    center_occluder_geometry = None
+    if center_ambiguity_occluder:
+        center_distance = (
+            ACTION_RIGHT_ONLY_CENTER_OCCLUDER_TARGET_DISTANCE_M
+            if variant == "right_only"
+            else ACTION_CENTER_OCCLUDER_TARGET_DISTANCE_M
+        )
+        center_radius = (
+            ACTION_RIGHT_ONLY_CENTER_OCCLUDER_RADIUS_M
+            if variant == "right_only"
+            else ACTION_CENTER_OCCLUDER_RADIUS_M
+        )
+        center_height = (
+            ACTION_RIGHT_ONLY_CENTER_OCCLUDER_HEIGHT_M
+            if variant == "right_only"
+            else ACTION_CENTER_OCCLUDER_HEIGHT_M
+        )
+        camera_x, camera_y, _ = ACTION_REFERENCE_CAMERA_POSITION_SCENE_M[
+            "center"
+        ]
+        direction_x = camera_x - target_position[0]
+        direction_y = camera_y - target_position[1]
+        direction_norm = math.hypot(direction_x, direction_y)
+        if direction_norm <= 1e-9:
+            raise ValueError("Center camera and target share the same XY")
+        center_occluder_position = (
+            target_position[0]
+            + direction_x / direction_norm
+            * center_distance,
+            target_position[1]
+            + direction_y / direction_norm
+            * center_distance,
+            basket_z
+            + SCANNED_BASKET_INNER_SUPPORT_Z_OFFSET_M
+            + center_height * 0.5,
+        )
+        center_occluder_geometry = {
+            "type": "supported_upright_cylinder",
+            "radius_m": center_radius,
+            "height_m": center_height,
+            "support_surface": "scanned_basket_interior",
+            "base_z_world_m": (
+                basket_z + SCANNED_BASKET_INNER_SUPPORT_Z_OFFSET_M
+            ),
+            "semantic_role": "center_view_foreground_occluder",
+        }
+        if variant == "close_high_only":
+            # The ordinary right-view blocker and the center blocker occupy
+            # nearly the same footprint. Represent them as one supported
+            # object instead of authoring two intersecting cylinders.
+            occluder_position = (
+                0.5 * (occluder_position[0] + center_occluder_position[0]),
+                0.5 * (occluder_position[1] + center_occluder_position[1]),
+                basket_z
+                + SCANNED_BASKET_INNER_SUPPORT_Z_OFFSET_M
+                + ACTION_COMBINED_CENTER_RIGHT_OCCLUDER_HEIGHT_M * 0.5,
+            )
+            occluder_geometry = {
+                **occluder_geometry,
+                "radius_m": ACTION_COMBINED_CENTER_RIGHT_OCCLUDER_RADIUS_M,
+                "height_m": ACTION_COMBINED_CENTER_RIGHT_OCCLUDER_HEIGHT_M,
+                "semantic_role": "center_and_right_foreground_occluder",
+            }
+            center_occluder_position = None
+            center_occluder_geometry = None
     return {
         "variant": variant,
         "seed": seed,
@@ -1083,6 +1422,12 @@ def compute_action_differentiating_layout(
             else None
         ),
         "action_occluder_geometry": occluder_geometry,
+        "center_ambiguity_occluder_position_world_m": (
+            list(center_occluder_position)
+            if center_occluder_position is not None
+            else None
+        ),
+        "center_ambiguity_occluder_geometry": center_occluder_geometry,
         "cover_required": variant == "cover_removal_required",
         "reference_camera_positions_scene_m": {
             key: list(value)
@@ -1091,6 +1436,48 @@ def compute_action_differentiating_layout(
         "geometry_design_status": (
             "analytic_initialization_pending_rendered_objective_mask_gate"
         ),
+        "manual_annotation": False,
+        "valid_for_final_evaluation": False,
+    }
+
+
+def compute_negative_evidence_occluder_layout(
+    target_position_world_m: tuple[float, float, float],
+) -> dict:
+    """Place a table-supported occluder on the post-removal camera ray."""
+    camera_x, camera_y, _ = ACTION_REFERENCE_CAMERA_POSITION_SCENE_M[
+        "center"
+    ]
+    target_x, target_y, target_base_z = target_position_world_m
+    direction_x = camera_x - target_x
+    direction_y = camera_y - target_y
+    direction_norm = math.hypot(direction_x, direction_y)
+    if direction_norm <= 1e-9:
+        raise ValueError("Center camera and target share the same XY")
+    position = (
+        target_x
+        + direction_x / direction_norm
+        * NEGATIVE_EVIDENCE_OCCLUDER_TARGET_DISTANCE_M,
+        target_y
+        + direction_y / direction_norm
+        * NEGATIVE_EVIDENCE_OCCLUDER_TARGET_DISTANCE_M,
+        target_base_z + NEGATIVE_EVIDENCE_OCCLUDER_HEIGHT_M * 0.5,
+    )
+    return {
+        "action_occluder_position_world_m": list(position),
+        "action_occluder_geometry": {
+            "type": "supported_upright_cylinder",
+            "radius_m": NEGATIVE_EVIDENCE_OCCLUDER_RADIUS_M,
+            "height_m": NEGATIVE_EVIDENCE_OCCLUDER_HEIGHT_M,
+            "support_surface": "table",
+            "base_z_world_m": target_base_z,
+            "semantic_role": "post_remove_foreground_occluder",
+        },
+        "target_planar_distance_m": math.hypot(
+            target_x - position[0], target_y - position[1]
+        ),
+        "blocked_view": "post_remove",
+        "resolving_view": "right",
         "manual_annotation": False,
         "valid_for_final_evaluation": False,
     }
@@ -1146,6 +1533,30 @@ def _configure_action_occluder(
     UsdGeom.Imageable(occluder).MakeVisible()
 
 
+def _configure_center_ambiguity_occluder(stage, action_layout: dict) -> None:
+    """Use a supported scene object to hide the logo only from center."""
+    from pxr import Gf, UsdGeom
+
+    occluder = stage.GetPrimAtPath("/World/DistractorBlue")
+    if not occluder.IsValid():
+        raise RuntimeError("Blue center-view occluder prim is missing")
+    geometry = action_layout["center_ambiguity_occluder_geometry"]
+    position = action_layout[
+        "center_ambiguity_occluder_position_world_m"
+    ]
+    occluder.SetTypeName("Cylinder")
+    cylinder = UsdGeom.Cylinder(occluder)
+    cylinder.CreateRadiusAttr().Set(geometry["radius_m"])
+    cylinder.CreateHeightAttr().Set(geometry["height_m"])
+    xform = UsdGeom.Xformable(occluder)
+    xform.ClearXformOpOrder()
+    xform.AddTranslateOp().Set(Gf.Vec3d(*position))
+    UsdGeom.Gprim(occluder).CreateDisplayColorAttr(
+        [Gf.Vec3f(0.025, 0.20, 0.88)]
+    )
+    UsdGeom.Imageable(occluder).MakeVisible()
+
+
 def _raise_target_logo_for_partial_visibility(stage) -> None:
     """Keep the target attribute visible above a shallow tray rim."""
     from pxr import Gf, UsdGeom
@@ -1168,6 +1579,90 @@ def _raise_target_logo_for_partial_visibility(stage) -> None:
         translate_ops[0].Set(
             Gf.Vec3d(float(current[0]), float(current[1]), 0.085)
         )
+
+
+def _configure_right_only_side_logo(stage) -> None:
+    """Keep one side print so the right view reveals target identity."""
+    for name in ("WhiteLogoFront", "WhiteLogoSide"):
+        prim = stage.GetPrimAtPath(f"/World/TargetRed/{name}")
+        if not prim.IsValid():
+            raise RuntimeError(f"Target logo prim is missing: {name}")
+        prim.SetActive(False)
+    side = stage.GetPrimAtPath("/World/TargetRed/WhiteLogoLeft")
+    if not side.IsValid():
+        raise RuntimeError("Target side-logo prim is missing")
+    side.SetActive(True)
+
+
+def _configure_close_high_interior_logo(
+    stage,
+    *,
+    center_xy_m: tuple[float, float] = CLOSE_HIGH_INTERIOR_LOGO_CENTER_XY_M,
+) -> None:
+    """Author a flat white star printed on the mug's inner floor."""
+    from pxr import Gf, Sdf, UsdGeom, UsdShade
+
+    # The original rectangular patches look like extra geometry from oblique
+    # views. A printed emblem inside the cup gives the steep camera useful
+    # identity evidence while the shallow view still has to reason through
+    # the rim and foreground occluder. The mesh is visual-only.
+    for name in (
+        "WhiteLogoFront",
+        "WhiteLogoSide",
+        "WhiteLogoLeft",
+        "WhiteLogoTop",
+    ):
+        prim = stage.GetPrimAtPath(f"/World/TargetRed/{name}")
+        if prim.IsValid():
+            prim.SetActive(False)
+
+    points = []
+    for index in range(10):
+        angle = math.pi * 0.5 + index * math.pi / 5.0
+        radius = (
+            CLOSE_HIGH_INTERIOR_LOGO_OUTER_RADIUS_M
+            if index % 2 == 0
+            else CLOSE_HIGH_INTERIOR_LOGO_INNER_RADIUS_M
+        )
+        points.append(
+            Gf.Vec3f(
+                center_xy_m[0]
+                + radius * math.cos(angle),
+                center_xy_m[1]
+                + radius * math.sin(angle),
+                CLOSE_HIGH_INTERIOR_LOGO_CENTER_Z_M,
+            )
+        )
+
+    logo = UsdGeom.Mesh.Define(stage, "/World/TargetRed/WhiteLogoInterior")
+    logo.CreatePointsAttr(points)
+    logo.CreateFaceVertexCountsAttr([len(points)])
+    logo.CreateFaceVertexIndicesAttr(list(range(len(points))))
+    logo.CreateSubdivisionSchemeAttr("none")
+    logo.CreateDoubleSidedAttr(True)
+    UsdGeom.Gprim(logo.GetPrim()).CreateDisplayColorAttr(
+        [Gf.Vec3f(0.98, 0.98, 0.95)]
+    )
+    material = UsdShade.Material.Define(
+        stage, "/World/Looks/TargetInteriorLogoWhite"
+    )
+    shader = UsdShade.Shader.Define(
+        stage, "/World/Looks/TargetInteriorLogoWhite/PreviewSurface"
+    )
+    shader.CreateIdAttr("UsdPreviewSurface")
+    shader.CreateInput("diffuseColor", Sdf.ValueTypeNames.Color3f).Set(
+        Gf.Vec3f(0.98, 0.98, 0.95)
+    )
+    # A small emissive component keeps the printed white legible in the cup's
+    # shadow without changing scene lighting or adding a light source.
+    shader.CreateInput("emissiveColor", Sdf.ValueTypeNames.Color3f).Set(
+        Gf.Vec3f(0.35, 0.35, 0.33)
+    )
+    shader.CreateInput("roughness", Sdf.ValueTypeNames.Float).Set(0.75)
+    material.CreateSurfaceOutput().ConnectToSource(
+        shader.ConnectableAPI(), "surface"
+    )
+    UsdShade.MaterialBindingAPI(logo.GetPrim()).Bind(material)
 
 
 def _author_calibration_cover(
@@ -1535,6 +2030,7 @@ def replace_procedural_basket_with_scan(
     )
     cover_metadata = {"enabled": False}
     action_occluder_enabled = False
+    center_ambiguity_occluder_enabled = False
     calibration_ground_truth = None
     target_support = {
         "surface": "scanned_basket_interior",
@@ -1545,15 +2041,69 @@ def replace_procedural_basket_with_scan(
             "vertical_rays_over_mug_footprint_against_scanned_mesh"
         ),
     }
-    if calibration_scene_variant == "outside":
-        _set_target_position(
-            stage, CALIBRATION_OUTSIDE_TARGET_POSITION_WORLD_M
+    if calibration_scene_variant == "target_absent_covered":
+        UsdGeom.Imageable(target_prim).MakeInvisible()
+        cover_metadata = _author_calibration_cover(
+            stage,
+            root_path,
+            manipulable=True,
+            physics_calibration=cover_physics_calibration,
         )
-        target_position = CALIBRATION_OUTSIDE_TARGET_POSITION_WORLD_M
+        target_support = {
+            "surface": None,
+            "validation": "target_prim_hidden_for_absent_episode",
+        }
+        occlusion_metadata = {
+            "enabled": False,
+            "semantic_id": "cover_01",
+            "purpose": "covered_container_target_absent_negative_evidence",
+            "manual_annotation": False,
+            "generator_revision": "v15-target-absent-covered-v1",
+            "render_validation_required": True,
+        }
+    elif calibration_scene_variant == "covered_target_outside_visible_no_gain":
+        outside_layout = compute_seeded_outside_target_layout(
+            basket_position,
+            calibration_seed,
+        )
+        target_position = tuple(outside_layout["target_position_world_m"])
+        _set_target_position(stage, target_position)
         target_support = {
             "surface": "table",
-            "base_z_world_m": CALIBRATION_OUTSIDE_TARGET_POSITION_WORLD_M[2],
+            "base_z_world_m": target_position[2],
             "validation": "target_mug_bottom_origin_on_table_top",
+            "basket_planar_clearance_m": outside_layout[
+                "basket_planar_clearance_m"
+            ],
+        }
+        cover_metadata = _author_calibration_cover(
+            stage,
+            root_path,
+            manipulable=True,
+            physics_calibration=cover_physics_calibration,
+        )
+        occlusion_metadata = {
+            "enabled": False,
+            "semantic_id": "cover_01",
+            "purpose": "visible_outside_target_makes_cover_interaction_no_gain",
+            "manual_annotation": False,
+            "generator_revision": "v16-covered-outside-seeded-no-gain-v1",
+            "render_validation_required": True,
+        }
+    elif calibration_scene_variant == "outside":
+        outside_layout = compute_seeded_outside_target_layout(
+            basket_position,
+            calibration_seed,
+        )
+        target_position = tuple(outside_layout["target_position_world_m"])
+        _set_target_position(stage, target_position)
+        target_support = {
+            "surface": "table",
+            "base_z_world_m": target_position[2],
+            "validation": "target_mug_bottom_origin_on_table_top",
+            "basket_planar_clearance_m": outside_layout[
+                "basket_planar_clearance_m"
+            ],
         }
     elif calibration_scene_variant == "behind_ambiguous":
         ambiguous_layout = compute_behind_ambiguous_target_layout(
@@ -1564,7 +2114,6 @@ def replace_procedural_basket_with_scan(
             ambiguous_layout["target_position_world_m"]
         )
         _set_target_position(stage, target_position)
-        _raise_target_logo_for_partial_visibility(stage)
         target_support = {
             "surface": "table",
             "base_z_world_m": target_position[2],
@@ -1587,7 +2136,7 @@ def replace_procedural_basket_with_scan(
                 "reachable_reobservation_views_resolve_outside_behind"
             ),
             "manual_annotation": False,
-            "generator_revision": "behind-ambiguous-ray-jitter-v2",
+            "generator_revision": "behind-ambiguous-hidden-logo-v3",
         }
     elif calibration_scene_variant == "behind_boundary_unknown":
         boundary_layout = compute_behind_boundary_unknown_target_layout(
@@ -1639,7 +2188,11 @@ def replace_procedural_basket_with_scan(
             NEGATIVE_EVIDENCE_TARGET_Y_OFFSET_M,
         ]
         _set_target_position(stage, target_position)
-        _raise_target_logo_for_partial_visibility(stage)
+        negative_occluder_layout = (
+            compute_negative_evidence_occluder_layout(target_position)
+        )
+        _configure_action_occluder(stage, negative_occluder_layout)
+        action_occluder_enabled = True
         target_support = {
             "surface": "table",
             "base_z_world_m": target_position[2],
@@ -1665,7 +2218,106 @@ def replace_procedural_basket_with_scan(
                 "physical_empty_cover_negative_evidence_then_right_reobservation"
             ),
             "manual_annotation": False,
-            "generator_revision": "empty-cover-negative-evidence-v1",
+            "negative_evidence_occluder_layout": (
+                negative_occluder_layout
+            ),
+            "generator_revision": "empty-cover-negative-evidence-v2",
+            "render_validation_required": True,
+        }
+    elif calibration_scene_variant in COVERED_ACTION_DIFFERENTIATING_SCENE_VARIANTS:
+        base_variant = COVERED_ACTION_BASE_VARIANT[
+            calibration_scene_variant
+        ]
+        action_layout = compute_action_differentiating_layout(
+            basket_position,
+            base_variant,
+            calibration_seed,
+            center_ambiguity_occluder=(
+                calibration_scene_variant
+                in COVERED_CENTER_AMBIGUOUS_SCENE_VARIANTS
+            ),
+        )
+        action_layout["covered_variant"] = calibration_scene_variant
+        target_position = tuple(action_layout["target_position_world_m"])
+        _set_target_position(stage, target_position)
+        if base_variant == "close_high_only":
+            # Keep the printed target attribute on the mug's upper side so
+            # the intended close-high view exposes semantic evidence, not
+            # only the mug silhouette. The logo remains within the 102 mm
+            # mug body and does not change collision or mass properties.
+            _raise_target_logo_for_partial_visibility(stage)
+            logo_center_xy = (
+                CLOSE_HIGH_INTERIOR_LOGO_V2_CENTER_XY_M
+                if calibration_scene_variant
+                == "covered_center_ambiguous_then_close_high_logo_v2"
+                else CLOSE_HIGH_INTERIOR_LOGO_CENTER_XY_M
+            )
+            _configure_close_high_interior_logo(
+                stage,
+                center_xy_m=logo_center_xy,
+            )
+            action_layout["target_logo_layout"] = {
+                "type": (
+                    "white_star_interior_print_far_floor_v2"
+                    if calibration_scene_variant
+                    == "covered_center_ambiguous_then_close_high_logo_v2"
+                    else "white_star_interior_print"
+                ),
+                "center_xy_m": list(logo_center_xy),
+                "center_z_m": CLOSE_HIGH_INTERIOR_LOGO_CENTER_Z_M,
+                "outer_radius_m": CLOSE_HIGH_INTERIOR_LOGO_OUTER_RADIUS_M,
+                "purpose": "close_high_identity_evidence",
+                "changes_collision_or_mass": False,
+            }
+        target_support = {
+            "surface": "scanned_basket_interior",
+            "base_z_offset_from_reference_m": (
+                SCANNED_BASKET_INNER_SUPPORT_Z_OFFSET_M
+            ),
+            "validation": (
+                "target_mug_bottom_on_scanned_basket_support_with_"
+                "post_remove_action_specific_occlusion"
+            ),
+        }
+        occluder_position = action_layout[
+            "action_occluder_position_world_m"
+        ]
+        if occluder_position is not None:
+            _configure_action_occluder(stage, action_layout)
+            action_occluder_enabled = True
+        center_occluder_position = action_layout[
+            "center_ambiguity_occluder_position_world_m"
+        ]
+        if center_occluder_position is not None:
+            _configure_center_ambiguity_occluder(stage, action_layout)
+            center_ambiguity_occluder_enabled = True
+        cover_metadata = _author_calibration_cover(
+            stage,
+            root_path,
+            manipulable=True,
+            physics_calibration=cover_physics_calibration,
+        )
+        occlusion_metadata = {
+            "enabled": True,
+            "semantic_id": "cover_01",
+            "target_position_world_m": list(target_position),
+            "action_scene_layout": action_layout,
+            "purpose": (
+                "covered_then_post_remove_action_specific_reobservation"
+            ),
+            "manual_annotation": False,
+            "generator_revision": (
+                "covered-action-center-ambiguous-semantic-layout-v4"
+                if calibration_scene_variant
+                == "covered_center_ambiguous_then_close_high_logo_v2"
+                else
+                "covered-action-center-ambiguous-semantic-layout-v3"
+                if calibration_scene_variant
+                == "covered_center_ambiguous_then_close_high_only"
+                else "covered-action-center-ambiguous-layout-v2"
+                if center_ambiguity_occluder_enabled
+                else "covered-action-differentiating-layout-v1"
+            ),
             "render_validation_required": True,
         }
     elif (
@@ -1676,11 +2328,40 @@ def replace_procedural_basket_with_scan(
             basket_position,
             calibration_scene_variant,
             calibration_seed,
+            center_ambiguity_occluder=(
+                calibration_scene_variant == "right_only"
+            ),
         )
+        if calibration_scene_variant == "right_only":
+            action_layout["center_ambiguity_occluder_geometry"][
+                "radius_m"
+            ] = ACTION_STATIC_RIGHT_LOGO_OCCLUDER_RADIUS_M
+            action_layout["center_ambiguity_occluder_geometry"][
+                "semantic_role"
+            ] = "center_view_logo_occluder"
         target_position = tuple(
             action_layout["target_position_world_m"]
         )
         _set_target_position(stage, target_position)
+        if calibration_scene_variant == "close_high_only":
+            _raise_target_logo_for_partial_visibility(stage)
+            _configure_close_high_interior_logo(stage)
+            action_layout["target_logo_layout"] = {
+                "type": "white_star_interior_print",
+                "center_xy_m": list(CLOSE_HIGH_INTERIOR_LOGO_CENTER_XY_M),
+                "center_z_m": CLOSE_HIGH_INTERIOR_LOGO_CENTER_Z_M,
+                "outer_radius_m": CLOSE_HIGH_INTERIOR_LOGO_OUTER_RADIUS_M,
+                "purpose": "static_close_high_identity_preflight",
+                "changes_collision_or_mass": False,
+            }
+        elif calibration_scene_variant == "right_only":
+            _configure_right_only_side_logo(stage)
+            action_layout["target_logo_layout"] = {
+                "type": "single_right-camera-facing_rectangular_print",
+                "visible_logo_prims": ["WhiteLogoLeft"],
+                "purpose": "right_view_identity_evidence",
+                "changes_collision_or_mass": False,
+            }
         target_support = {
             "surface": "scanned_basket_interior",
             "base_z_offset_from_reference_m": (
@@ -1697,6 +2378,12 @@ def replace_procedural_basket_with_scan(
         if occluder_position is not None:
             _configure_action_occluder(stage, action_layout)
             action_occluder_enabled = True
+        center_occluder_position = action_layout[
+            "center_ambiguity_occluder_position_world_m"
+        ]
+        if center_occluder_position is not None:
+            _configure_center_ambiguity_occluder(stage, action_layout)
+            center_ambiguity_occluder_enabled = True
         if calibration_scene_variant == "cover_removal_required":
             cover_metadata = _author_calibration_cover(
                 stage,
@@ -1722,7 +2409,11 @@ def replace_procedural_basket_with_scan(
                 "causal_view_action_differentiation_for_belief_mpc"
             ),
             "manual_annotation": False,
-            "generator_revision": "action-differentiating-layout-v1",
+            "generator_revision": (
+                "action-differentiating-single-side-logo-right-v2"
+                if calibration_scene_variant == "right_only"
+                else "action-differentiating-layout-v1"
+            ),
             "render_validation_required": True,
         }
     elif calibration_scene_variant in (
@@ -1870,7 +2561,7 @@ def replace_procedural_basket_with_scan(
             (
                 (
                     (
-                        "behind-ambiguous-ray-jitter-v2"
+                        "behind-ambiguous-hidden-logo-v3"
                         if calibration_scene_variant == "behind_ambiguous"
                         else "behind-boundary-unknown-v1"
                     )
@@ -1884,11 +2575,20 @@ def replace_procedural_basket_with_scan(
                     "behind_boundary_unknown",
                     "empty_cover_then_right",
                 )
-                else "factorized-scene-generator-v1"
+                else (
+                    "covered-action-differentiating-layout-v1"
+                    if calibration_scene_variant
+                    in COVERED_ACTION_DIFFERENTIATING_SCENE_VARIANTS
+                    else "factorized-scene-generator-v1"
+                )
             )
             if calibration_scene_variant
             not in ACTION_DIFFERENTIATING_SCENE_VARIANTS
-            else "action-differentiating-layout-v1"
+            else (
+                "action-differentiating-single-side-logo-right-v2"
+                if calibration_scene_variant == "right_only"
+                else "action-differentiating-layout-v1"
+            )
         ),
         "target_position_world_m": list(target_position),
         "target_support": target_support,

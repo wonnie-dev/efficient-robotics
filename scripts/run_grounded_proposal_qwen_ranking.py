@@ -8,6 +8,7 @@ are scored independently so one factor cannot silently stand in for the other.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import time
@@ -39,7 +40,32 @@ def resolve_path(value: str | Path) -> Path:
     return path if path.is_absolute() else ROOT / path
 
 
+def sha256(path: Path) -> str:
+    """Return the digest used to bind a ranking result to its input."""
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def cached_result_matches_input(result_path: Path, input_path: Path) -> bool:
+    """Check input bytes and prompt version before accepting a cache hit."""
+    if not result_path.is_file():
+        return False
+    try:
+        cached = json.loads(result_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    return (
+        cached.get("input_path") == str(input_path)
+        and cached.get("input_sha256") == sha256(input_path)
+        and cached.get("prompt_version") == RANKING_PROMPT_VERSION
+    )
+
+
 def main() -> None:
+    """Rank anonymous candidates and score their factorized relations."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--model-path", type=Path, default=DEFAULT_MODEL)
@@ -85,7 +111,7 @@ def main() -> None:
         input_path = resolve_path(item["input_path"])
         destination = pilot_root / "grounded_sam2_qwen_rankings" / item["sample_id"]
         result_path = destination / "result.json"
-        if result_path.is_file() and not args.force:
+        if not args.force and cached_result_matches_input(result_path, input_path):
             # Cache hits retain the runtime and memory metrics from their original run.
             result = json.loads(result_path.read_text(encoding="utf-8"))
             results.append(result)
@@ -207,6 +233,7 @@ def main() -> None:
                 if relation["source_id"] == selected_candidate
             ],
             "input_path": str(input_path),
+            "input_sha256": sha256(input_path),
             "metrics": metrics,
             "training_performed": False,
             "simulator_ground_truth_used_for_inference": False,

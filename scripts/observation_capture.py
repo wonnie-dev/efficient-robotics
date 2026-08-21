@@ -179,6 +179,7 @@ def add_scene_labels(stage, semantic_objects=None) -> None:
 
 
 def load_observation_config(project_root: Path) -> dict:
+    """Load camera poses and verify their UR10e joint ordering."""
     path = project_root / "configs" / "sim" / "observation_poses.json"
     with path.open("r", encoding="utf-8") as stream:
         config = json.load(stream)
@@ -188,6 +189,7 @@ def load_observation_config(project_root: Path) -> dict:
 
 
 def set_pose(robot, config: dict, pose_name: str, update, warmup_frames: int = 8) -> None:
+    """Place the arm at a named observation pose and clear stale velocity."""
     values = config["poses_rad"][pose_name]
     indices = [robot.dof_names.index(name) for name in JOINT_NAMES]
     robot.set_dof_positions(values, dof_indices=indices)
@@ -456,6 +458,7 @@ def make_gripper_kinematic(rg6_prim) -> None:
 
 
 def configure_camera(camera_prim, config: dict) -> None:
+    """Apply the calibrated pinhole parameters to a USD camera prim."""
     from pxr import Gf, UsdGeom
 
     camera = UsdGeom.Camera(camera_prim)
@@ -505,6 +508,7 @@ def camera_calibration(camera_prim, resolution: tuple[int, int]) -> dict:
 
 
 def create_fixed_overview_camera(stage, config: dict):
+    """Create the external camera used only for diagnostics and videos."""
     from pxr import Gf, UsdGeom
 
     settings = config["overview_camera"]
@@ -635,7 +639,7 @@ def _instance_ids_from_scene_colors(rgb: np.ndarray, depth: np.ndarray) -> tuple
 
 
 def render_benchmark_id_pass(stage, rep, rgb_annotator) -> tuple[np.ndarray, dict]:
-    """Render temporary unique object colors, then restore visible scene colors."""
+    """Render unique object colors, then restore visible scene materials."""
     from pxr import Gf, Sdf, UsdGeom, UsdShade
 
     material_root = "/World/__BenchmarkIdMaterials"
@@ -700,7 +704,8 @@ def render_benchmark_id_pass(stage, rep, rgb_annotator) -> tuple[np.ndarray, dic
             relationship.SetTargets(previous_targets)
         else:
             relationship.ClearTargets(True)
-    stage.RemovePrim(material_root)
+    # Reuse the material resources across captures in the same renderer process.
+    # Repeated shader destruction and recreation can exhaust RTX descriptors.
     for _ in range(2):
         rep.orchestrator.step(rt_subframes=4)
 
@@ -1021,7 +1026,7 @@ def objective_camera_relative_behind_measurement(
         raise ValueError("Target center and reference bounds must be 3D")
     if camera_matrix.shape != (4, 4):
         raise ValueError("Camera-to-world matrix must be 4x4")
-    if membership not in {"inside", "outside"}:
+    if membership not in {"inside", "outside", "not_applicable"}:
         raise ValueError(f"Unsupported world membership: {membership}")
     target_mask = np.asarray(target_amodal_mask, dtype=bool)
     reference_mask = np.asarray(reference_visible_mask, dtype=bool)
@@ -1059,6 +1064,15 @@ def objective_camera_relative_behind_measurement(
         "simulator_ground_truth_only": True,
         "exposed_to_model_or_planner": False,
     }
+    if membership == "not_applicable":
+        result.update(
+            {
+                "valid": True,
+                "label": "unknown",
+                "reason": "target_absent_relation_not_applicable",
+            }
+        )
+        return result
     if target_bbox is None or reference_bbox is None:
         return result
 

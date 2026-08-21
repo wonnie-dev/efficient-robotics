@@ -35,6 +35,7 @@ def audit_relation(
     ranking_path: Path,
     config_path: Path,
 ) -> dict:
+    """Estimate the selected candidate's relation from learned masks and depth."""
     observation_dir = observation_dir.resolve()
     model_input = load_json(model_input_path.resolve())
     ranking = load_json(ranking_path.resolve())
@@ -97,6 +98,7 @@ def audit_relation(
 
 
 def main() -> None:
+    """Run the RGB-D relation audit for one saved perception result."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("observation_dir", type=Path)
     parser.add_argument("model_input", type=Path)

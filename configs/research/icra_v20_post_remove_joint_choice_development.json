@@ -1,0 +1,18 @@
+{
+  "schema_version": "icra-v20-post-remove-joint-choice-development-v1",
+  "experiment_id": "icra_v20_post_remove_joint_choice_development",
+  "source_perception_root": "outputs/development/icra_v19_condition_balanced_development_64episode/perception",
+  "grounding_audit_root": "outputs/development/icra_v19_condition_balanced_development_64episode/grounding_candidate_audit",
+  "output_root": "outputs/development/icra_v20_post_remove_joint_choice_development",
+  "model_path": "models/Qwen3-VL-8B-Instruct",
+  "gpu_ids": [0, 2, 4, 5],
+  "view_id": "post_remove",
+  "max_pixels_per_image": 401408,
+  "batch_size_per_gpu": 1,
+  "include_none_choice": true,
+  "reserved_test_seed_range_untouched": [1100, 1159],
+  "training_performed": false,
+  "calibration_performed": false,
+  "testing_performed": false,
+  "valid_for_final_evaluation": false
+}

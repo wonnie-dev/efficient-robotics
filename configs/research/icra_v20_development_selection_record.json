@@ -1,0 +1,73 @@
+{
+  "schema_version": "icra-v20-development-selection-record-v1",
+  "status": "open_before_calibration_freeze",
+  "selection_data_split": "development_only",
+  "reserved_test_seed_range_opened": false,
+  "decisions": {
+    "post_remove_semantic_selector": {
+      "selected": "existing_separate_identity_and_absence_evidence",
+      "rejected": "joint_candidate_or_none_prompt",
+      "reason": "The joint prompt reduced visible-target candidate accuracy from 0.59375 to 0.375 and selected none in 0 of 8 target-absent episodes.",
+      "source": "outputs/development/icra_v20_post_remove_joint_choice_development/evaluation.json"
+    },
+    "scene_conditioned_view_feature_extractor": {
+      "selected": "selected_candidate_features_v1",
+      "rejected": "candidate_set_x_sorted_v1",
+      "reason": "The candidate-set model improved one development replay episode but had worse leave-one-episode-out calibration accuracy, NLL, and ECE.",
+      "selected_model_source": "outputs/calibration/icra_v18_persistent_negative_evidence_candidate/scene_conditioned_view_model_candidate.json",
+      "candidate_source": "outputs/calibration/icra_v20_candidate_set_view_model_candidate/scene_conditioned_view_model_candidate.json"
+    },
+    "direct_vlm_baseline": {
+      "retained_for_final_comparison": true,
+      "development_semantic_task_success_rate": 0.46875,
+      "development_wrong_commitment_rate": 0.0625,
+      "development_information_action_count": 0,
+      "development_mean_online_inference_seconds": 4.28141335800683,
+      "proposed_development_semantic_task_success_rate": 0.984375,
+      "exact_mcnemar_two_sided_p": 2.3283064365386963e-10,
+      "source": "outputs/development/icra_v20_direct_vlm_action_baseline_development/evaluation.json"
+    },
+    "partial_right_scene_design": {
+      "selected": "single_right_camera_facing_logo_with_narrow_center_logo_occluder",
+      "rejected": "three_sided_logo_with_body_visibility_only_gate",
+      "reason": "The original scene passed geometric visibility checks but Qwen read a front logo from center and grasped immediately. The corrected scene makes identity evidence negative in center and close-high while the right view gives a strong positive target logit.",
+      "single_seed_gate": {
+        "seed": 1365,
+        "center_target_logit": -4.5,
+        "close_high_best_logit": -16.25,
+        "right_target_logit": 20.0,
+        "objective_visibility": {
+          "center": 0.4043820138941904,
+          "close_high": 0.0,
+          "right": 0.7338554547952735
+        }
+      },
+      "multi_seed_gate": {
+        "seeds": [1366, 1367, 1368, 1369],
+        "passed": 4,
+        "failed": 0,
+        "center_all_candidate_logits_negative": 4,
+        "close_high_all_candidate_logits_negative": 4,
+        "right_true_candidate_positive": 4,
+        "grounding_target_proposal_recall": 1.0,
+        "qwen_selected_target_accuracy": 1.0
+      },
+      "source": "outputs/calibration/icra_v20_partial_right_semantic_gate_perception_v10"
+    },
+    "integrated_policy_cross_validation": {
+      "episode_count": 89,
+      "semantic_decision_accuracy": 0.9775280898876404,
+      "target_present_retrieval_success_rate": 0.974025974025974,
+      "target_absent_safe_deferral_count": 12,
+      "wrong_commitment_count": 0,
+      "corrected_partial_right_action_sequence": "viewpoint_right -> grasp",
+      "corrected_partial_right_passed": 5,
+      "corrected_partial_right_failed": 0,
+      "source": "outputs/calibration/icra_v20_combined_89episode_integrated_policy_cv/result.json"
+    }
+  },
+  "training_performed": false,
+  "calibration_performed": false,
+  "testing_performed": false,
+  "valid_for_final_evaluation": false
+}

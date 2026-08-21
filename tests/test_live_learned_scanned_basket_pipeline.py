@@ -4,6 +4,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 from PIL import Image
@@ -13,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from run_live_learned_scanned_basket_pipeline import (  # noqa: E402
+    apply_external_model_root,
     grounded_qwen_cache_key,
     make_perception_config,
     mask_iou,
@@ -29,6 +31,32 @@ from scanned_basket_scene import (  # noqa: E402
 
 
 class LiveLearnedScannedBasketPipelineTest(unittest.TestCase):
+    def test_external_model_root_rewrites_portable_paths(self):
+        config = {
+            "models": {
+                "qwen": {"path": "models/Qwen3-VL-8B-Instruct"},
+                "sam2": {"path": "models/sam2/model.pt"},
+                "absolute": {"path": "/opt/models/fixed/model.pt"},
+            }
+        }
+        with patch.dict(
+            "os.environ",
+            {"EFFICIENT_ROBOTICS_MODELS_ROOT": "/srv/robot-models"},
+        ):
+            apply_external_model_root(config)
+        self.assertEqual(
+            config["models"]["qwen"]["path"],
+            "/srv/robot-models/Qwen3-VL-8B-Instruct",
+        )
+        self.assertEqual(
+            config["models"]["sam2"]["path"],
+            "/srv/robot-models/sam2/model.pt",
+        )
+        self.assertEqual(
+            config["models"]["absolute"]["path"],
+            "/opt/models/fixed/model.pt",
+        )
+
     def test_incremental_config_uses_no_removed_occluder_concept(self):
         with tempfile.TemporaryDirectory(dir=ROOT / "outputs") as temporary:
             session = Path(temporary)
@@ -52,6 +80,50 @@ class LiveLearnedScannedBasketPipelineTest(unittest.TestCase):
             )
             self.assertFalse(config["training_performed"])
             self.assertFalse(config["calibration_performed"])
+
+    def test_incremental_config_accepts_factorized_relation_fields(self):
+        with tempfile.TemporaryDirectory(dir=ROOT / "outputs") as temporary:
+            session = Path(temporary)
+            observation = session / "observations" / "post_remove"
+            observation.mkdir(parents=True)
+            path = make_perception_config(
+                session_dir=session,
+                observation_dir=observation,
+                sample_id="seed238_post_remove",
+                step_index=1,
+                task_overrides={
+                    "factorized_relations": True,
+                    "membership_label_space": ["inside", "outside", "unknown"],
+                    "independent_relation_label_spaces": {
+                        "near": ["yes", "no", "unknown"]
+                    },
+                },
+            )
+            task = json.loads(path.read_text(encoding="utf-8"))["task"]
+            self.assertTrue(task["factorized_relations"])
+            self.assertEqual(task["membership_label_space"][0], "inside")
+
+    def test_incremental_config_applies_frozen_detector_threshold(self):
+        with tempfile.TemporaryDirectory(dir=ROOT / "outputs") as temporary:
+            session = Path(temporary)
+            observation = session / "observations" / "post_remove"
+            observation.mkdir(parents=True)
+            path = make_perception_config(
+                session_dir=session,
+                observation_dir=observation,
+                sample_id="seed239_post_remove",
+                step_index=1,
+                model_overrides={
+                    "grounding_dino": {
+                        "box_threshold": 0.25,
+                        "text_threshold": 0.2,
+                    }
+                },
+            )
+            model = json.loads(path.read_text(encoding="utf-8"))["models"][
+                "grounding_dino"
+            ]
+            self.assertEqual(model["box_threshold"], 0.25)
 
     def test_selected_target_mask_uses_track_mapping(self):
         with tempfile.TemporaryDirectory(dir=ROOT / "outputs") as temporary:

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import math
+import time
 from pathlib import Path
 
 import numpy as np
@@ -95,6 +96,7 @@ DESCENT_OFFSETS_M = tuple(
 # also avoids an unnecessary near-pi wrist_3 roll from the live observation
 # posture before the vertical approach begins.
 DEFAULT_TABLE_ALIGNED_GRASP_YAW_RAD = 2.0579804469193013
+RG6_OPEN_FINGER_CENTER_HALF_SPAN_M = 0.085
 ENVIRONMENT_ROOTS = (
     "/World/Ground",
     "/World/LabBackWall",
@@ -176,6 +178,74 @@ def parallel_gripper_yaw_candidates(grasp_yaw_rad: float) -> tuple[float, float]
         math.cos(primary + math.pi),
     )
     return float(primary), float(opposite)
+
+
+def rank_outside_container_grasp_yaws(
+    grasp_yaw_rad: float,
+    target_xy_world_m: np.ndarray,
+    wall_bounds_world_m: list[tuple[np.ndarray, np.ndarray]],
+) -> tuple[tuple[float, ...], list[dict]]:
+    """Rank parallel and orthogonal pinch axes by basket-wall clearance.
+
+    An outside target can sit beside a basket corner.  A collision-free
+    vertical wrist path may then require rotating the RG6 pinch line by 90
+    degrees so that both open fingers remain clear of the nearest wall end.
+    This ranking uses only the selected RGB-D position and current scene
+    collision geometry; it does not use the target identity ground truth.
+    """
+    target_xy = np.asarray(target_xy_world_m, dtype=np.float64)
+    if target_xy.shape != (2,) or not np.all(np.isfinite(target_xy)):
+        raise ValueError("target_xy_world_m must be a finite 2-vector")
+    if not wall_bounds_world_m:
+        return parallel_gripper_yaw_candidates(grasp_yaw_rad), []
+
+    candidates = (
+        *parallel_gripper_yaw_candidates(grasp_yaw_rad),
+        *parallel_gripper_yaw_candidates(grasp_yaw_rad + math.pi * 0.5),
+    )
+    diagnostics = []
+    for order, yaw in enumerate(candidates):
+        pinch_yaw = yaw - math.pi * 0.5
+        pinch_axis = np.asarray(
+            [math.cos(pinch_yaw), math.sin(pinch_yaw)], dtype=np.float64
+        )
+        finger_centers = (
+            target_xy
+            + RG6_OPEN_FINGER_CENTER_HALF_SPAN_M * pinch_axis,
+            target_xy
+            - RG6_OPEN_FINGER_CENTER_HALF_SPAN_M * pinch_axis,
+        )
+        clearances = []
+        for center in finger_centers:
+            for lower, upper in wall_bounds_world_m:
+                lower_xy = np.asarray(lower, dtype=np.float64)[:2]
+                upper_xy = np.asarray(upper, dtype=np.float64)[:2]
+                outside_delta = np.maximum(
+                    np.maximum(lower_xy - center, center - upper_xy),
+                    0.0,
+                )
+                clearances.append(float(np.linalg.norm(outside_delta)))
+        diagnostics.append(
+            {
+                "grasp_yaw_rad": float(yaw),
+                "pinch_axis_xy": pinch_axis.tolist(),
+                "predicted_open_finger_centers_xy_world_m": [
+                    center.tolist() for center in finger_centers
+                ],
+                "minimum_wall_aabb_clearance_m": min(clearances),
+                "input_order": order,
+            }
+        )
+    diagnostics.sort(
+        key=lambda row: (
+            -float(row["minimum_wall_aabb_clearance_m"]),
+            int(row["input_order"]),
+        )
+    )
+    return (
+        tuple(float(row["grasp_yaw_rad"]) for row in diagnostics),
+        diagnostics,
+    )
 
 
 def closest_equivalent_joint_configuration(
@@ -360,6 +430,7 @@ def execute_persistent_composite_grasp(
     minimum_verified_lift_m: float = 0.10,
     planning_target_world_m: list[float] | None = None,
     planning_grasp_yaw_rad: float | None = None,
+    planning_membership: str | None = None,
     pregrasp_settle_steps: int = 60,
     rg6_master_max_torque_nm: float = PROVISIONAL_RG6_MASTER_MAX_TORQUE_NM,
     minimum_grip_force_per_finger_n: float = MINIMUM_GRIP_FORCE_PER_FINGER_N,
@@ -375,6 +446,8 @@ def execute_persistent_composite_grasp(
     ),
     grip_compliant_contact_stiffness_n_m: float = 0.0,
     grip_compliant_contact_damping_n_s_m: float = 0.0,
+    record_debug_video: bool = True,
+    physics_only_steps: bool = False,
 ) -> dict:
     """Run contact-gated manipulation in the caller's live Isaac stage.
 
@@ -382,6 +455,7 @@ def execute_persistent_composite_grasp(
     continuous target motion, and a verified lift. No fixed joint, attachment,
     or target-pose copying is introduced by this executor.
     """
+    execution_started = time.perf_counter()
     if grasp_height_offset_m < 0.0 or grasp_height_offset_m > 0.08:
         raise ValueError(
             "grasp_height_offset_m must be between 0.0 and 0.08"
@@ -402,6 +476,8 @@ def execute_persistent_composite_grasp(
         planning_grasp_yaw_rad
     ):
         raise ValueError("planning_grasp_yaw_rad must be finite")
+    if planning_membership not in (None, "inside", "outside"):
+        raise ValueError("planning_membership must be inside, outside, or None")
     if minimum_verified_lift_m <= 0.0:
         raise ValueError("minimum_verified_lift_m must be positive")
     if pregrasp_settle_steps < 60:
@@ -723,7 +799,50 @@ def execute_persistent_composite_grasp(
         # joint solutions remain local.  This is especially important after
         # cover placement, where the arm no longer starts from the original
         # center-view posture.
-        grasp_yaw_candidates = parallel_gripper_yaw_candidates(grasp_yaw)
+        wall_clearance_ranking = []
+        if planning_membership == "outside":
+            bbox_cache = UsdGeom.BBoxCache(
+                Usd.TimeCode.Default(), [UsdGeom.Tokens.default_]
+            )
+            wall_bounds = []
+            for wall_name in (
+                "WallFront",
+                "WallBack",
+                "WallLeft",
+                "WallRight",
+            ):
+                collision_prim = stage.GetPrimAtPath(
+                    f"/World/OpenContainer/CollisionApproximation/{wall_name}"
+                )
+                wall_prim = (
+                    collision_prim
+                    if collision_prim.IsValid()
+                    else stage.GetPrimAtPath(f"/World/OpenContainer/{wall_name}")
+                )
+                if not wall_prim.IsValid():
+                    continue
+                aligned = bbox_cache.ComputeWorldBound(
+                    wall_prim
+                ).ComputeAlignedRange()
+                wall_bounds.append(
+                    (
+                        np.asarray(aligned.GetMin(), dtype=np.float64),
+                        np.asarray(aligned.GetMax(), dtype=np.float64),
+                    )
+                )
+            grasp_yaw_candidates, wall_clearance_ranking = (
+                rank_outside_container_grasp_yaws(
+                    grasp_yaw,
+                    planning_target[:2],
+                    wall_bounds,
+                )
+            )
+            grasp_yaw_source = (
+                "outside_container_wall_clearance_ranked_from_"
+                f"{grasp_yaw_source}"
+            )
+        else:
+            grasp_yaw_candidates = parallel_gripper_yaw_candidates(grasp_yaw)
         descent_planning_attempts = []
         selected_descent = None
         for candidate_yaw in grasp_yaw_candidates:
@@ -1300,6 +1419,10 @@ def execute_persistent_composite_grasp(
             ).tolist(),
             "collision_avoidance_grasp_yaw_rad": grasp_yaw,
             "grasp_yaw_source": grasp_yaw_source,
+            "planning_membership": planning_membership,
+            "outside_container_wall_clearance_ranking": (
+                wall_clearance_ranking
+            ),
             "descent_planning_attempts": descent_planning_attempts,
             "descent_waypoints": descent_plan,
             "lift_joints_rad": np.asarray(
@@ -2640,6 +2763,20 @@ def execute_persistent_composite_grasp(
     except OSError:
         font = ImageFont.load_default()
     frames: list[Path] = []
+    debug_capture_seconds = 0.0
+    video_encoding_seconds = 0.0
+
+    if physics_only_steps:
+        from isaacsim.core.simulation_manager import SimulationManager
+
+        def advance_simulation() -> None:
+            SimulationManager.step(
+                steps=1,
+                update_fabric=SimulationManager.is_fabric_enabled(),
+            )
+    else:
+        def advance_simulation() -> None:
+            simulation_app.update()
     trajectory_records: list[dict] = []
 
     def save_failure_diagnostics(label: str, reason: str) -> None:
@@ -2773,6 +2910,10 @@ def execute_persistent_composite_grasp(
             )
 
     def capture(label: str) -> None:
+        nonlocal debug_capture_seconds
+        if not record_debug_video:
+            return
+        capture_started = time.perf_counter()
         rep.orchestrator.step(rt_subframes=2)
         rgba = np.asarray(overview_rgb_annotator.get_data()).copy()
         image = Image.fromarray(rgba[:, :, :3].astype(np.uint8), "RGB")
@@ -2793,6 +2934,7 @@ def execute_persistent_composite_grasp(
         path = frame_root / f"frame_{len(frames):04d}.png"
         image.save(path)
         frames.append(path)
+        debug_capture_seconds += time.perf_counter() - capture_started
 
     def check_state(label: str) -> None:
         if not np.all(np.isfinite(measured())):
@@ -2839,7 +2981,7 @@ def execute_persistent_composite_grasp(
         for step in range(steps):
             set_targets(arm, controlled_master_target(master))
             reset_latest_contact_forces()
-            simulation_app.update()
+            advance_simulation()
             contact_context["step"] += 1
             sample_target_stability()
             if require_bilateral_contact:
@@ -2897,7 +3039,7 @@ def execute_persistent_composite_grasp(
             master = start_master + alpha * (end_master - start_master)
             set_targets(arm, controlled_master_target(master))
             reset_latest_contact_forces()
-            simulation_app.update()
+            advance_simulation()
             contact_context["step"] += 1
             sample_target_stability()
             if require_bilateral_contact:
@@ -2952,7 +3094,7 @@ def execute_persistent_composite_grasp(
                 end_arm, controlled_master_target(end_master)
             )
             reset_latest_contact_forces()
-            simulation_app.update()
+            advance_simulation()
             contact_context["step"] += 1
             sample_target_stability()
             if require_bilateral_contact:
@@ -3058,7 +3200,7 @@ def execute_persistent_composite_grasp(
             )
             set_targets(arm, actual_master)
             reset_latest_contact_forces()
-            simulation_app.update()
+            advance_simulation()
             contact_context["step"] += 1
             maximum_error = max(maximum_error, arm_error(arm))
             if grip_contact_limits_exceeded():
@@ -3152,7 +3294,7 @@ def execute_persistent_composite_grasp(
         for step in range(60):
             set_targets(arm, grasp_master)
             reset_latest_contact_forces()
-            simulation_app.update()
+            advance_simulation()
             contact_context["step"] += 1
             maximum_error = max(maximum_error, arm_error(arm))
             if grip_contact_limits_exceeded():
@@ -3735,18 +3877,43 @@ def execute_persistent_composite_grasp(
         and not contacts["unexpected_environment_pairs"]
         and not contacts["unexpected_target_environment_pairs"]
     )
-    video = build_frame_sequence_video(
-        frames,
-        output_root / "persistent_composite_grasp.mp4",
-        fps=10,
-        crf=17,
-        preset="slow",
-        purpose="same_process_composite_grasp_physics_pilot",
-    )
+    if record_debug_video:
+        video_started = time.perf_counter()
+        video = build_frame_sequence_video(
+            frames,
+            output_root / "persistent_composite_grasp.mp4",
+            fps=10,
+            crf=17,
+            preset="slow",
+            purpose="same_process_composite_grasp_physics_pilot",
+        )
+        video_encoding_seconds = time.perf_counter() - video_started
+    else:
+        video = {
+            "status": "disabled",
+            "output_path": None,
+            "frame_count": 0,
+            "purpose": "evaluation_without_debug_recording",
+        }
+    execution_seconds = time.perf_counter() - execution_started
     result = {
         "schema_version": "persistent-composite-grasp-pilot-v3",
         "status": "completed" if success else "failed",
         "seed": seed,
+        "timing": {
+            "execution_wall_seconds": execution_seconds,
+            "debug_frame_capture_seconds": debug_capture_seconds,
+            "video_encoding_seconds": video_encoding_seconds,
+            "core_execution_excluding_debug_recording_seconds": max(
+                0.0,
+                execution_seconds
+                - debug_capture_seconds
+                - video_encoding_seconds,
+            ),
+            "debug_frame_count": len(frames),
+            "debug_recording_enabled": record_debug_video,
+            "physics_only_steps_enabled": physics_only_steps,
+        },
         "manipulation_label": manipulation_label,
         "manipulation_target_path": manipulation_target_path,
         "contact_target_path": contact_target_path,

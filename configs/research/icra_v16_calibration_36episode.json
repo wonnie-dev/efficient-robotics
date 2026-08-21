@@ -1,0 +1,75 @@
+{
+  "schema_version": "icra-v16-calibration-36episode-v1",
+  "status": "development_calibration_predeclared_before_collection",
+  "data_split": "calibration",
+  "seed_start": 1064,
+  "episode_count": 36,
+  "episodes_per_family": 6,
+  "gpu_ids": [0, 1, 2, 3],
+  "output_root": "outputs/live_pipeline/icra_v16_calibration_36episode",
+  "physics_config": "configs/hardware/rg6_lid_development_proxy.json",
+  "views": ["center", "post_remove", "close_high", "right"],
+  "counterfactual_post_remove_views": ["close_high", "right"],
+  "disable_manipulation_video": true,
+  "physics_only_manipulation_steps": true,
+  "startup_timeout_seconds": 1200.0,
+  "family_cycle": [
+    {
+      "family": "inside_close_high_resolving",
+      "scene_variant": "covered_center_ambiguous_then_close_high_logo_v2",
+      "collector": "remove_cover_counterfactual",
+      "resolving_view": "close_high",
+      "blocked_view": "right",
+      "expected_membership": "inside"
+    },
+    {
+      "family": "inside_right_resolving",
+      "scene_variant": "covered_center_ambiguous_then_right_only",
+      "collector": "remove_cover_counterfactual",
+      "resolving_view": "right",
+      "blocked_view": "close_high",
+      "expected_membership": "inside"
+    },
+    {
+      "family": "outside_immediate_grasp",
+      "scene_variant": "outside",
+      "collector": "static_reachable_views",
+      "resolving_view": "center",
+      "blocked_view": null,
+      "expected_membership": "outside"
+    },
+    {
+      "family": "outside_reobservation_required",
+      "scene_variant": "behind_ambiguous",
+      "collector": "static_reachable_views",
+      "resolving_view": "close_high",
+      "blocked_view": "center",
+      "expected_membership": "outside"
+    },
+    {
+      "family": "target_absent_negative_evidence",
+      "scene_variant": "target_absent_covered",
+      "collector": "remove_cover_counterfactual",
+      "resolving_view": "post_remove_empty",
+      "blocked_view": null,
+      "expected_membership": "not_applicable"
+    },
+    {
+      "family": "remove_cover_failure_or_no_gain",
+      "scene_variant": "covered_target_outside_visible_no_gain",
+      "collector": "remove_cover_counterfactual",
+      "resolving_view": "center",
+      "blocked_view": null,
+      "expected_membership": "outside"
+    }
+  ],
+  "one_process_per_gpu": true,
+  "multi_gpu_inside_process": false,
+  "ddp_used": false,
+  "nccl_used": false,
+  "training_performed": false,
+  "calibration_data_collection": true,
+  "calibration_performed": false,
+  "testing_performed": false,
+  "valid_for_final_evaluation": false
+}

@@ -71,6 +71,24 @@ GROUNDED_QWEN_CACHE_ROOT = (
 )
 
 
+def apply_external_model_root(config: dict) -> None:
+    """Resolve portable ``models/...`` entries against an optional local root."""
+    root_text = os.environ.get("EFFICIENT_ROBOTICS_MODELS_ROOT")
+    if not root_text:
+        return
+    model_root = Path(root_text).expanduser().resolve()
+    for model in config.get("models", {}).values():
+        value = model.get("path")
+        if not value:
+            continue
+        path = Path(value)
+        if path.is_absolute():
+            continue
+        if path.parts and path.parts[0] == "models":
+            path = Path(*path.parts[1:])
+        model["path"] = str(model_root / path)
+
+
 def next_output_dir(seed: int) -> Path:
     seed_root = OUTPUT_ROOT / f"seed{seed:03d}"
     seed_root.mkdir(parents=True, exist_ok=True)
@@ -247,12 +265,18 @@ def qwen_ranking_with_cache(
             "cache_key": cache_key,
         }
 
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    model_path = Path(config["models"]["qwen"]["path"])
+    if not model_path.is_absolute():
+        model_path = ROOT / model_path
     stage_result = run_stage(
         [
             str(PERCEPTION_PYTHON),
             str(ROOT / "scripts" / "run_grounded_proposal_qwen_ranking.py"),
             "--config",
             str(config_path),
+            "--model-path",
+            str(model_path),
             "--force",
         ],
         session_dir=session_dir,
@@ -293,8 +317,10 @@ def make_perception_config(
     sample_id: str,
     step_index: int,
     task_overrides: dict | None = None,
+    model_overrides: dict | None = None,
 ) -> Path:
     source = json.loads(MODEL_CONFIG_SOURCE.read_text(encoding="utf-8"))
+    apply_external_model_root(source)
     config = {
         **source,
         "experiment_id": f"{session_dir.name}_live_step_{step_index:03d}",
@@ -312,10 +338,32 @@ def make_perception_config(
     # likelihood instead of forcing a detector hallucination.
     config["task"]["minimum_candidate_proposals"] = 1
     if task_overrides:
-        unknown = sorted(set(task_overrides) - set(config["task"]))
+        optional_task_fields = {
+            "factorized_relations",
+            "membership_label_space",
+            "independent_relation_label_spaces",
+        }
+        unknown = sorted(
+            set(task_overrides)
+            - set(config["task"])
+            - optional_task_fields
+        )
         if unknown:
             raise ValueError(f"Unknown perception task overrides: {unknown}")
         config["task"].update(copy.deepcopy(task_overrides))
+    if model_overrides:
+        unknown_models = sorted(set(model_overrides) - set(config["models"]))
+        if unknown_models:
+            raise ValueError(f"Unknown perception model overrides: {unknown_models}")
+        for model_name, values in model_overrides.items():
+            unknown_fields = sorted(
+                set(values) - set(config["models"][model_name])
+            )
+            if unknown_fields:
+                raise ValueError(
+                    f"Unknown {model_name} model overrides: {unknown_fields}"
+                )
+            config["models"][model_name].update(copy.deepcopy(values))
     config["limitations"] = [
         "Single deterministic live integration pilot only.",
         "Grounding thresholds, Qwen scores, and belief update are uncalibrated.",
@@ -333,6 +381,7 @@ def run_current_observation_perception(
     view: str,
     step_index: int,
     task_overrides: dict | None = None,
+    model_overrides: dict | None = None,
 ) -> tuple[dict, Path, Path, list[dict]]:
     sample_id = f"{session_dir.name}_{step_index:03d}_{view}"
     config_path = make_perception_config(
@@ -341,6 +390,7 @@ def run_current_observation_perception(
         sample_id=sample_id,
         step_index=step_index,
         task_overrides=task_overrides,
+        model_overrides=model_overrides,
     )
     stage_results = []
     for stage in ("gdino_detect", "sam2_segment"):

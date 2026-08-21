@@ -55,6 +55,7 @@ from persistent_composite_grasp import (  # noqa: E402
     MINIMUM_TERMINAL_FORCE_QUALIFYING_STEPS,
     grasp_yaw_from_pinch_axis_world,
     parallel_gripper_yaw_candidates,
+    rank_outside_container_grasp_yaws,
     closest_equivalent_joint_configuration,
     quintic_time_scaling,
     rotation_angle_rad,
@@ -301,6 +302,31 @@ class LidPhysicsStabilityTests(unittest.TestCase):
             abs(math.atan2(math.sin(second - first), math.cos(second - first))),
             math.pi,
         )
+
+    def test_outside_corner_grasp_prefers_axis_clear_of_wall_end(self) -> None:
+        target_xy = np.asarray([0.913, 0.001], dtype=np.float64)
+        wall_bounds = [
+            (
+                np.asarray([0.505, 0.013, 0.0], dtype=np.float64),
+                np.asarray([0.855, 0.031, 0.2], dtype=np.float64),
+            ),
+            (
+                np.asarray([1.003, -0.445, 0.0], dtype=np.float64),
+                np.asarray([1.021, 0.005, 0.2], dtype=np.float64),
+            ),
+        ]
+        candidates, ranking = rank_outside_container_grasp_yaws(
+            2.0579804469193013,
+            target_xy,
+            wall_bounds,
+        )
+        best_pinch_axis = np.asarray(ranking[0]["pinch_axis_xy"])
+        self.assertGreater(
+            ranking[0]["minimum_wall_aabb_clearance_m"],
+            ranking[-1]["minimum_wall_aabb_clearance_m"],
+        )
+        self.assertGreater(abs(best_pinch_axis[1]), abs(best_pinch_axis[0]))
+        self.assertEqual(candidates[0], ranking[0]["grasp_yaw_rad"])
 
     def test_vertical_pinch_axis_is_rejected(self) -> None:
         with self.assertRaises(ValueError):

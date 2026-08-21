@@ -34,11 +34,13 @@ DEFAULT_CONFIG = (
 
 
 def resolve_path(value: str | Path) -> Path:
+    """Resolve a repository-relative artifact path."""
     path = Path(value)
     return path if path.is_absolute() else ROOT / path
 
 
 def load_json(path: Path) -> dict[str, Any]:
+    """Load one JSON artifact."""
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -850,6 +852,7 @@ def audit_predictions(
 
 
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
+    """Write flattened relation predictions for cross-view analysis."""
     path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = list(rows[0]) if rows else []
     with path.open("w", encoding="utf-8", newline="") as stream:
@@ -944,6 +947,7 @@ def run(config_path: Path) -> dict[str, Any]:
 
 
 def main() -> None:
+    """Estimate candidate relations from learned masks and metric depth."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     args = parser.parse_args()

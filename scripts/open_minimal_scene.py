@@ -15,6 +15,11 @@ from pathlib import Path
 import numpy as np
 from isaacsim import SimulationApp
 
+from final_evaluation_authorization import (
+    DEFAULT_PROTOCOL as DEFAULT_FINAL_EVALUATION_PROTOCOL,
+    validate_output_authorization,
+)
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_LOG = PROJECT_ROOT / "runtime_scene_status.log"
@@ -117,6 +122,14 @@ parser.add_argument(
         "either_view",
         "cover_removal_required",
         "empty_cover_then_right",
+        "covered_then_close_high_only",
+        "covered_then_right_only",
+        "covered_then_either_view",
+        "covered_center_ambiguous_then_close_high_only",
+        "covered_center_ambiguous_then_close_high_logo_v2",
+        "covered_center_ambiguous_then_right_only",
+        "target_absent_covered",
+        "covered_target_outside_visible_no_gain",
     ),
     help=(
         "Scanned-basket pilot only: deterministic factorized calibration scene. "
@@ -162,6 +175,22 @@ parser.add_argument(
         "After a live remove_cover request, use the existing UR10e+RG6 "
         "articulation to grasp the dynamic cover handle, lift it, move it "
         "beside the basket, and capture a new RGB-D observation."
+    ),
+)
+parser.add_argument(
+    "--disable-manipulation-video",
+    action="store_true",
+    help=(
+        "Keep all physics and safety checks but skip per-step overview PNG "
+        "capture and MP4 encoding. RGB-D observations are still saved."
+    ),
+)
+parser.add_argument(
+    "--physics-only-manipulation-steps",
+    action="store_true",
+    help=(
+        "Advance PhysX without a renderer update during manipulation. "
+        "RGB-D observations before and after the action still render normally."
     ),
 )
 parser.add_argument(
@@ -233,6 +262,12 @@ parser.add_argument(
     ),
 )
 parser.add_argument("--live-session-dir", type=Path)
+parser.add_argument("--final-evaluation-authorized", action="store_true")
+parser.add_argument(
+    "--final-evaluation-protocol",
+    type=Path,
+    default=DEFAULT_FINAL_EVALUATION_PROTOCOL,
+)
 parser.add_argument("--seed", type=int, default=0)
 parser.add_argument(
     "--pilot-result",
@@ -378,6 +413,8 @@ if args.live_pipeline_server and args.live_session_dir is None:
     parser.error("--live-pipeline-server requires --live-session-dir")
 if args.live_session_dir is not None and not args.live_pipeline_server:
     parser.error("--live-session-dir requires --live-pipeline-server")
+if args.final_evaluation_authorized and not args.live_pipeline_server:
+    parser.error("--final-evaluation-authorized requires --live-pipeline-server")
 if args.actual_view_motion and not args.live_pipeline_server:
     parser.error("--actual-view-motion requires --live-pipeline-server")
 if args.execute_persistent_composite_grasp and not args.live_pipeline_server:
@@ -400,12 +437,22 @@ if (
     parser.error("Select only one persistent manipulation executor")
 if args.execute_persistent_remove_cover and (
     args.calibration_scene_variant
-    not in ("cover_removal_required", "empty_cover_then_right")
+    not in (
+        "cover_removal_required",
+        "empty_cover_then_right",
+        "covered_then_close_high_only",
+        "covered_then_right_only",
+        "covered_then_either_view",
+        "covered_center_ambiguous_then_close_high_only",
+        "covered_center_ambiguous_then_close_high_logo_v2",
+        "covered_center_ambiguous_then_right_only",
+        "target_absent_covered",
+        "covered_target_outside_visible_no_gain",
+    )
 ):
     parser.error(
         "--execute-persistent-remove-cover requires "
-        "--calibration-scene-variant cover_removal_required or "
-        "empty_cover_then_right"
+        "--calibration-scene-variant requires a manipulable covered variant"
     )
 if args.rg6_lid_calibration_config and not args.execute_persistent_remove_cover:
     parser.error(
@@ -562,6 +609,7 @@ SCENE_PATH = (
 
 
 def record(message: str) -> None:
+    """Append one line to the run log without buffering simulation state."""
     with RUNTIME_LOG.open("a", encoding="utf-8") as stream:
         stream.write(message + "\n")
 
@@ -720,6 +768,11 @@ if (
                         "world_ground_truth"
                     ]["membership"]
                 )
+                seeded_layout["relations_preserved"]["target_red"] = (
+                    scanned_reference["calibration_ground_truth"][
+                        "world_ground_truth"
+                    ]["membership"]
+                )
                 calibration_active_occlusion = scanned_reference.get(
                     "active_occlusion", {}
                 )
@@ -739,6 +792,23 @@ if (
                     )["action_occluder"] = action_scene_layout.get(
                         "action_occluder_geometry"
                     )
+                    center_occluder_position = action_scene_layout.get(
+                        "center_ambiguity_occluder_position_world_m"
+                    )
+                    if center_occluder_position is not None:
+                        seeded_layout["positions_world_m"][
+                            "distractor_blue"
+                        ] = list(center_occluder_position)
+                        seeded_layout.setdefault(
+                            "geometry_overrides_world_m", {}
+                        )["center_ambiguity_occluder"] = (
+                            action_scene_layout.get(
+                                "center_ambiguity_occluder_geometry"
+                            )
+                        )
+                        seeded_layout["relations_preserved"][
+                            "distractor_blue"
+                        ] = "center-view foreground occluder"
                     seeded_layout["relations_preserved"][
                         "occluder_orange"
                     ] = (
@@ -1202,12 +1272,13 @@ elif args.seeded_pilot_capture:
             encoding="utf-8",
         )
 elif args.live_pipeline_server:
-    allowed_live_root = (PROJECT_ROOT / "outputs" / "live_pipeline").resolve()
     live_session_dir = args.live_session_dir.resolve()
-    if not live_session_dir.is_relative_to(allowed_live_root):
-        raise ValueError(
-            f"Live session must be under {allowed_live_root}: {live_session_dir}"
-        )
+    validate_output_authorization(
+        seed=args.seed,
+        output_dir=live_session_dir,
+        final_evaluation_authorized=args.final_evaluation_authorized,
+        protocol_path=args.final_evaluation_protocol,
+    )
     output_root = live_session_dir / "observations"
     output_root.mkdir(parents=True, exist_ok=True)
     (live_session_dir / "scene_layout.json").write_text(
@@ -1422,6 +1493,7 @@ record(
 
 
 def current_ee_pose():
+    """Return the current end-effector position and orientation."""
     positions, orientations = ee_geom.get_world_poses()
     return positions.numpy()[0], orientations.numpy()[0]
 
@@ -1872,7 +1944,14 @@ if args.live_pipeline_server:
                 f"LIVE_PIPELINE_OBSERVATION_READY={event_index}:{selected_pose}"
             )
             continue
-        if action_type in {"grasp", "remove_cover", "defer", "stop"}:
+        if action_type in {
+            "grasp",
+            "grasp_inside",
+            "grasp_outside",
+            "remove_cover",
+            "defer",
+            "stop",
+        }:
             terminal_action = action_type
             terminal_request = request
             break
@@ -1883,7 +1962,13 @@ if args.live_pipeline_server:
     persistent_remove_cover_result = None
     post_remove_replan_request = None
     post_remove_replan_requests = []
-    if terminal_action == "grasp" and args.execute_persistent_composite_grasp:
+    if (
+        terminal_action in {"grasp", "grasp_inside", "grasp_outside"}
+        and (
+            args.execute_persistent_composite_grasp
+            or args.execute_persistent_remove_cover
+        )
+    ):
         from persistent_composite_grasp import (
             PROVISIONAL_TARGET_COORDINATED_DRIVE_EFFORT_LIMIT_NM,
             PROVISIONAL_TARGET_FOLLOWER_REQUEST_BLEND,
@@ -1924,6 +2009,18 @@ if args.live_pipeline_server:
                 )
         # Pass the live stage directly; serializing and reopening it would lose
         # transient articulation, contact, and rigid-body state.
+        requested_joint_action = str(
+            (terminal_request or {}).get("joint_action", "")
+        )
+        requested_membership = (
+            requested_joint_action.rsplit(":", 1)[-1]
+            if requested_joint_action.startswith("grasp:")
+            else (
+                terminal_action.removeprefix("grasp_")
+                if terminal_action in {"grasp_inside", "grasp_outside"}
+                else None
+            )
+        )
         persistent_grasp_result = execute_persistent_composite_grasp(
             project_root=PROJECT_ROOT,
             stage=stage,
@@ -1937,6 +2034,7 @@ if args.live_pipeline_server:
             initial_arm_positions_rad=live_arm_positions,
             rgbd_localization=terminal_rgbd_localization,
             grasp_height_offset_m=args.persistent_grasp_height_offset_m,
+            planning_membership=requested_membership,
             rg6_coupling_mode="passive_mimic",
             coordinated_total_drive_effort_limit_nm=None,
             coordinated_follower_request_blend=(
@@ -1948,6 +2046,9 @@ if args.live_pipeline_server:
             force_controller_max_torque_nm=(
                 PROVISIONAL_TARGET_PASSIVE_FORCE_CONTROLLER_MAX_TORQUE_NM
             ),
+            enable_micro_lift_force_validation=True,
+            record_debug_video=not args.disable_manipulation_video,
+            physics_only_steps=args.physics_only_manipulation_steps,
         )
         if (
             persistent_grasp_result.get("status") != "completed"
@@ -2096,6 +2197,8 @@ if args.live_pipeline_server:
             coordinated_total_drive_effort_limit_nm=(
                 args.coordinated_rg6_total_drive_effort_limit_nm
             ),
+            record_debug_video=not args.disable_manipulation_video,
+            physics_only_steps=args.physics_only_manipulation_steps,
         )
         if (
             persistent_remove_cover_result.get("status") != "completed"
@@ -2151,6 +2254,7 @@ if args.live_pipeline_server:
                 "grasp",
                 "grasp_inside",
                 "grasp_outside",
+                "viewpoint_left",
                 "viewpoint_close_high",
                 "viewpoint_right",
                 "defer",
@@ -2167,7 +2271,8 @@ if args.live_pipeline_server:
                 "LIVE_PIPELINE_POST_REMOVE_REPLAN="
                 f"{post_remove_event['index']}:{replanned_type}"
             )
-            if replanned_type.startswith("viewpoint_"):
+            visited_post_remove_views = set()
+            while replanned_type.startswith("viewpoint_"):
                 selected_pose = replanned_type.removeprefix(
                     "viewpoint_"
                 )
@@ -2176,6 +2281,12 @@ if args.live_pipeline_server:
                         "Post-remove replan selected unknown view: "
                         f"{selected_pose}"
                     )
+                if selected_pose in visited_post_remove_views:
+                    raise RuntimeError(
+                        "Post-remove replan repeated an already captured view: "
+                        f"{selected_pose}"
+                    )
+                visited_post_remove_views.add(selected_pose)
                 app_utils.play()
 
                 def post_remove_motion_update() -> None:
@@ -2248,6 +2359,9 @@ if args.live_pipeline_server:
                     "grasp",
                     "grasp_inside",
                     "grasp_outside",
+                    "viewpoint_left",
+                    "viewpoint_close_high",
+                    "viewpoint_right",
                     "defer",
                     "stop",
                 }:
@@ -2337,6 +2451,8 @@ if args.live_pipeline_server:
                     # This keeps the same force, penetration, slip, and
                     # bilateral-contact gates active at lift onset.
                     enable_micro_lift_force_validation=True,
+                    record_debug_video=not args.disable_manipulation_video,
+                    physics_only_steps=args.physics_only_manipulation_steps,
                 )
                 if (
                     persistent_grasp_result.get("status") != "completed"

@@ -56,6 +56,7 @@ AVAILABLE_VIEWS = {"center", "close_high", "right", "left", "overhead"}
 
 
 def next_session_dir(seed: int) -> Path:
+    """Allocate the next run directory for a deterministic seed."""
     LIVE_ROOT.mkdir(parents=True, exist_ok=True)
     prefix = f"benchmark_seed{seed:03d}_run"
     indices = []
@@ -93,6 +94,7 @@ def wait_for_path(path: Path, process: subprocess.Popen, timeout: float) -> None
 
 
 def main() -> None:
+    """Run one cached-or-live single-GPU perception and replanning episode."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--cache-root", type=Path, default=DEFAULT_CACHE_ROOT)
